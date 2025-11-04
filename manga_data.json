@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "Kanojo Okarishimasu",
+    "code": "KNJ-001",
+    "genres": ["Romance", "Comedy", "Drama"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 7.8,
+    "synopsis": "Kazuya Kinoshita, seorang mahasiswa yang baru saja putus cinta, memutuskan untuk menyewa seorang pacar untuk menghibur dirinya.",
+    "url": "https://example.com/manga/kanojo-okarishimasu",
+    "cover": "🏮"
+  },
+  {
+    "id": 2,
+    "title": "Domestic na Kanojo",
+    "code": "DMC-002",
+    "genres": ["Romance", "Drama", "NTR"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.2,
+    "synopsis": "Natsuo jatuh cinta pada gurunya, Hina. Setelah malam yang panas dengan Rui, ia menemukan bahwa kedua gadis itu akan menjadi saudara tirinya.",
+    "url": "https://example.com/manga/domestic-na-kanojo",
+    "cover": "💔"
+  },
+  {
+    "id": 3,
+    "title": "Netsuzou Trap",
+    "code": "NTZ-003",
+    "genres": ["Romance", "Drama", "NTR", "Yuri"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 7.5,
+    "synopsis": "Yuma dan Hotaru adalah sahabat sejak kecil. Namun hubungan mereka berubah ketika Hotaru mulai memanipulasi perasaan Yuma.",
+    "url": "https://example.com/manga/netsuzou-trap",
+    "cover": "🌸"
+  },
+  {
+    "id": 4,
+    "title": "Kimi no Iru Machi",
+    "code": "KNM-004",
+    "genres": ["Romance", "Drama", "School"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.0,
+    "synopsis": "Haruto Kirishima tinggal di pedesaan sampai Yuzuki Eba pindah dari Tokyo. Kehidupan Haruto berubah drastis setelah pertemuan ini.",
+    "url": "https://example.com/manga/kimi-no-iru-machi",
+    "cover": "🌆"
+  },
+  {
+    "id": 5,
+    "title": "Scum's Wish",
+    "code": "SCM-005",
+    "genres": ["Romance", "Drama", "Psychological"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.4,
+    "synopsis": "Hanabi dan Mugi terlihat seperti pasangan sempurna, namun mereka berdua mencintai orang lain dan menggunakan satu sama lain sebagai pengganti.",
+    "url": "https://example.com/manga/scums-wish",
+    "cover": "🥀"
+  },
+  {
+    "id": 6,
+    "title": "Aku no Hana",
+    "code": "AKH-006",
+    "genres": ["Psychological", "Drama", "Romance"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.1,
+    "synopsis": "Takao Kasuga mencuri seragam olahraga gadis yang ia sukai, tapi perbuatannya diketahui oleh Sawa Nakamura yang kemudian memeras dirinya.",
+    "url": "https://example.com/manga/aku-no-hana",
+    "cover": "🌺"
+  },
+  {
+    "id": 7,
+    "title": "Good Ending",
+    "code": "GDE-007",
+    "genres": ["Romance", "Comedy", "School"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 7.9,
+    "synopsis": "Utsumi jatuh cinta pada Senpai-nya, tetapi dengan bantuan Kurokawa Yuki, ia belajar tentang cinta yang sebenarnya.",
+    "url": "https://example.com/manga/good-ending",
+    "cover": "💕"
+  },
+  {
+    "id": 8,
+    "title": "Nozoki Ana",
+    "code": "NZK-008",
+    "genres": ["Romance", "Drama", "Ecchi"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.3,
+    "synopsis": "Tatsuhiko menemukan lubang intip di apartemennya yang menghubungkan ke apartemen tetangganya, Emiru. Dimulailah hubungan rumit mereka.",
+    "url": "https://example.com/manga/nozoki-ana",
+    "cover": "👁️"
+  },
+  {
+    "id": 9,
+    "title": "Oyasumi Punpun",
+    "code": "OYS-009",
+    "genres": ["Drama", "Psychological", "Slice of Life"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 9.0,
+    "synopsis": "Mengikuti kehidupan Punpun dari masa kanak-kanak hingga dewasa, manga ini mengeksplorasi tema-tema gelap kehidupan manusia.",
+    "url": "https://example.com/manga/oyasumi-punpun",
+    "cover": "🐦"
+  },
+  {
+    "id": 10,
+    "title": "Parallel Paradise",
+    "code": "PRP-010",
+    "genres": ["Fantasy", "Ecchi", "Harem"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 7.6,
+    "synopsis": "Youta ditransportasikan ke dunia paralel yang hanya dihuni oleh wanita, dan ia adalah satu-satunya pria di sana.",
+    "url": "https://example.com/manga/parallel-paradise",
+    "cover": "🌍"
+  }
+]
