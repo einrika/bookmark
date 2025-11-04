@@ -8,7 +8,7 @@ let selectedLetter = null;
 // Ambil data JSON dari file eksternal jika ada
 async function loadMangaData() {
     try {
-        const response = await fetch('/manga_data.json'); // arahkan ke file JSON eksternal
+        const response = await fetch('https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/manga_data.json'); // arahkan ke file JSON eksternal
         if (!response.ok) throw new Error('Gagal memuat JSON eksternal');
         const data = await response.json();
         
@@ -95,10 +95,11 @@ function renderManga(data) {
     
     grid.innerHTML = data.map(manga => `  
             <div class="manga-card" onclick="openManga('${manga.url}')">  
-                <div class="manga-cover">  
-                    <span style="font-size: 2.5rem;">${manga.cover}</span>  
-                    <div class="manga-status">${manga.status}</div>  
-                </div>  
+             <div class="mangabox">
+                <img class="manga-cover" src="${manga.cover}" alt="${manga.title}">  
+                </img>  
+                <div class="manga-status">${manga.status}</div>
+                </div>
                 <div class="manga-info">  
                     <div class="manga-title">${manga.title}</div>  
                     <div class="manga-code">${manga.code}</div>  
