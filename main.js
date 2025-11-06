@@ -5,14 +5,15 @@ let filteredData = [...mangaData];
 let selectedGenre = null;
 let selectedLetter = null;
 
-// Ambil data JSON dari file eksternal jika ada
 async function loadMangaData() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/manga_data.json'); // arahkan ke file JSON eksternal
+        // Tambahkan query unik agar tidak di-cache CDN
+        const url = `https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/manga_data.json?t=${Date.now()}`;
+        const response = await fetch(url, { cache: 'no-store' });
+        
         if (!response.ok) throw new Error('Gagal memuat JSON eksternal');
         const data = await response.json();
         
-        // jika file JSON kosong atau tidak valid, pakai data internal
         if (!Array.isArray(data) || data.length === 0) {
             console.warn('File JSON kosong, gunakan data internal');
             mangaData = [];
@@ -26,10 +27,8 @@ async function loadMangaData() {
     
     filteredData = [...mangaData];
     
-    // Tunggu renderManga selesai dulu
     await renderManga(mangaData);
     
-    // Jalankan renderGenreTags hanya setelah DOM siap
     if (document.readyState === "complete" || document.readyState === "interactive") {
         renderGenreTags();
     } else {
