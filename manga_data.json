@@ -26,6 +26,19 @@
     "cover": "https://cdnxyz.xyz/web/cover/84619/thumbnail.png"
   },
   
+  {
+   "id": 3,
+   "title": "Saihate ni Madou",
+   "code": "SNM-001",
+   "genres": ["Drama", "Tragedy", "Psychological"],
+   "type": "Manga",
+   "status": "Completed",
+   "rating": 8.8,
+   "synopsis": "After his little sister was raped and killed herself, a teenage boy took revenge and killed her rapist in return. Seven years later the boy's released from prison, determined to kill himself due to insufferable guilt but then he's confronted by the rapist's daughter. A dramatic tale of guilt and atonement.",
+   "url": "https://mangadex.org/title/ff4669dd-c512-4d30-aeb7-6ceec5308a76/lost-at-the-farthest-ends",
+   "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8Syz3TmDLWccach9TFOtv1fnHAkWbJi84BbpJwCxBCw&s=10"
+   },
+  
    {
    "id": "0",
    "title": "Coming_soon",
