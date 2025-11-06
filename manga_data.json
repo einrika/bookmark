@@ -38,18 +38,16 @@
    "url": "https://mangadex.org/title/ff4669dd-c512-4d30-aeb7-6ceec5308a76/lost-at-the-farthest-ends",
    "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8Syz3TmDLWccach9TFOtv1fnHAkWbJi84BbpJwCxBCw&s=10"
    },
-  
-   {
-   "id": "0",
-   "title": "Coming_soon",
-   "code": "Coming_soon",
-   "genres": ["Coming_soon"],
-   "type": "Coming_soon",
-   "status": "Coming_soon",
-   "rating": "Coming_soon",
-   "synopsis": "Coming_soon",
-   "url": "Coming_soon",
-   "cover": "Coming_soon"
+     {
+     "id": 4,
+     "title": "Busou Shoujo Machiavellianism",
+     "code": "BSM-001",
+     "genres": ["Action", "Martial Arts", "Shounen", "School life"],
+     "type": "Manga",
+     "status": "Ongoing",
+     "rating": 8.9,
+     "synopsis": "The Private Aichi Symbiosis Academy was originally a high school for high-class girls, when it became co-ed, the girls, out of fear, asked to be permitted to bring weapons to school. When that was enforced, a five-member vigilante corps-like organization called the 'Supreme Five Swords' was also formed. After many generations, the five swords eventually became a group which corrected problematic students and such the academy started proactively accepting such students in order to correct them. Nomura Fudou was sent to that school after being part of a huge brawl, what will he do when the only options he has after enrolling are being expelled from that school too or being corrected the way the rest of the male students there were...by being forced to dress and act like girls!",
+     "url": "https://vymanga.com/manga/busou-shoujo-machiavellianism-p",
+     "cover": "https://cdnxyz.xyz/web/cover/5143/thumbnail.png"
    }
-  
 ]
