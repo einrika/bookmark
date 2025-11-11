@@ -34,7 +34,7 @@
    "type": "Manga",
    "status": "Completed",
    "rating": 8.8,
-   "synopsis": "After his little sister was raped and killed herself, a teenage boy took revenge and killed her rapist in return. Seven years later the boy's released from prison, determined to kill himself due to insufferable guilt but then he's confronted by the rapist's daughter. A dramatic tale of guilt and atonement.",
+   "synopsis": "After his little sister was raped and killed herself, a teenage boy took revenge and killed her rapist in return. \n\n Seven years later the boy's released from prison, determined to kill himself due to insufferable guilt but then he's confronted by the rapist's daughter. A dramatic tale of guilt and atonement.",
    "url": "https://mangadex.org/title/ff4669dd-c512-4d30-aeb7-6ceec5308a76/lost-at-the-farthest-ends",
    "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8Syz3TmDLWccach9TFOtv1fnHAkWbJi84BbpJwCxBCw&s=10"
    },
@@ -46,7 +46,7 @@
      "type": "Manga",
      "status": "Ongoing",
      "rating": 8.9,
-     "synopsis": "The Private Aichi Symbiosis Academy was originally a high school for high-class girls, when it became co-ed, the girls, out of fear, asked to be permitted to bring weapons to school. When that was enforced, a five-member vigilante corps-like organization called the 'Supreme Five Swords' was also formed. After many generations, the five swords eventually became a group which corrected problematic students and such the academy started proactively accepting such students in order to correct them. Nomura Fudou was sent to that school after being part of a huge brawl, what will he do when the only options he has after enrolling are being expelled from that school too or being corrected the way the rest of the male students there were...by being forced to dress and act like girls!",
+     "synopsis": "The Private Aichi Symbiosis Academy was originally a high school for high-class girls, when it became co-ed, the girls, out of fear, asked to be permitted to bring weapons to school.\n\n When that was enforced, a five-member vigilante corps-like organization called the 'Supreme Five Swords' was also formed. After many generations, the five swords eventually became a group which corrected problematic students and such the academy started proactively accepting such students in order to correct them.\n\n Nomura Fudou was sent to that school after being part of a huge brawl, what will he do when the only options he has after enrolling are being expelled from that school too or being corrected the way the rest of the male students there were...by being forced to dress and act like girls!",
      "url": "https://vymanga.com/manga/busou-shoujo-machiavellianism-p",
      "cover": "https://cdnxyz.xyz/web/cover/5143/thumbnail.png"
    },
@@ -75,6 +75,19 @@
    "synopsis": "At the end of summer, Eiji Aono witnesses his childhood friend and girlfriend, Miyuki Amada, cheating on him with Kondo, the ace of the soccer team. Betrayed by her and emotionally shattered, Eiji becomes the target of baseless slander and harassment. Cornered and with nowhere to turn, he escapes to the school rooftop—where he meets a mysterious girl…",
    "url": "https://vymanga.com/manga/jinsei-gyakuten-uwakisare-enzai-wo-kiserareta-orega-gakuenichi-no-bishoujo-ni-natsukareru",
    "cover": "https://cdnxyz.xyz/web/cover/100392/thumbnail.png"
+   },
+   
+   {
+   "id": 7,
+   "title": "Watashi, 2-banme no Kanojo de Ii kara.",
+   "code": "W2BN-001",
+   "genres": ["Slice of Life","Drama", "Romance", "Shounen"],
+   "type": "Manga",
+   "status": "Ongoing",
+   "rating": 7.8,
+   "synopsis": "Kirishima and Hayasaka are two classmates who have a secret relationship in the public eye. \n\n In their school life they act as if they do not know each other, but secretly, there is much more than people can imagine. Both of them get into a relationship that becomes difficult to break and ends up being impure, unhealthy and complicated since the relationship between them was nothing more than a fling that simply generated a love triangle before Kirishima's first love and second love.",
+   "url": "https://mangadex.org/title/70015311-3e53-4501-bd6e-7504edd16d08/watashi-2-banme-no-kanojo-de-ii-kara",
+   "cover": "https://storage.westmanga.me/west/images/covers/06d4af70-bd5f-11f0-9320-7dfadbad6118.jpg"
    }
    
 ]

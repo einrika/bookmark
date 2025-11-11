@@ -163,7 +163,7 @@ function showModal(mangaId) {
     modalBody.innerHTML = `
                 <div class="modal-synopsis">
                     <strong style="color: var(--color-gold);">Synopsis:</strong><br/>
-                    ${manga.synopsis}
+                 ${manga.synopsis.replace(/\n/g, '<br>')}
                 </div>
                 <button class="modal-btn" onclick="readNow('${manga.url}')">📖 Read Now</button>
             `;
