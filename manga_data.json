@@ -97,10 +97,23 @@
    "genres": ["Ecchi", "Romance", "Seinen"],
    "type": "Manga & Doujin",
    "status": "Ongoing",
-   "rating": 0.0,
+   "rating": 7.5,
    "synopsis": "'Onii-san, it seems like you come to this store a lot, don't you?'\n\nTomoya's nightly visits to his local conbini aren't for snacks. He's there for the girl who shows up every night. When they finally talk, it quickly becomes clear that she's looking for some fun... ADULT fun.",
    "url": "https://mangadex.org/title/43f0d516-fc20-4651-b54f-526a7c079190/i-got-into-a-passionate-relationship-with-a-sexy-girl-i-met-at-a-convenience-store",
    "cover": "https://storage.westmanga.me/west/images/covers/500e2fb0-c4bf-11f0-85fd-bfbcf1d668b1.jpg"
-  }
+  },
+
+{
+  "id": 9,
+  "title": "Teisou Gyakuten Sekai de Tanomeba Yareru to Uwasa no Ore",
+  "code": "TGSTYUO-001",
+  "genres": ["Ecchi", "Romance", "Seinen", "Isekai", "School life"],
+  "type": "Manga",
+  "status": "Ongoing",
+  "rating": 7.5,
+  "synopsis": "Upon waking up, I, Sora Satou, found myself thrown into a 'world where morality is reversed.' Although confused at first, I gradually adapted to the norms of this new world and eventually started working at a supermarket right in front of an all-girls high school.\n\n Just when I was getting used to my life as an employee under the guidance of a kind and beautiful manager, a rumor began to spread: 'That male employee... they say if you ask him, he'll gladly do it.' As a result, a group of cute girls who swallowed the rumor whole started swarming around me... What am I supposed to do now!?",
+  "url": "https://mangadex.org/title/e264447e-2aa3-4467-980f-5a64c18f7087/the-rumor-is-i-m-easy-man-if-you-ask-in-a-world-of-reversed-chastity",
+  "cover": "https://storage.westmanga.me/west/images/covers/84c56200-c85c-11f0-b2ae-4380b4e578a7.jpg"
+}
    
 ]
