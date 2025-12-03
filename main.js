@@ -160,43 +160,39 @@ function showModal(mangaId) {
     if (!manga) return;
     
     const modalBody = document.getElementById('modalBody');
-    
-    // Build language buttons HTML
-    let languageButtonsHTML = '<div class="modal-language-buttons">';
     const fallback404 = "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg";
-
-// RAW
-if (manga.urls.raw) {
-    const is404 = manga.urls.raw === fallback404;
-    languageButtonsHTML += `
-        <button class="modal-lang-btn raw" ${is404 ? "" : `onclick="readNow('${manga.urls.raw}')"`}>
-            🇯🇵 Raw ${is404 ? "(404)" : ""}
-        </button>
-    `;
-}
-
-// ENGLISH
-if (manga.urls.english) {
-    const is404 = manga.urls.english === fallback404;
-    languageButtonsHTML += `
-        <button class="modal-lang-btn english" ${is404 ? "" : `onclick="readNow('${manga.urls.english}')"`}>
-            🇬🇧 English ${is404 ? "(404)" : ""}
-        </button>
-    `;
-}
-
-// INDONESIA
-if (manga.urls.indonesia) {
-    const is404 = manga.urls.indonesia === fallback404;
-    languageButtonsHTML += `
-        <button class="modal-lang-btn indonesia" ${is404 ? "" : `onclick="readNow('${manga.urls.indonesia}')"`}>
-            🇮🇩 Indonesia ${is404 ? "(404)" : ""}
-        </button>
-    `;
-}
-
-    // Fallback to single URL if urls object doesn't exist
-    else if (manga.url) {
+    
+    let languageButtonsHTML = '<div class="modal-language-buttons">';
+    const urls = manga.urls || {}; // aman walau urls tidak ada
+    
+    // Fungsi pembuat tombol
+    const makeBtn = (flag, label, url, className) => {
+        const is404 = url === fallback404;
+        return `
+            <button class="modal-lang-btn ${className}" 
+                ${is404 ? `onclick="readNow('${url}')"` : `onclick="readNow('${url}')"`}>
+                ${flag} ${label} ${is404 ? "(404)" : ""}
+            </button>
+        `;
+    };
+    
+    // RAW
+    if (urls.raw) {
+        languageButtonsHTML += makeBtn("🇯🇵", "Raw", urls.raw, "raw");
+    }
+    
+    // ENGLISH
+    if (urls.english) {
+        languageButtonsHTML += makeBtn("🇬🇧", "English", urls.english, "english");
+    }
+    
+    // INDONESIA
+    if (urls.indonesia) {
+        languageButtonsHTML += makeBtn("🇮🇩", "Indonesia", urls.indonesia, "indonesia");
+    }
+    
+    // Fallback jika tidak ada urls sama sekali
+    if (!urls.raw && !urls.english && !urls.indonesia && manga.url) {
         languageButtonsHTML += `
             <button class="modal-lang-btn" onclick="readNow('${manga.url}')">
                 📖 Read Now
@@ -204,13 +200,17 @@ if (manga.urls.indonesia) {
         `;
     }
     
-    languageButtonsHTML += '</div>';
+    languageButtonsHTML += "</div>";
     
+    // Template utama
     modalBody.innerHTML = `
         <div class="modal-cover-container">
-            <img class="modal-cover" src="${manga.cover}" alt="${manga.title}" onerror="this.src='https://via.placeholder.com/300x400/8b0000/d4af37?text=${encodeURIComponent(manga.title)}'">
+            <img class="modal-cover" src="${manga.cover}" alt="${manga.title}"
+                 onerror="this.src='https://via.placeholder.com/300x400/8b0000/d4af37?text=${encodeURIComponent(manga.title)}'">
         </div>
+
         <div class="modal-title">${manga.title}</div>
+
         <div class="modal-info-grid">
             <div class="modal-info-item">
                 <span class="modal-label">Code:</span>
@@ -233,16 +233,19 @@ if (manga.urls.indonesia) {
                 <span class="modal-value">${manga.genres.join(', ')}</span>
             </div>
         </div>
+
         <div class="modal-synopsis">
             <strong style="color: var(--color-gold);">Synopsis:</strong><br/>
-            ${manga.synopsis.replace(/\n/g, '<br>')}
+            ${manga.synopsis.replace(/\n/g, "<br>")}
         </div>
+
         ${languageButtonsHTML}
     `;
     
-    document.getElementById('mangaModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
+    document.getElementById("mangaModal").classList.add("show");
+    document.body.style.overflow = "hidden";
 }
+
 
 function closeModal() {
     document.getElementById('mangaModal').classList.remove('show');
