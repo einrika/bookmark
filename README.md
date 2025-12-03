@@ -14,7 +14,13 @@
    "status": "Coming_soon",
    "rating": 0.0,
    "synopsis": "Coming_soon",
-   "url": "Coming_soon",
+   
+   "urls": {
+     "raw": "/404.jpg",
+     "english": "/404.jpg",
+     "indonesia": "/404.jpg"
+     },
+     
    "cover": "Coming_soon"
    }
    

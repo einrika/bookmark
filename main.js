@@ -72,8 +72,8 @@ function renderPagination(totalItems) {
     }
     
     let html = `
-                <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>❮</button>
-            `;
+        <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>❮</button>
+    `;
     
     const maxVisible = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -98,8 +98,8 @@ function renderPagination(totalItems) {
     }
     
     html += `
-                <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>❯</button>
-            `;
+        <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>❯</button>
+    `;
     
     pagination.innerHTML = html;
 }
@@ -134,22 +134,22 @@ function renderManga(data) {
     const paginatedData = data.slice(startIdx, endIdx);
     
     grid.innerHTML = paginatedData.map(manga => `
-                <div class="manga-card" onclick="showModal(${manga.id})">
-                    <div class="mangabox">
-                        <img class="manga-cover" src="${manga.cover}" alt="${manga.title}">
-                        <div class="manga-status">${manga.status}</div>
-                    </div>
-                    <div class="manga-info">
-                        <div class="manga-title">${manga.title}</div>
-                        <div class="manga-code">${manga.code}</div>
-                        <div class="manga-meta">
-                            ${manga.genres.slice(0, 2).map(g => `<span class="meta-tag">${g}</span>`).join('')}
-                        </div>
-                        <div class="manga-synopsis">${manga.synopsis}</div>
-                        <div class="manga-rating">⭐ ${manga.rating}</div>
-                    </div>
+        <div class="manga-card" onclick="showModal(${manga.id})">
+            <div class="mangabox">
+                <img class="manga-cover" src="${manga.cover}" alt="${manga.title}" onerror="this.src='https://via.placeholder.com/300x400/8b0000/d4af37?text=${encodeURIComponent(manga.title)}'">
+                <div class="manga-status">${manga.status}</div>
+            </div>
+            <div class="manga-info">
+                <div class="manga-title">${manga.title}</div>
+                <div class="manga-code">${manga.code}</div>
+                <div class="manga-meta">
+                    ${manga.genres.slice(0, 2).map(g => `<span class="meta-tag">${g}</span>`).join('')}
                 </div>
-            `).join('');
+                <div class="manga-synopsis">${manga.synopsis}</div>
+                <div class="manga-rating">⭐ ${manga.rating}</div>
+            </div>
+        </div>
+    `).join('');
     
     renderPagination(data.length);
 }
@@ -160,13 +160,77 @@ function showModal(mangaId) {
     if (!manga) return;
     
     const modalBody = document.getElementById('modalBody');
-    modalBody.innerHTML = `
-                <div class="modal-synopsis">
-                    <strong style="color: var(--color-gold);">Synopsis:</strong><br/>
-                 ${manga.synopsis.replace(/\n/g, '<br>')}
-                </div>
-                <button class="modal-btn" onclick="readNow('${manga.url}')">📖 Read Now</button>
+    
+    // Build language buttons HTML
+    let languageButtonsHTML = '<div class="modal-language-buttons">';
+    
+    if (manga.urls) {
+        if (manga.urls.raw) {
+            languageButtonsHTML += `
+                <button class="modal-lang-btn raw" onclick="readNow('${manga.urls.raw}')">
+                    🇯🇵 Raw
+                </button>
             `;
+        }
+        if (manga.urls.english) {
+            languageButtonsHTML += `
+                <button class="modal-lang-btn english" onclick="readNow('${manga.urls.english}')">
+                    🇬🇧 English
+                </button>
+            `;
+        }
+        if (manga.urls.indonesia) {
+            languageButtonsHTML += `
+                <button class="modal-lang-btn indonesia" onclick="readNow('${manga.urls.indonesia}')">
+                    🇮🇩 Indonesia
+                </button>
+            `;
+        }
+    }
+    // Fallback to single URL if urls object doesn't exist
+    else if (manga.url) {
+        languageButtonsHTML += `
+            <button class="modal-lang-btn" onclick="readNow('${manga.url}')">
+                📖 Read Now
+            </button>
+        `;
+    }
+    
+    languageButtonsHTML += '</div>';
+    
+    modalBody.innerHTML = `
+        <div class="modal-cover-container">
+            <img class="modal-cover" src="${manga.cover}" alt="${manga.title}" onerror="this.src='https://via.placeholder.com/300x400/8b0000/d4af37?text=${encodeURIComponent(manga.title)}'">
+        </div>
+        <div class="modal-title">${manga.title}</div>
+        <div class="modal-info-grid">
+            <div class="modal-info-item">
+                <span class="modal-label">Code:</span>
+                <span class="modal-value">${manga.code}</span>
+            </div>
+            <div class="modal-info-item">
+                <span class="modal-label">Type:</span>
+                <span class="modal-value">${manga.type}</span>
+            </div>
+            <div class="modal-info-item">
+                <span class="modal-label">Status:</span>
+                <span class="modal-value">${manga.status}</span>
+            </div>
+            <div class="modal-info-item">
+                <span class="modal-label">Rating:</span>
+                <span class="modal-value">⭐ ${manga.rating}</span>
+            </div>
+            <div class="modal-info-item">
+                <span class="modal-label">Genres:</span>
+                <span class="modal-value">${manga.genres.join(', ')}</span>
+            </div>
+        </div>
+        <div class="modal-synopsis">
+            <strong style="color: var(--color-gold);">Synopsis:</strong><br/>
+            ${manga.synopsis.replace(/\n/g, '<br>')}
+        </div>
+        ${languageButtonsHTML}
+    `;
     
     document.getElementById('mangaModal').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -178,7 +242,11 @@ function closeModal() {
 }
 
 function readNow(url) {
-    window.open(url, '_blank');
+    if (url && url !== '#' && url !== '') {
+        window.open(url, '_blank');
+    } else {
+        alert('Link tidak tersedia untuk bahasa ini');
+    }
 }
 
 // Close modal when clicking outside
@@ -248,16 +316,22 @@ function filterByLetter(letter) {
 }
 
 // Search functionality
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    currentPage = 1;
-    applyFilters();
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            currentPage = 1;
+            applyFilters();
+        });
+    }
 });
 
 // Apply all filters
 function applyFilters() {
     let data = [...mangaData];
     
-    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    const searchInput = document.getElementById('searchInput');
+    const searchValue = searchInput ? searchInput.value.toLowerCase() : '';
     
     if (selectedGenre) {
         data = data.filter(manga => manga.genres.includes(selectedGenre));
@@ -300,7 +374,8 @@ function resetFilters() {
     selectedGenre = null;
     selectedLetter = null;
     currentPage = 1;
-    document.getElementById('searchInput').value = '';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
     
     document.querySelectorAll('.genre-tag').forEach(tag => {
         tag.classList.remove('active');
@@ -313,13 +388,14 @@ function resetFilters() {
     renderManga(filteredData);
     
     // Set "Semua" genre as active
-    document.querySelector('.genre-tag').classList.add('active');
+    const firstGenreTag = document.querySelector('.genre-tag');
+    if (firstGenreTag) firstGenreTag.classList.add('active');
     
     // Clear URL params
     window.history.pushState({}, '', window.location.pathname);
 }
 
-// Load external data (optional)
+// Load external data
 async function loadMangaData() {
     try {
         let url;

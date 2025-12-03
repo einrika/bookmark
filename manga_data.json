@@ -8,7 +8,11 @@
     "status": "Ongoing",
     "rating": 7.8,
     "synopsis": "Shinozuka Takeshi and his family finally achieved their dream of owning a home. But their happiness was made possible by one person: their kind neighbor, Shirasawa! From helping with household adjustments to supporting them through child-rearing troubles and job searches, Shirasawa’s generosity knew no bounds. As days turned into reliance, Takeshi grew uneasy, but by the time he realized things had gone too far, it was already.",
-    "url": "https://weloma.art/5557/",
+    "urls": {
+      "raw": "https://weloma.art/5557/",
+      "english": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
     "cover": "https://s4.ihlv1.xyz/images3/20250227/image_67bfe50e55df2.png"
   },
   
@@ -17,103 +21,141 @@
     "id": 2,
     "title": "Dare demo Dakeru Kimi ga Suki",
     "code": "DMDKS-001",
-    "genres": ["Romance","Drama"],
+    "genres": ["Romance", "Drama"],
     "type": "Manga",
     "status": "Ongoing",
     "rating": 5.5,
     "synopsis": "A slutty Gal who let everyone have sex with her & a virgin high school boy falling in love with her after watching her have sex with his classmate. ***NTR(?) Elements****",
-    "url": "https://vymanga.com/manga/dare-demo-dakeru-kimi-ga-suki",
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://vymanga.com/manga/dare-demo-dakeru-kimi-ga-suki",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
     "cover": "https://cdnxyz.xyz/web/cover/84619/thumbnail.png"
   },
   
   {
-   "id": 3,
-   "title": "Saihate ni Madou",
-   "code": "SNM-001",
-   "genres": ["Drama", "Tragedy", "Psychological"],
-   "type": "Manga",
-   "status": "Completed",
-   "rating": 8.8,
-   "synopsis": "After his little sister was raped and killed herself, a teenage boy took revenge and killed her rapist in return. \n\n Seven years later the boy's released from prison, determined to kill himself due to insufferable guilt but then he's confronted by the rapist's daughter. A dramatic tale of guilt and atonement.",
-   "url": "https://mangadex.org/title/ff4669dd-c512-4d30-aeb7-6ceec5308a76/lost-at-the-farthest-ends",
-   "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8Syz3TmDLWccach9TFOtv1fnHAkWbJi84BbpJwCxBCw&s=10"
-   },
-     {
-     "id": 4,
-     "title": "Busou Shoujo Machiavellianism",
-     "code": "BSM-001",
-     "genres": ["Action", "Martial Arts", "Shounen", "School life"],
-     "type": "Manga",
-     "status": "Ongoing",
-     "rating": 8.9,
-     "synopsis": "The Private Aichi Symbiosis Academy was originally a high school for high-class girls, when it became co-ed, the girls, out of fear, asked to be permitted to bring weapons to school.\n\n When that was enforced, a five-member vigilante corps-like organization called the 'Supreme Five Swords' was also formed. After many generations, the five swords eventually became a group which corrected problematic students and such the academy started proactively accepting such students in order to correct them.\n\n Nomura Fudou was sent to that school after being part of a huge brawl, what will he do when the only options he has after enrolling are being expelled from that school too or being corrected the way the rest of the male students there were...by being forced to dress and act like girls!",
-     "url": "https://vymanga.com/manga/busou-shoujo-machiavellianism-p",
-     "cover": "https://cdnxyz.xyz/web/cover/5143/thumbnail.png"
-   },
-   
-   {
-   "id": 5,
-   "title": "Stalkers",
-   "code": "STKRS-001",
-   "genres": ["Comedy", "Romance"],
-   "type": "Manga",
-   "status": "Ongoing",
-   "rating": 7.5,
-   "synopsis": "I always think about people I like. I want to know anything about my favorite people. Because I like you. Because I like you. Everyone has a feeling of wanting to know about people I like. There are as many forms of love as there are people.",
-   "url": "https://vymanga.com/manga/stalkers",
-   "cover": "https://cdnxyz.xyz/web/cover/47200/thumbnail.png"
-   },
-   
-   {
-   "id": 6,
-   "title": "Jinsei Gyakuten ~Uwakisare, Enzai wo Kiserareta Orega, Gakuenichi no Bishoujo ni Natsukareru~",
-   "code": "JGU-001",
-   "genres": ["Seinen", "Drama", "Romance", "Psychological"],
-   "type": "Manga",
-   "status": "Ongoing",
-   "rating": 8.5,
-   "synopsis": "At the end of summer, Eiji Aono witnesses his childhood friend and girlfriend, Miyuki Amada, cheating on him with Kondo, the ace of the soccer team. Betrayed by her and emotionally shattered, Eiji becomes the target of baseless slander and harassment. Cornered and with nowhere to turn, he escapes to the school rooftop—where he meets a mysterious girl…",
-   "url": "https://vymanga.com/manga/jinsei-gyakuten-uwakisare-enzai-wo-kiserareta-orega-gakuenichi-no-bishoujo-ni-natsukareru",
-   "cover": "https://cdnxyz.xyz/web/cover/100392/thumbnail.png"
-   },
-   
-   {
-   "id": 7,
-   "title": "Watashi, 2-banme no Kanojo de Ii kara.",
-   "code": "W2BN-001",
-   "genres": ["Slice of Life","Drama", "Romance", "Shounen"],
-   "type": "Manga",
-   "status": "Ongoing",
-   "rating": 7.8,
-   "synopsis": "Kirishima and Hayasaka are two classmates who have a secret relationship in the public eye. \n\n In their school life they act as if they do not know each other, but secretly, there is much more than people can imagine. Both of them get into a relationship that becomes difficult to break and ends up being impure, unhealthy and complicated since the relationship between them was nothing more than a fling that simply generated a love triangle before Kirishima's first love and second love.",
-   "url": "https://mangadex.org/title/70015311-3e53-4501-bd6e-7504edd16d08/watashi-2-banme-no-kanojo-de-ii-kara",
-   "cover": "https://storage.westmanga.me/west/images/covers/06d4af70-bd5f-11f0-9320-7dfadbad6118.jpg"
-   },
-   
-    {
-   "id": 8,
-   "title": "Konbini de Deatta Eroi Onnanoko to Tadare Kitta Kankei ni Narimashita",
-   "code": "KDERO-001",
-   "genres": ["Ecchi", "Romance", "Seinen"],
-   "type": "Manga & Doujin",
-   "status": "Ongoing",
-   "rating": 7.5,
-   "synopsis": "'Onii-san, it seems like you come to this store a lot, don't you?'\n\nTomoya's nightly visits to his local conbini aren't for snacks. He's there for the girl who shows up every night. When they finally talk, it quickly becomes clear that she's looking for some fun... ADULT fun.",
-   "url": "https://mangadex.org/title/43f0d516-fc20-4651-b54f-526a7c079190/i-got-into-a-passionate-relationship-with-a-sexy-girl-i-met-at-a-convenience-store",
-   "cover": "https://storage.westmanga.me/west/images/covers/500e2fb0-c4bf-11f0-85fd-bfbcf1d668b1.jpg"
+    "id": 3,
+    "title": "Saihate ni Madou",
+    "code": "SNM-001",
+    "genres": ["Drama", "Tragedy", "Psychological"],
+    "type": "Manga",
+    "status": "Completed",
+    "rating": 8.8,
+    "synopsis": "After his little sister was raped and killed herself, a teenage boy took revenge and killed her rapist in return. \n\n Seven years later the boy's released from prison, determined to kill himself due to insufferable guilt but then he's confronted by the rapist's daughter. A dramatic tale of guilt and atonement.",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://mangadex.org/title/ff4669dd-c512-4d30-aeb7-6ceec5308a76/lost-at-the-farthest-ends",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8Syz3TmDLWccach9TFOtv1fnHAkWbJi84BbpJwCxBCw&s=10"
   },
-
-{
-  "id": 9,
-  "title": "Teisou Gyakuten Sekai de Tanomeba Yareru to Uwasa no Ore",
-  "code": "TGSTYUO-001",
-  "genres": ["Ecchi", "Romance", "Seinen", "Isekai", "School life"],
-  "type": "Manga",
-  "status": "Ongoing",
-  "rating": 7.5,
-  "synopsis": "Upon waking up, I, Sora Satou, found myself thrown into a 'world where morality is reversed.' Although confused at first, I gradually adapted to the norms of this new world and eventually started working at a supermarket right in front of an all-girls high school.\n\n Just when I was getting used to my life as an employee under the guidance of a kind and beautiful manager, a rumor began to spread: 'That male employee... they say if you ask him, he'll gladly do it.' As a result, a group of cute girls who swallowed the rumor whole started swarming around me... What am I supposed to do now!?",
-  "url": "https://mangadex.org/title/e264447e-2aa3-4467-980f-5a64c18f7087/the-rumor-is-i-m-easy-man-if-you-ask-in-a-world-of-reversed-chastity",
-  "cover": "https://storage.westmanga.me/west/images/covers/84c56200-c85c-11f0-b2ae-4380b4e578a7.jpg"
-}
-   
+  {
+    "id": 4,
+    "title": "Busou Shoujo Machiavellianism",
+    "code": "BSM-001",
+    "genres": ["Action", "Martial Arts", "Shounen", "School life"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 8.9,
+    "synopsis": "The Private Aichi Symbiosis Academy was originally a high school for high-class girls, when it became co-ed, the girls, out of fear, asked to be permitted to bring weapons to school.\n\n When that was enforced, a five-member vigilante corps-like organization called the 'Supreme Five Swords' was also formed. After many generations, the five swords eventually became a group which corrected problematic students and such the academy started proactively accepting such students in order to correct them.\n\n Nomura Fudou was sent to that school after being part of a huge brawl, what will he do when the only options he has after enrolling are being expelled from that school too or being corrected the way the rest of the male students there were...by being forced to dress and act like girls!",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://vymanga.com/manga/busou-shoujo-machiavellianism-p",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://cdnxyz.xyz/web/cover/5143/thumbnail.png"
+  },
+  
+  {
+    "id": 5,
+    "title": "Stalkers",
+    "code": "STKRS-001",
+    "genres": ["Comedy", "Romance"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 7.5,
+    "synopsis": "I always think about people I like. I want to know anything about my favorite people. Because I like you. Because I like you. Everyone has a feeling of wanting to know about people I like. There are as many forms of love as there are people.",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://vymanga.com/manga/stalkers",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://cdnxyz.xyz/web/cover/47200/thumbnail.png"
+  },
+  
+  {
+    "id": 6,
+    "title": "Jinsei Gyakuten ~Uwakisare, Enzai wo Kiserareta Orega, Gakuenichi no Bishoujo ni Natsukareru~",
+    "code": "JGU-001",
+    "genres": ["Seinen", "Drama", "Romance", "Psychological"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 8.5,
+    "synopsis": "At the end of summer, Eiji Aono witnesses his childhood friend and girlfriend, Miyuki Amada, cheating on him with Kondo, the ace of the soccer team. Betrayed by her and emotionally shattered, Eiji becomes the target of baseless slander and harassment. Cornered and with nowhere to turn, he escapes to the school rooftop—where he meets a mysterious girl…",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://vymanga.com/manga/jinsei-gyakuten-uwakisare-enzai-wo-kiserareta-orega-gakuenichi-no-bishoujo-ni-natsukareru",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://cdnxyz.xyz/web/cover/100392/thumbnail.png"
+  },
+  
+  {
+    "id": 7,
+    "title": "Watashi, 2-banme no Kanojo de Ii kara.",
+    "code": "W2BN-001",
+    "genres": ["Slice of Life", "Drama", "Romance", "Shounen"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 7.8,
+    "synopsis": "Kirishima and Hayasaka are two classmates who have a secret relationship in the public eye. \n\n In their school life they act as if they do not know each other, but secretly, there is much more than people can imagine. Both of them get into a relationship that becomes difficult to break and ends up being impure, unhealthy and complicated since the relationship between them was nothing more than a fling that simply generated a love triangle before Kirishima's first love and second love.",
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://mangadex.org/title/70015311-3e53-4501-bd6e-7504edd16d08/watashi-2-banme-no-kanojo-de-ii-kara",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://storage.westmanga.me/west/images/covers/06d4af70-bd5f-11f0-9320-7dfadbad6118.jpg"
+  },
+  
+  {
+    "id": 8,
+    "title": "Konbini de Deatta Eroi Onnanoko to Tadare Kitta Kankei ni Narimashita",
+    "code": "KDERO-001",
+    "genres": ["Ecchi", "Romance", "Seinen"],
+    "type": "Manga & Doujin",
+    "status": "Ongoing",
+    "rating": 7.5,
+    "synopsis": "'Onii-san, it seems like you come to this store a lot, don't you?'\n\nTomoya's nightly visits to his local conbini aren't for snacks. He's there for the girl who shows up every night. When they finally talk, it quickly becomes clear that she's looking for some fun... ADULT fun.",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://mangadex.org/title/43f0d516-fc20-4651-b54f-526a7c079190/i-got-into-a-passionate-relationship-with-a-sexy-girl-i-met-at-a-convenience-store",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://storage.westmanga.me/west/images/covers/500e2fb0-c4bf-11f0-85fd-bfbcf1d668b1.jpg"
+  },
+  
+  {
+    "id": 9,
+    "title": "Teisou Gyakuten Sekai de Tanomeba Yareru to Uwasa no Ore",
+    "code": "TGSTYUO-001",
+    "genres": ["Ecchi", "Romance", "Seinen", "Isekai", "School life"],
+    "type": "Manga",
+    "status": "Ongoing",
+    "rating": 7.5,
+    "synopsis": "Upon waking up, I, Sora Satou, found myself thrown into a 'world where morality is reversed.' Although confused at first, I gradually adapted to the norms of this new world and eventually started working at a supermarket right in front of an all-girls high school.\n\n Just when I was getting used to my life as an employee under the guidance of a kind and beautiful manager, a rumor began to spread: 'That male employee... they say if you ask him, he'll gladly do it.' As a result, a group of cute girls who swallowed the rumor whole started swarming around me... What am I supposed to do now!?",
+    
+    "urls": {
+      "raw": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg",
+      "english": "https://mangadex.org/title/e264447e-2aa3-4467-980f-5a64c18f7087/the-rumor-is-i-m-easy-man-if-you-ask-in-a-world-of-reversed-chastity",
+      "indonesia": "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg"
+    },
+    "cover": "https://storage.westmanga.me/west/images/covers/84c56200-c85c-11f0-b2ae-4380b4e578a7.jpg"
+  }
+  
 ]
