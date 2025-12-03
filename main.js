@@ -163,30 +163,38 @@ function showModal(mangaId) {
     
     // Build language buttons HTML
     let languageButtonsHTML = '<div class="modal-language-buttons">';
-    
-    if (manga.urls) {
-        if (manga.urls.raw) {
-            languageButtonsHTML += `
-                <button class="modal-lang-btn raw" onclick="readNow('${manga.urls.raw}')">
-                    🇯🇵 Raw
-                </button>
-            `;
-        }
-        if (manga.urls.english) {
-            languageButtonsHTML += `
-                <button class="modal-lang-btn english" onclick="readNow('${manga.urls.english}')">
-                    🇬🇧 English
-                </button>
-            `;
-        }
-        if (manga.urls.indonesia) {
-            languageButtonsHTML += `
-                <button class="modal-lang-btn indonesia" onclick="readNow('${manga.urls.indonesia}')">
-                    🇮🇩 Indonesia
-                </button>
-            `;
-        }
-    }
+    const fallback404 = "https://raw.githubusercontent.com/einrika/bookmark/refs/heads/main/404.jpg";
+
+// RAW
+if (manga.urls.raw) {
+    const is404 = manga.urls.raw === fallback404;
+    languageButtonsHTML += `
+        <button class="modal-lang-btn raw" ${is404 ? "" : `onclick="readNow('${manga.urls.raw}')"`}>
+            🇯🇵 Raw ${is404 ? "(404)" : ""}
+        </button>
+    `;
+}
+
+// ENGLISH
+if (manga.urls.english) {
+    const is404 = manga.urls.english === fallback404;
+    languageButtonsHTML += `
+        <button class="modal-lang-btn english" ${is404 ? "" : `onclick="readNow('${manga.urls.english}')"`}>
+            🇬🇧 English ${is404 ? "(404)" : ""}
+        </button>
+    `;
+}
+
+// INDONESIA
+if (manga.urls.indonesia) {
+    const is404 = manga.urls.indonesia === fallback404;
+    languageButtonsHTML += `
+        <button class="modal-lang-btn indonesia" ${is404 ? "" : `onclick="readNow('${manga.urls.indonesia}')"`}>
+            🇮🇩 Indonesia ${is404 ? "(404)" : ""}
+        </button>
+    `;
+}
+
     // Fallback to single URL if urls object doesn't exist
     else if (manga.url) {
         languageButtonsHTML += `
