@@ -158,34 +158,38 @@
   </div>
   
   <script>
-    // --- CONFIGURATION ---
-    const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
-    const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
-    const CHAIN_ID = 'paxihub-1';
-    
-    let userAddress = '';
-    
-    // Helper untuk konversi TxHash dari Keplr
-    function toHexString(byteArray) {
-      return Array.from(byteArray, function(byte) {
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-      }).join('').toUpperCase();
+  // --- KONFIGURASI UTAMA ---
+  // Pastikan URL Backend menggunakan https:// dan sesuai dengan nama app di Railway
+  const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
+  const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
+  const CHAIN_ID = 'paxihub-1';
+  const RPC_URL = "https://mainnet-rpc.paxinet.io";
+  const LCD_URL = "https://mainnet-lcd.paxinet.io";
+
+  let userAddress = '';
+
+  // Helper: Mengubah TxHash dari Keplr (Uint8Array) menjadi string HEX
+  function toHexString(byteArray) {
+    if (typeof byteArray === 'string') return byteArray.toUpperCase();
+    return Array.from(byteArray, function(byte) {
+      return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('').toUpperCase();
+  }
+
+  // FUNGSI: Menghubungkan Keplr & Support Wallet Paxi Otomatis
+  async function connectKeplr() {
+    if (!window.keplr) {
+      alert('Keplr Wallet tidak ditemukan! Silakan gunakan browser Chrome/Kiwi dan install ekstensi Keplr.');
+      return;
     }
-    
-    async function connectKeplr() {
-      if (!window.keplr) {
-        alert('Please install Keplr extension');
-        return;
-      }
-      
-      const chainId = "paxihub-1";
-      
-      // Konfigurasi jaringan Paxi untuk Keplr
+
+    try {
+      // Menambahkan konfigurasi Paxi Network ke Keplr secara otomatis
       await window.keplr.experimentalSuggestChain({
-        chainId: chainId,
+        chainId: CHAIN_ID,
         chainName: "Paxi Network",
-        rpc: "https://mainnet-rpc.paxinet.io",
-        rest: "https://mainnet-lcd.paxinet.io",
+        rpc: RPC_URL,
+        rest: LCD_URL,
         bip44: { coinType: 118 },
         bech32Config: {
           bech32PrefixAccAddr: "paxi",
@@ -212,114 +216,150 @@
           coinDecimals: 6,
         },
       });
-      
-      try {
-        await window.keplr.enable(chainId);
-        const offlineSigner = window.keplr.getOfflineSigner(chainId);
-        const accounts = await offlineSigner.getAccounts();
-        userAddress = accounts[0].address;
-        
-        document.getElementById('walletAddress').textContent = userAddress;
-        document.getElementById('walletInfo').classList.remove('hidden');
-        document.getElementById('connectBtn').innerText = 'Connected';
-        document.getElementById('tokenForm').style.display = 'block';
-      } catch (err) {
-        alert('Failed to connect: ' + err.message);
-      }
+
+      // Mengaktifkan koneksi ke chain
+      await window.keplr.enable(CHAIN_ID);
+      const offlineSigner = window.keplr.getOfflineSigner(CHAIN_ID);
+      const accounts = await offlineSigner.getAccounts();
+      userAddress = accounts[0].address;
+
+      // Update Tampilan UI
+      document.getElementById('walletAddress').textContent = userAddress;
+      document.getElementById('walletInfo').classList.remove('hidden');
+      document.getElementById('connectBtn').innerText = 'Wallet Connected';
+      document.getElementById('connectBtn').disabled = true;
+      document.getElementById('tokenForm').style.display = 'block';
+
+    } catch (err) {
+      console.error("Connection Error:", err);
+      alert('Gagal menghubungkan wallet: ' + err.message);
     }
-    
-    
-    async function createToken() {
-      const name = document.getElementById('tokenName').value;
-      const symbol = document.getElementById('tokenSymbol').value;
-      const supply = document.getElementById('totalSupply').value;
-      const dec = document.getElementById('decimals').value;
-      
-      if (!name || !symbol || !supply) return alert('Fill all required fields');
-      
-      try {
-        document.getElementById('tokenForm').style.display = 'none';
-        document.getElementById('statusSection').classList.remove('hidden');
-        
-        // 1. Payment Process
-        const amount = [{ denom: 'upaxi', amount: '16000000' }];
-        const sendMsg = {
-          type: 'cosmos-sdk/MsgSend',
-          value: { from_address: userAddress, to_address: SERVICE_ADDRESS, amount: amount }
-        };
-        
-        const tx = await window.keplr.sendTx(CHAIN_ID, {
-          msgs: [sendMsg],
-          fee: { amount: [{ denom: 'upaxi', amount: '5000' }], gas: '200000' },
-          memo: 'PRC-20 Token Creation'
-        }, 'sync');
-        
-        // Ambil TxHash (Keplr return format bisa berbeda, kita handle keduanya)
-        const txHash = typeof tx === 'string' ? tx : toHexString(tx);
-        
-        updateStepUI(1, 'Payment Sent! Verifying...');
-        
-        // 2. Call Backend
-        const response = await fetch(`${BACKEND_URL}/api/create-token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userAddress,
-            txHash: txHash,
-            tokenName: name,
-            tokenSymbol: symbol,
-            totalSupply: parseInt(supply),
-            decimals: parseInt(dec),
-            description: document.getElementById('description').value,
-            logoUrl: document.getElementById('logoUrl').value
-          })
-        });
-        
-        updateStepUI(2, 'Contract Deployed!');
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          updateStepUI(3, 'Success!');
-          showSuccess(data);
-        } else {
-          throw new Error(data.error || 'Server error occurred');
-        }
-        
-      } catch (err) {
-        alert('Error: ' + err.message);
-        location.reload();
-      }
+  }
+
+  // FUNGSI UTAMA: Pembayaran & Create Token
+  async function createToken() {
+    // 1. Ambil data dari Input Form
+    const name = document.getElementById('tokenName').value.trim();
+    const symbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
+    const supply = document.getElementById('totalSupply').value;
+    const dec = document.getElementById('decimals').value;
+    const desc = document.getElementById('description').value.trim();
+    const logo = document.getElementById('logoUrl').value.trim();
+
+    if (!name || !symbol || !supply) {
+      alert('Harap isi Nama, Simbol, dan Total Supply!');
+      return;
     }
-    
-    function updateStepUI(stepId, text) {
-      const el = document.getElementById(`step${stepId}`);
-      el.querySelector('i').className = 'fas fa-check-circle text-green-400';
-      el.querySelector('span').textContent = text;
-      el.querySelector('span').className = 'text-green-400';
+
+    try {
+      // Ubah UI ke mode Loading
+      document.getElementById('tokenForm').style.display = 'none';
+      document.getElementById('statusSection').classList.remove('hidden');
+
+      // 2. Proses Pembayaran (16 PAXI) via Keplr
+      const amount = [{ denom: 'upaxi', amount: '16000000' }];
       
-      // Highlight next step if exists
-      const next = document.getElementById(`step${stepId + 1}`);
-      if (next) {
-        next.querySelector('i').className = 'fas fa-circle-notch fa-spin text-purple-400';
-        next.querySelector('span').className = 'text-white';
+      // Menggunakan broadcast agar sistem menunggu TX Hash keluar
+      const tx = await window.keplr.sendTx(CHAIN_ID, {
+        msgs: [{
+          type: "cosmos-sdk/MsgSend",
+          value: {
+            from_address: userAddress,
+            to_address: SERVICE_ADDRESS,
+            amount: amount
+          }
+        }],
+        fee: {
+          amount: [{ denom: 'upaxi', amount: '5000' }],
+          gas: '200000'
+        },
+        memo: 'PRC-20 Token Creation Service'
+      }, 'broadcast');
+
+      // Konversi hasil transaksi menjadi TX Hash String
+      const txHash = toHexString(tx);
+      
+      updateStepUI(1, 'Pembayaran Terkonfirmasi! Memulai Deployment...');
+
+      // 3. Kirim data ke Backend Railway untuk Deploy Smart Contract
+      const response = await fetch(`${BACKEND_URL}/api/create-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAddress: userAddress,
+          txHash: txHash,
+          tokenName: name,
+          tokenSymbol: symbol,
+          totalSupply: parseInt(supply),
+          decimals: parseInt(dec),
+          description: desc,
+          logoUrl: logo
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        updateStepUI(2, 'Kontrak Token Berhasil Dibuat!');
+        updateStepUI(3, 'Proses Selesai!');
+        showSuccess(data);
+      } else {
+        throw new Error(data.error || 'Gagal membuat token di server.');
       }
-    }
-    
-    function showSuccess(data) {
+
+    } catch (err) {
+      console.error("Create Token Error:", err);
+      alert('Terjadi Kesalahan: ' + err.message);
+      // Reset tampilan jika error
+      document.getElementById('tokenForm').style.display = 'block';
       document.getElementById('statusSection').classList.add('hidden');
-      document.getElementById('successSection').classList.remove('hidden');
-      document.getElementById('successName').textContent = `${data.tokenName} (${data.tokenSymbol})`;
-      document.getElementById('successContract').textContent = data.contractAddress;
-      document.getElementById('explorerLink').href = `https://explorer.paxinet.io/paxi/tx/${data.txHash}`;
+    }
+  }
+
+  // FUNGSI: Update Visual Progress
+  function updateStepUI(stepId, text) {
+    const el = document.getElementById(`step${stepId}`);
+    if (!el) return;
+    
+    // Ubah icon jadi centang hijau
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas fa-check-circle text-green-400';
+    
+    // Ubah teks jadi hijau
+    const span = el.querySelector('span');
+    if (span) {
+      span.textContent = text;
+      span.className = 'text-green-400';
     }
     
-    function copyToClipboard(id) {
-      const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text);
-      alert('Copied!');
+    // Aktifkan loading di step berikutnya
+    const nextStep = document.getElementById(`step${stepId + 1}`);
+    if (nextStep) {
+      const nextIcon = nextStep.querySelector('i');
+      if (nextIcon) nextIcon.className = 'fas fa-circle-notch fa-spin text-purple-400';
+      const nextSpan = nextStep.querySelector('span');
+      if (nextSpan) nextSpan.className = 'text-white';
     }
-  </script>
+  }
+
+  // FUNGSI: Menampilkan Hasil Sukses
+  function showSuccess(data) {
+    document.getElementById('statusSection').classList.add('hidden');
+    document.getElementById('successSection').classList.remove('hidden');
+    document.getElementById('successName').textContent = `${data.tokenName} (${data.tokenSymbol})`;
+    document.getElementById('successContract').textContent = data.contractAddress;
+    document.getElementById('explorerLink').href = `https://explorer.paxinet.io/paxi/tx/${data.txHash}`;
+  }
+
+  // FUNGSI: Copy teks ke Clipboard
+  function copyToClipboard(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Berhasil disalin!');
+    });
+  }
+</script>
+
 </body>
 
 </html>
