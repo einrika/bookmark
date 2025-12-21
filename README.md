@@ -4,6 +4,9 @@
 - link tutorial token prc20 paxihub : https://einrika.github.io/bookmark/paxi-prc20/doc-paxihub-prc20.html
 https://einrika.github.io/bookmark/paxi-prc20/create-token.html
 
+link web berita: 
+https://einrika.github.io/bookmark//web%20berita/web-janji.html
+
 # json data manga
 ```json
 
