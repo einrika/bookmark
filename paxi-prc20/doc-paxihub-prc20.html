@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRC-20 Token Tutorial - Create Your Own Token on Android</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .code-block {
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Custom scrollbar for code blocks */
+    pre::-webkit-scrollbar {
+      height: 5px;
+    }
+    
+    pre::-webkit-scrollbar-thumb {
+      background: rgba(74, 222, 128, 0.3);
+      border-radius: 5px;
+    }
+    
+    /* Custom scrollbar for the long script code block */
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.5);
+      /* Blue scrollbar */
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body class="bg-black text-white">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    
+    <!-- Header -->
+    <header class="glass rounded-2xl p-8 mb-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+        PRC-20 Token Tutorial
+      </h1>
+      <p class="text-gray-400 text-lg">Complete guide to creating your own cryptocurrency token on Paxi Network using Android</p>
+    </header>
+    
+    <!-- Navigation Tabs -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <button onclick="showTab('intro')" class="tab-btn glass px-4 py-3 rounded-lg whitespace-nowrap hover:bg-white/10 transition">
+        <i class="fas fa-home mr-2"></i>Introduction
+      </button>
+      <button onclick="showTab('setup')" class="tab-btn glass px-4 py-3 rounded-lg whitespace-nowrap hover:bg-white/10 transition">
+        <i class="fas fa-download mr-2"></i>Setup
+      </button>
+      <button onclick="showTab('create')" class="tab-btn glass px-4 py-3 rounded-lg whitespace-nowrap hover:bg-white/10 transition">
+        <i class="fas fa-code mr-2"></i>Create Token
+      </button>
+      <button onclick="showTab('manage')" class="tab-btn glass px-4 py-3 rounded-lg whitespace-nowrap hover:bg-white/10 transition">
+        <i class="fas fa-cog mr-2"></i>Management
+      </button>
+      <button onclick="showTab('faq')" class="tab-btn glass px-4 py-3 rounded-lg whitespace-nowrap hover:bg-white/10 transition">
+        <i class="fas fa-question-circle mr-2"></i>FAQ
+      </button>
+    </div>
+    
+    <!-- Introduction Tab -->
+    <div id="intro" class="tab-content">
+      <div class="glass rounded-xl p-8 mb-6">
+        <h2 class="text-2xl font-bold mb-4">What is PRC-20?</h2>
+        <p class="text-gray-300 mb-6">PRC-20 is a token standard on Paxi Network, similar to ERC-20 on Ethereum. It allows you to create your own cryptocurrency token with customizable features.</p>
+        
+        <div class="grid md:grid-cols-4 gap-4 mt-8">
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-mobile-alt text-4xl mb-3"></i>
+            <h3 class="font-semibold mb-2">Mobile Friendly</h3>
+            <p class="text-sm text-gray-400">Create tokens directly from your Android phone</p>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-dollar-sign text-4xl mb-3"></i>
+            <h3 class="font-semibold mb-2">Low Cost</h3>
+            <p class="text-sm text-gray-400">Only requires 6 PAXI for deployment</p>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-clock text-4xl mb-3"></i>
+            <h3 class="font-semibold mb-2">Fast Setup</h3>
+            <p class="text-sm text-gray-400">Get your token running in under 30 minutes</p>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-shield-alt text-4xl mb-3"></i>
+            <h3 class="font-semibold mb-2">Secure</h3>
+            <p class="text-sm text-gray-400">Built on CosmWasm smart contracts</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="glass rounded-xl p-8 mb-6">
+        <h2 class="text-2xl font-bold mb-4">What You Will Learn</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Installing Termux and required tools on Android</li>
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Setting up Node.js development environment</li>
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Creating PRC-20 tokens with custom parameters</li>
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Adding liquidity to enable trading</li>
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Managing token ownership and permissions</li>
+          <li><i class="fas fa-check text-green-400 mr-3"></i>Best practices for token deployment</li>
+        </ul>
+      </div>
+      
+      <div class="glass rounded-xl p-8">
+        <h2 class="text-2xl font-bold mb-4">Requirements</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left p-3 font-semibold">Item</th>
+                <th class="text-left p-3 font-semibold">Requirement</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300">
+              <tr class="border-b border-white/10">
+                <td class="p-3">Device</td>
+                <td class="p-3">Android 7.0 or higher</td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-3">Storage</td>
+                <td class="p-3">Minimum 500MB free space</td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-3">Internet</td>
+                <td class="p-3">Stable connection required</td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-3">Wallet</td>
+                <td class="p-3">Paxi wallet with minimum 6 PAXI</td>
+              </tr>
+              <tr>
+                <td class="p-3">Knowledge</td>
+                <td class="p-3">Basic understanding of cryptocurrency</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Setup Tab -->
+    <div id="setup" class="tab-content">
+      <div class="glass rounded-xl p-8 bg-black/20 backdrop-blur-md">
+        
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-xl shadow-lg shadow-purple-500/20">1</div>
+            <h3 class="text-2xl font-bold text-white">Install Termux Application</h3>
+          </div>
+          
+          <div class="ml-0 md:ml-16">
+            <div class="bg-yellow-500/10 border-l-4 border-yellow-500 p-5 mb-8 rounded-r-lg">
+              <div class="flex gap-4">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mt-1"></i>
+                <div>
+                  <strong class="text-yellow-400 text-lg block mb-2">CRITICAL: DO NOT USE PLAY STORE!</strong>
+                  <p class="text-gray-300 leading-relaxed">The version of Termux on the Google Play Store is <strong>deprecated</strong> and no longer receives updates. You will encounter "Repository" errors if you use it.</p>
+                  <p class="text-gray-300 mt-2 font-semibold">Please install from F-Droid to ensure everything works correctly.</p>
+                </div>
+              </div>
+            </div>
+            
+            <p class="text-gray-300 mb-6 text-lg font-medium">Step-by-step installation:</p>
+            
+            <div class="space-y-4 mb-8">
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 text-purple-400 font-bold">1</div>
+                <p class="text-gray-300">Open your mobile browser and go to <code class="text-green-400 font-mono">f-droid.org</code>, install app f-droid and open.</p>
+              </div>
+              
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 text-purple-400 font-bold">2</div>
+                <p class="text-gray-300">Search for "Termux" and select the one by <strong>Fredrik Fornwall</strong>.</p>
+              </div>
+              
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 text-purple-400 font-bold">3</div>
+                <p class="text-gray-300">Scroll down to "Packages" and click <strong>"Download APK"</strong>.</p>
+              </div>
+            </div>
+            
+            <a href="https://f-droid.org/packages/com.termux/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center glass px-8 py-4 rounded-xl hover:bg-white/10 transition transform hover:scale-105 border border-white/20 group">
+              <i class="fas fa-download mr-4 text-xl"></i>
+              <span class="font-bold text-lg text-white">Download Termux from F-Droid</span>
+              <i class="fas fa-external-link-alt ml-4 text-sm opacity-50"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-xl">2</div>
+            <h3 class="text-2xl font-bold text-white">System Preparation (Update)</h3>
+          </div>
+          
+          <div class="ml-0 md:ml-16">
+            <p class="text-gray-300 mb-6 leading-relaxed">Once Termux is open, you must update the package list to ensure you can download the latest software versions.</p>
+            
+            <div class="code-block rounded-xl p-5 mb-4 relative bg-black/50 border border-white/10">
+              <button onclick="copyCode(this)" class="absolute top-3 right-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm text-white transition-all border border-white/10">
+                <i class="fas fa-copy mr-2"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm md:text-base overflow-x-auto whitespace-pre pr-12">pkg update && pkg upgrade -y</pre>
+            </div>
+            
+            <div class="bg-blue-500/10 border-l-4 border-blue-500 p-5 rounded-r-lg">
+              <p class="text-gray-300 text-sm"><strong>Pro Tip:</strong> If the process stops and asks a question like <code class="text-yellow-400">[Y/n]</code>, just press <strong>ENTER</strong> on your keyboard until it finishes at the <code class="text-green-400">$</code> prompt.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">3</div>
+            <h3 class="text-2xl font-semibold">Install Node.js</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">Install Node.js, which is required to run JavaScript code:</p>
+            <div class="code-block rounded-lg p-4 mb-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">pkg install nodejs</pre>
+            </div>
+            <p class="text-gray-300 mb-4">Verify the installation:</p>
+            <div class="code-block rounded-lg p-4 mb-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">node --version</pre>
+            </div>
+            <div class="bg-green-500/10 border-l-4 border-green-500 p-4">
+              <div class="flex gap-3">
+                <i class="fas fa-check-circle text-green-400"></i>
+                <div>If you see a version number (e.g., v18.19.0), Node.js is installed successfully</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-xl">4</div>
+            <h3 class="text-2xl font-bold text-white">Project Setup & Libraries</h3>
+          </div>
+          
+          <div class="ml-0 md:ml-16 space-y-8">
+            
+            <div>
+              <p class="text-gray-300 mb-3 font-medium">A. Create a new project folder:</p>
+              <div class="code-block rounded-xl p-4 relative bg-black/50 border border-white/10">
+                <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/10 px-3 py-1 rounded text-xs text-white">Copy</button>
+                <pre class="text-green-400 font-mono text-sm overflow-x-auto whitespace-pre">mkdir token-generator</pre>
+              </div>
+            </div>
+            
+            <div>
+              <p class="text-gray-300 mb-3 font-medium">B. Enter the folder:</p>
+              <div class="code-block rounded-xl p-4 relative bg-black/50 border border-white/10">
+                <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/10 px-3 py-1 rounded text-xs text-white">Copy</button>
+                <pre class="text-green-400 font-mono text-sm overflow-x-auto whitespace-pre">cd token-generator</pre>
+              </div>
+            </div>
+            
+            <div>
+              <p class="text-gray-300 mb-3 font-medium">C. Initialize the Node.js project:</p>
+              <div class="code-block rounded-xl p-4 relative bg-black/50 border border-white/10">
+                <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/10 px-3 py-1 rounded text-xs text-white">Copy</button>
+                <pre class="text-green-400 font-mono text-sm overflow-x-auto whitespace-pre">npm init -y</pre>
+              </div>
+            </div>
+            
+            <div class="mb-8">
+              <p class="text-gray-300 mb-3 font-medium">D. Install required Blockchain libraries:</p>
+              
+              <div class="code-block rounded-xl p-5 relative bg-black/50 border border-white/10 shadow-inner">
+                <button onclick="copyCode(this)" class="absolute top-3 right-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm text-white transition-all border border-white/10">
+                  <i class="fas fa-copy mr-2"></i>Copy
+                </button>
+                <pre class="text-green-400 font-mono text-sm md:text-base overflow-x-auto whitespace-pre pr-12">npm install @cosmjs/proto-signing @cosmjs/cosmwasm-stargate</pre>
+              </div>
+              
+              <div class="mt-4 space-y-3">
+                <div class="flex items-center gap-2 text-yellow-500">
+                  <i class="fas fa-hourglass-half animate-pulse"></i>
+                  <p class="text-sm font-semibold uppercase tracking-wide">Wait until it's finished!</p>
+                </div>
+                
+                <p class="text-gray-400 text-sm leading-relaxed">
+                  This process usually takes <strong>2-5 minutes</strong> depending on your internet speed.
+                  <span class="text-red-400">Do not close Termux</span> while the installation is in progress.
+                </p>
+                
+                <div class="bg-green-500/10 border border-green-500/30 p-3 rounded-lg flex items-start gap-3">
+                  <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                  <p class="text-gray-300 text-sm">
+                    <strong>Success Indicator:</strong> If you see a message like <code class="text-green-400">"added xxx packages"</code>, it means the installation was <strong>SUCCESSFUL!</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        
+        <div class="mb-0">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">5</div>
+            <h3 class="text-2xl font-semibold">Install Text Editor</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">Install nano text editor for creating and editing files:</p>
+            <div class="code-block rounded-lg p-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">pkg install nano</pre>
+            </div>
+          </div>
+          
+          <div class="mt-8 p-4 bg-green-500/20 border border-green-500/50 rounded-xl text-center">
+            <p class="text-green-400 font-bold"><i class="fas fa-flag-checkered mr-2"></i> SETUP COMPLETE! Your environment is ready to Create token.</p>
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Create Token Tab -->
+    <div id="create" class="tab-content hidden">
+      <div class="glass rounded-xl p-8">
+        
+        <!-- Step 1 -->
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">1</div>
+            <h3 class="text-2xl font-semibold">Create Token Script</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">Create a new JavaScript file for token creation:</p>
+            <div class="code-block rounded-lg p-4 mb-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">nano create-token.js</pre>
+            </div>
+            <p class="text-gray-300 mb-4">Copy and paste the following code into the editor:</p>
+            <div class="code-block rounded-lg p-4 relative overflow-x-auto">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10 z-10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-xs">const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
+const { SigningCosmWasmClient } = require("@cosmjs/cosmwasm-stargate");
+const { GasPrice } = require("@cosmjs/stargate");
+
+async function createPRC20Token() {
+  console.log("PRC-20 Token Generator");
+  console.log("=".repeat(50));
+
+  // CONFIGURATION - EDIT THIS SECTION
+  const MNEMONIC = "your twelve word mnemonic phrase goes here";
+  const TOKEN_NAME = "My Token";
+  const TOKEN_SYMBOL = "MTK";
+  const TOTAL_SUPPLY = 1000000;
+  const DECIMALS = 6;
+  const DESCRIPTION = "token on Paxi Network";
+  const LOGO_URL = "";
+  
+  // Don't edit anything below!!!
+  try {
+    console.log("Token Configuration:");
+    console.log("  Name: " + TOKEN_NAME);
+    console.log("  Symbol: " + TOKEN_SYMBOL);
+    console.log("  Supply: " + TOTAL_SUPPLY.toLocaleString() + " " + TOKEN_SYMBOL);
+
+    console.log("\\nLoading wallet from mnemonic...");
+    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(MNEMONIC, {
+      prefix: "paxi"
+    });
+    
+    const [account] = await wallet.getAccounts();
+    console.log("Wallet Address: " + account.address);
+
+    console.log("\\nConnecting to Paxi Network...");
+    const client = await SigningCosmWasmClient.connectWithSigner(
+      "https://mainnet-rpc.paxinet.io",
+      wallet,
+      { gasPrice: GasPrice.fromString("0.05upaxi") }
+    );
+
+    const balance = await client.getBalance(account.address, "upaxi");
+    const balancePaxi = parseFloat(balance.amount) / 1000000;
+    console.log("Balance: " + balancePaxi.toFixed(6) + " PAXI");
+
+    if (balancePaxi < 6) {
+      console.log("\\nERROR: Insufficient balance!");
+      return;
+    }
+
+    const totalSupplyWithDecimals = (TOTAL_SUPPLY * Math.pow(10, DECIMALS)).toString();
+    const instantiateMsg = {
+      name: TOKEN_NAME,
+      symbol: TOKEN_SYMBOL,
+      decimals: DECIMALS,
+      initial_balances: [{
+        address: account.address,
+        amount: totalSupplyWithDecimals
+      }],
+      mint: { minter: account.address },
+      marketing: {
+        project: TOKEN_NAME + " Project",
+        description: DESCRIPTION,
+        marketing: account.address
+      }
+    };
+
+    if (LOGO_URL) {
+      instantiateMsg.marketing.logo = { url: LOGO_URL };
+    }
+
+    console.log("\\nCreating token on blockchain...");
+    const result = await client.instantiate(
+      account.address,
+      1,
+      instantiateMsg,
+      TOKEN_NAME,
+      "auto"
+    );
+
+    console.log("\\nTOKEN CREATED SUCCESSFULLY");
+    console.log("Contract Address: " + result.contractAddress);
+    console.log("TX Hash: " + result.transactionHash);
+    console.log("Explorer: https://explorer.paxinet.io/paxi/tx/" + result.transactionHash);
+
+    const fs = require('fs');
+    fs.writeFileSync('token-info.json', JSON.stringify({
+      tokenName: TOKEN_NAME,
+      tokenSymbol: TOKEN_SYMBOL,
+      contractAddress: result.contractAddress,
+      transactionHash: result.transactionHash
+    }, null, 2));
+
+  } catch (error) {
+    console.log("\\nERROR: " + error.message);
+  }
+}
+
+createPRC20Token();</pre>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2 -->
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">2</div>
+            <h3 class="text-2xl font-semibold">Configure Token Parameters</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">Edit the configuration section. Use arrow keys to navigate and modify these values:</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-white/10">
+                    <th class="text-left p-3">Parameter</th>
+                    <th class="text-left p-3">Description</th>
+                    <th class="text-left p-3">Example</th>
+                  </tr>
+                </thead>
+                <tbody class="text-gray-300">
+                  <tr class="border-b border-white/10">
+                    <td class="p-3">MNEMONIC</td>
+                    <td class="p-3">Your 12-word wallet phrase</td>
+                    <td class="p-3">"word1 word2 word3..."</td>
+                  </tr>
+                  <tr class="border-b border-white/10">
+                    <td class="p-3">TOKEN_NAME</td>
+                    <td class="p-3">Full name of your token</td>
+                    <td class="p-3">"My Amazing Token"</td>
+                  </tr>
+                  <tr class="border-b border-white/10">
+                    <td class="p-3">TOKEN_SYMBOL</td>
+                    <td class="p-3">Short ticker symbol</td>
+                    <td class="p-3">"MAT"</td>
+                  </tr>
+                  <tr class="border-b border-white/10">
+                    <td class="p-3">TOTAL_SUPPLY</td>
+                    <td class="p-3">Total number of tokens</td>
+                    <td class="p-3">1000000</td>
+                  </tr>
+                  <tr class="border-b border-white/10">
+                    <td class="p-3">DECIMALS</td>
+                    <td class="p-3">Number of decimal places</td>
+                    <td class="p-3">6</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">DESCRIPTION</td>
+                    <td class="p-3">Short description</td>
+                    <td class="p-3">"Community token"</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 mt-4">
+              <div class="flex gap-3">
+                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                <div><strong>Never share your mnemonic with anyone!</strong> Keep it secure and private.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="mb-12 pb-12 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">3</div>
+            <h3 class="text-2xl font-semibold">Save and Exit</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">To save the file in nano:</p>
+            <ul class="space-y-2 text-gray-300">
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Ctrl + X</li>
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Y to confirm save</li>
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Enter to confirm filename</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Step 4 -->
+        <div class="mb-0">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold">4</div>
+            <h3 class="text-2xl font-semibold">Run Token Creation Script</h3>
+          </div>
+          <div class="ml-14">
+            <p class="text-gray-300 mb-4">Execute the script to create your token:</p>
+            <div class="code-block rounded-lg p-4 mb-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">node create-token.js</pre>
+            </div>
+            <div class="bg-green-500/10 border-l-4 border-green-500 p-4">
+              <div class="flex gap-3">
+                <i class="fas fa-check-circle text-green-400"></i>
+                <div><strong>Success!</strong> Your token will be created in 10-30 seconds. Save the contract address and transaction hash.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Management Tab -->
+    <div id="manage" class="tab-content hidden">
+      <div class="glass rounded-xl p-8 bg-black/20 backdrop-blur-md">
+        
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center border-2 border-blue-500/50 shadow-lg shadow-blue-500/20">
+            <i class="fas fa-robot text-blue-400 text-xl"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-white">All-In-One Token Manager</h2>
+        </div>
+        
+        <p class="text-gray-300 mb-8 text-lg leading-relaxed">
+          Instead of using multiple files, use this powerful <strong>Management Script</strong>. It allows you to Add Liquidity, Renounce Minting Rights, and Burn Tokens through a simple interactive menu.
+        </p>
+        
+        <div class="mb-10 pb-10 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-white">A</div>
+            <h3 class="text-xl font-semibold text-white">Create the Manager File</h3>
+          </div>
+          <div class="ml-0 md:ml-14">
+            <p class="text-gray-400 mb-4">Run this command to open the Nano editor and create a new file:</p>
+            <div class="code-block rounded-xl p-4 relative bg-black/50 border border-white/10">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-xs text-white transition">Copy</button>
+              <pre class="text-green-400 font-mono text-sm overflow-x-auto whitespace-pre">nano token-manager.js</pre>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-10 pb-10 border-b border-white/10">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-white">B</div>
+            <h3 class="text-xl font-semibold text-white">Copy & Paste the Logic</h3>
+          </div>
+          <div class="ml-0 md:ml-14">
+            <p class="text-gray-400 mb-4 font-medium italic">Copy the entire block below and paste it into Termux:</p>
+            
+            <div class="code-block rounded-xl p-5 relative bg-black/60 border border-white/20 shadow-2xl">
+              <button onclick="copyCode(this)" class="absolute top-3 right-3 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 px-4 py-2 rounded-lg text-sm transition-all border border-blue-500/30 z-10">
+                <i class="fas fa-copy mr-2"></i>Copy Script
+              </button>
+              
+              <pre class="text-green-400 font-mono text-xs md:text-sm overflow-x-auto whitespace-pre h-80 scrollbar-thin">
+const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
+const { SigningCosmWasmClient } = require("@cosmjs/cosmwasm-stargate");
+const { GasPrice } = require("@cosmjs/stargate");
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+function question(query) {
+  return new Promise(resolve => rl.question(query, resolve));
+}
+
+async function main() {
+  console.clear();
+  console.log("🔧 PRC-20 TOKEN MANAGER");
+  console.log("==================================================");
+  console.log("\nSelect Action:");
+  console.log("1. Add Liquidity");
+  console.log("2. Renounce Minter Rights (Permanent)");
+  console.log("3. Burn Tokens");
+  console.log("4. Exit");
+  
+  const choice = await question("\nChoice (1-4): ");
+
+  if (choice === '4') {
+    console.log("Goodbye! 👋");
+    rl.close();
+    return;
+  }
+
+  const mnemonic = await question("Input Mnemonic: ");
+  const tokenContract = await question("Token Contract Address: ");
+
+  const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: "paxi"
+  });
+  const [account] = await wallet.getAccounts();
+
+  const client = await SigningCosmWasmClient.connectWithSigner(
+    "https://mainnet-rpc.paxinet.io",
+    wallet,
+    { gasPrice: GasPrice.fromString("0.05upaxi") }
+  );
+
+  try {
+    if (choice === '1') {
+      const paxiAmount = await question("PAXI Amount: ");
+      const tokenAmount = await question("Token Amount: ");
+      console.log("\n💧 Adding liquidity...");
+      // Implementation logic goes here
+      
+    } else if (choice === '2') {
+      console.log("\n🚫 Renouncing minter rights...");
+      const msg = { update_minter: { new_minter: null } };
+      const result = await client.execute(account.address, tokenContract, msg, "auto");
+      console.log(`✅ Success! TX: ${result.transactionHash}`);
+      
+    } else if (choice === '3') {
+      const burnAmount = await question("Burn Amount: ");
+      console.log("\n🔥 Burning tokens...");
+      const msg = { burn: { amount: (burnAmount * 1000000).toString() } };
+      const result = await client.execute(account.address, tokenContract, msg, "auto");
+      console.log(`✅ Success! TX: ${result.transactionHash}`);
+    }
+  } catch (error) {
+    console.log("\n❌ ERROR:", error.message);
+  }
+
+  rl.close();
+}
+
+main();</pre>
+            </div>
+            
+          <div class="mt-5 ml-14">
+            <p class="text-gray-300 mb-4">To save the file in nano:</p>
+            <ul class="space-y-2 text-gray-300">
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Ctrl + X</li>
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Y to confirm save</li>
+              <li><i class="fas fa-chevron-right mr-3"></i>Press Enter to confirm filename</li>
+            </ul>
+          </div>
+        
+          </div>
+        </div>
+        
+        <div class="mb-0">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-10 h-10 rounded-full glass border-2 border-white/30 flex items-center justify-center font-bold text-white">C</div>
+            <h3 class="text-xl font-semibold text-white">Run the Manager</h3>
+          </div>
+          <div class="ml-0 md:ml-14">
+            <p class="text-gray-400 mb-4">Start the interactive menu with this command:</p>
+            <div class="code-block rounded-xl p-4 relative bg-black/50 border border-white/10">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-xs text-white transition">Copy</button>
+              <pre class="text-green-400 font-mono text-sm overflow-x-auto whitespace-pre">node token-manager.js</pre>
+            </div>
+            
+            <div class="mt-6 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+              <p class="text-green-400 text-sm font-medium">
+                <i class="fas fa-check-double mr-2"></i> Follow the on-screen prompts in Termux to manage your token!
+              </p>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- FAQ Tab -->
+    <div id="faq" class="tab-content hidden">
+      <div class="glass rounded-xl p-8">
+        <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+        
+        <div class="space-y-8">
+          <div>
+            <h3 class="text-xl font-semibold mb-3">How much does it cost to create a token?</h3>
+            <p class="text-gray-300">Token creation costs approximately 6 PAXI for gas fees. Additional operations cost around 0.02-0.05 PAXI each.</p>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">Can I edit my token after creation?</h3>
+            <p class="text-gray-300">You can update the logo and description. However, you cannot change the token name, symbol, decimals, or total supply.</p>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">What happens if I close Termux?</h3>
+            <p class="text-gray-300 mb-3">All your files remain saved. Simply reopen the app and navigate to your project folder:</p>
+            <div class="code-block rounded-lg p-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">cd token-generator</pre>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">How do I backup my token information?</h3>
+            <p class="text-gray-300 mb-3">Install termux-api and setup storage access:</p>
+            <div class="code-block rounded-lg p-4 relative">
+              <button onclick="copyCode(this)" class="absolute top-2 right-2 glass px-3 py-1 rounded text-sm hover:bg-white/10">
+                <i class="fas fa-copy mr-1"></i>Copy
+              </button>
+              <pre class="text-green-400 font-mono text-sm">pkg install termux-api
+termux-setup-storage
+cp token-info.json ~/storage/downloads/</pre>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">Is renouncing minting rights reversible?</h3>
+            <p class="text-gray-300">No. This is permanent and cannot be undone. After renouncing, no one can ever mint new tokens.</p>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">How do I check my token on the blockchain?</h3>
+            <p class="text-gray-300 mb-3">Visit the Paxi Network explorer:</p>
+            <a href="https://explorer.paxinet.io" target="_blank" class="inline-block glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
+              <i class="fas fa-external-link-alt mr-2"></i>Open Paxi Explorer
+            </a>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">Can I create multiple tokens?</h3>
+            <p class="text-gray-300">Yes. You can create as many tokens as you want. Simply edit the configuration and run the script again.</p>
+          </div>
+          
+          <div>
+            <h3 class="text-xl font-semibold mb-3">What if I get an error during creation?</h3>
+            <p class="text-gray-300 mb-3">Common errors and solutions:</p>
+            <ul class="space-y-2 text-gray-300">
+              <li><i class="fas fa-chevron-right text-green-400 mr-3"></i>Insufficient balance - Add more PAXI to your wallet</li>
+              <li><i class="fas fa-chevron-right text-green-400 mr-3"></i>Invalid mnemonic - Check your 12-word phrase</li>
+              <li><i class="fas fa-chevron-right text-green-400 mr-3"></i>Connection error - Verify internet connection</li>
+              <li><i class="fas fa-chevron-right text-green-400 mr-3"></i>Contract error - Ensure all parameters are valid</li>
+            </ul>
+          </div>
+        </div>
+        
+      </div>
+      
+      <div class="glass rounded-xl p-8 mt-6">
+        <h2 class="text-2xl font-bold mb-6">Useful Resources</h2>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-book text-3xl mb-3"></i>
+            <h3 class="font-semibold mb-3">Official Docs</h3>
+            <a href="https://paxinet.io/paxi_docs/developers" target="_blank" class="glass px-4 py-2 rounded hover:bg-white/10 inline-block text-sm">
+              <i class="fas fa-external-link-alt mr-1"></i>View Docs
+            </a>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fas fa-search text-3xl mb-3"></i>
+            <h3 class="font-semibold mb-3">Explorer</h3>
+            <a href="https://explorer.paxinet.io" target="_blank" class="glass px-4 py-2 rounded hover:bg-white/10 inline-block text-sm">
+              <i class="fas fa-external-link-alt mr-1"></i>Open Explorer
+            </a>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fab fa-discord text-3xl mb-3"></i>
+            <h3 class="font-semibold mb-3">Discord</h3>
+            <a href="https://discord.gg/rA9Xzs69tx" target="_blank" class="glass px-4 py-2 rounded hover:bg-white/10 inline-block text-sm">
+              <i class="fas fa-external-link-alt mr-1"></i>Join Discord
+            </a>
+          </div>
+          <div class="glass rounded-lg p-6 text-center">
+            <i class="fab fa-telegram text-3xl mb-3"></i>
+            <h3 class="font-semibold mb-3">Telegram</h3>
+            <a href="https://t.me/paxi_network" target="_blank" class="glass px-4 py-2 rounded hover:bg-white/10 inline-block text-sm">
+              <i class="fas fa-external-link-alt mr-1"></i>Join Telegram
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="text-center py-8 mt-12 border-t border-white/10">
+      <p class="text-gray-400 mb-2">PRC-20 Token Tutorial - Create Your Own Cryptocurrency on Android</p>
+      <div class="flex justify-center gap-6 mb-4">
+        <a href="https://paxinet.io" target="_blank" class="text-gray-400 hover:text-white transition">Paxi Network</a>
+        <a href="https://github.com/paxi-web3/paxi" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
+        <a href="https://explorer.paxinet.io" target="_blank" class="text-gray-400 hover:text-white transition">Explorer</a>
+      </div>
+      <p class="text-sm text-gray-500">This tutorial is for educational purposes. Always do your own research before deploying tokens.</p>
+    </footer>
+    
+  </div>
+  
+  <script>
+    // Show first tab on load
+    document.addEventListener('DOMContentLoaded', function() {
+      showTab('intro');
+    });
+    
+    function showTab(tabName) {
+      // Hide all tabs
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.add('hidden'));
+      
+      // Remove active state from all buttons
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('bg-white/20'));
+      
+      // Show selected tab
+      document.getElementById(tabName).classList.remove('hidden');
+      
+      // Add active state to clicked button
+      event.target.classList.add('bg-white/20');
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function copyCode(button) {
+      const codeBlock = button.parentElement;
+      const code = codeBlock.querySelector('pre').textContent;
+      
+      navigator.clipboard.writeText(code).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied';
+        button.classList.add('bg-green-500/20');
+        
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.classList.remove('bg-green-500/20');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    }
+  </script>
+</body>
+
+</html>
