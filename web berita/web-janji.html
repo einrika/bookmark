@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KORAN DIGITAL $JANJI - Suara Elit, Derita Rakyat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,900&family=Roboto+Condensed:wght@400;700&family=Courier+Prime&display=swap');
+        
+        body { background-color: #000; color: #fff; font-family: 'Roboto Condensed', sans-serif; overflow-x: hidden; }
+        .newspaper-title { font-family: 'Playfair Display', serif; }
+        .border-double-custom { border-style: double; border-width: 4px; border-color: #fff; }
+        .breaking-news { animation: blink 1s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .sidebar-box { border: 1px solid #333; padding: 10px; margin-bottom: 15px; }
+        .grayscale-img { filter: grayscale(100%) contrast(120%); transition: 0.3s; }
+        .grayscale-img:hover { filter: grayscale(0%); }
+        
+        /* Modal Style */
+        .modal-blur { backdrop-filter: blur(10px); background: rgba(0,0,0,0.95); }
+        
+        /* PERBAIKAN PARAGRAF & MARKDOWN */
+        #md-render { 
+            font-family: 'Courier Prime', monospace; 
+            color: #d1d1d1;
+            line-height: 1.6;
+        }
+        #md-render h1 { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #fff; margin-bottom: 1.5rem; color: #fff; }
+        #md-render h2 { font-size: 1.8rem; font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; color: #fff; font-style: italic; }
+        #md-render h3 { font-size: 1.4rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+        
+        /* Ini yang bikin paragraf muncul jaraknya */
+        #md-render p { margin-bottom: 1.5rem; display: block; }
+        
+        #md-render ul, #md-render ol { margin-bottom: 1.5rem; padding-left: 1.5rem; list-style-type: disc; }
+        #md-render li { margin-bottom: 0.5rem; }
+        
+        #md-render blockquote { 
+            border-left: 4px solid #cc0000; 
+            padding: 1rem 1.5rem; 
+            background: #111; 
+            font-style: italic; 
+            margin: 2rem 0; 
+        }
+
+        .animate-marquee {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+    </style>
+
+</head>
+<body class="p-2 md:p-6">
+
+    <div class="bg-white text-black py-1 overflow-hidden whitespace-nowrap mb-4">
+        <div class="animate-marquee font-bold uppercase text-xs">
+            [BREAKING] HARGA $JANJI NAIK SETELAH PEJABAT X LUPA PASSWORD WALLET -- [KURS] 1 $JANJI = 817.000 HARAPAN PALU -- [IKLAN] DICARI: BUZZER TAHAN MALU -- [INFO] ANGGARAN MAKAN SIANG TOKEN SEGERA CAIR...
+        </div>
+    </div>
+
+    <header class="text-center border-b-4 border-white pb-6 mb-6">
+        <div class="flex justify-between text-[10px] font-bold uppercase mb-2">
+            <span>Edisi: Senin Pon, 2025</span>
+            <span class="text-red-600 breaking-news font-black">● SIAGA I: ANGGARAN BOCOR</span>
+            <span>ID: 817-X-KEMERDEKAAN</span>
+        </div>
+        <h1 class="newspaper-title text-6xl md:text-9xl font-black italic tracking-tighter uppercase leading-none">
+            $JANJI POST
+        </h1>
+        <p class="text-[10px] tracking-[0.5em] mt-2 font-bold uppercase">"Mengabarkan yang Perlu, Menyembunyikan yang Benar"</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-6 border-r border-gray-800 pr-0 lg:pr-6">
+            <article class="mb-10">
+                <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&q=80&w=800" class="w-full h-64 object-cover grayscale-img border-2 border-white mb-4">
+                <h2 class="text-4xl font-black uppercase italic leading-none mb-4 tracking-tighter hover:text-gray-400">
+                    DEWAN PERAMPOK CRYPTO SAHKAN RUU: "WAJIB HOLD $JANJI SEBELUM JADI ASN"
+                </h2>
+                <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                    <b>JAKARTA (JANJI NEWS)</b> — Sidang paripurna semalam resmi mengetok palu bahwa kepemilikan token $JANJI menjadi syarat mutlak kenaikan pangkat. Pasokan 817.000 koin dianggap pas dengan jumlah kursi yang bisa disuap di seluruh nusantara. "Ini adalah bentuk digitalisasi setoran," ujar seorang anggota dewan anonim.
+                </p>
+                <div class="flex gap-4 font-bold text-[10px] border-y border-gray-800 py-2 italic uppercase">
+                    <span>#PolitikCuan</span> <span>#AnggaranSiluman</span> <span>#817KSupply</span>
+                </div>
+            </article>
+
+            <div class="grid grid-cols-2 gap-6">
+                <section>
+                    <h3 class="border-b-2 border-white font-black uppercase text-sm mb-2">Opini</h3>
+                    <p class="text-[10px] italic leading-tight">"Kenapa Rakyat Harus Miskin Agar Kami Tetap Kaya? Sebuah Tinjauan Tokenomics." oleh Prof. Dr. Scamming, M.Cuan</p>
+                </section>
+                <section>
+                    <h3 class="border-b-2 border-white font-black uppercase text-sm mb-2">Ekonomi</h3>
+                    <p class="text-[10px] italic leading-tight">Inflasi Janji mencapai 817%. Bank Blockchain Indonesia sarankan cetak token lebih banyak jika rakyat mulai sadar.</p>
+                </section>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 border-r border-gray-800 pr-0 lg:pr-6">
+            <h3 class="bg-white text-black text-center font-black uppercase mb-4 text-sm py-1">ARSIP BOCOR (BETA)</h3>
+            
+            <div id="github-news-list" class="space-y-6">
+                <p class="text-xs animate-pulse text-center italic">Melobi GitHub API...</p>
+            </div>
+            
+            <div class="mt-8 p-4 border-double-custom bg-zinc-900 text-center">
+                <h4 class="font-black text-xl mb-1 tracking-tighter">AMBIL KURSI $JANJI</h4>
+                <p class="text-[9px] uppercase mb-4 tracking-tight leading-none text-gray-400">Sebelum dialokasikan untuk sepupu jauh penguasa</p>
+                <button class="bg-white text-black w-full py-2 font-black uppercase text-xs hover:bg-gray-300 transition">HUBUNGI ORANG DALAM (BUY)</button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3">
+            <div class="sidebar-box text-center">
+                <span class="text-[10px] text-gray-500 uppercase">Iklan Layanan Masyarakat</span>
+                <div class="bg-zinc-800 p-4 mt-2">
+                    <h5 class="font-black italic text-sm leading-none">"MALU BERTANYA, JALAN-JALAN KE LUAR NEGERI PAKAI ANGGARAN NEGARA"</h5>
+                    <button class="mt-2 text-[9px] underline font-bold uppercase">Daftar Jadi Pejabat ></button>
+                </div>
+            </div>
+
+            <div class="sidebar-box">
+                <h3 class="font-black uppercase text-xs mb-3 border-b border-white pb-1 italic">Statistik Kebohongan</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-[10px] uppercase font-bold">
+                            <span>Janji Terpenuhi</span>
+                            <span>0.001%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-1 mt-1">
+                            <div class="bg-white h-full" style="width: 1%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[10px] uppercase font-bold">
+                            <span>Anggaran Bocor</span>
+                            <span>99.9%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-1 mt-1">
+                            <div class="bg-white h-full shadow-[0_0_10px_#fff]" style="width: 99%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-box bg-white text-black">
+                <h3 class="font-black uppercase text-xs">Pojok Laporan</h3>
+                <p class="text-[10px] mt-2 italic leading-tight">"Punya info skandal pejabat sebelah? Kirim ke kami, kami jadikan konten, Anda kami jadikan target operasional."</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 modal-blur z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-black border-4 border-white w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal()" class="sticky top-0 float-right bg-white text-black px-4 py-2 font-black text-xs uppercase hover:bg-red-600 transition">Tutup Berkas [X]</button>
+            <div id="md-render" class="p-8 md:p-12 markdown-content"></div>
+        </div>
+    </div>
+
+    <footer class="mt-12 border-t-4 border-white pt-6 text-center">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-[9px] uppercase font-bold text-gray-500 mb-8">
+            <div><p class="text-white mb-1 italic">Redaksi</p><p>Gedung Tanpa Nama, Ruang Sidang Gelap.</p></div>
+            <div><p class="text-white mb-1 italic">Sponsorship</p><p>Menerima $JANJI & Emas Tanpa Seri.</p></div>
+            <div><p class="text-white mb-1 italic">Legalitas</p><p>Dilindungi UU Perlindungan Pejabat.</p></div>
+            <div><p class="text-white mb-1 italic">Kontak</p><p>Kami hubungi Anda pas butuh suara.</p></div>
+        </div>
+        <div class="p-4 bg-white text-black font-black italic tracking-widest uppercase text-xs">
+            &copy; 2025 KEMENTERIAN CUAN DIGITAL - HAK CIPTA MILIK ELIT, HAK DERITA MILIK ANDA
+        </div>
+    </footer>
+
+    <script>
+        const GITHUB_USER = "einrika"; 
+        const GITHUB_REPO = "bookmark"; 
+        const FOLDER_PATH = "berita"; 
+        const CACHE_KEY = "janji_cache_v1";
+        const CACHE_TIME = 24 * 60 * 60 * 1000; // 1 Hari
+
+        const newsContainer = document.getElementById('github-news-list');
+        const modal = document.getElementById('modal');
+        const mdRender = document.getElementById('md-render');
+
+        async function fetchNews() {
+            const cached = localStorage.getItem(CACHE_KEY);
+            const now = new Date().getTime();
+
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (now - parsed.timestamp < CACHE_TIME) {
+                    renderList(parsed.data);
+                    return;
+                }
+            }
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FOLDER_PATH}`);
+                const data = await res.json();
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: now, data: data }));
+                renderList(data);
+            } catch (e) {
+                newsContainer.innerHTML = "<p class='text-xs text-red-600'>API ERROR: PEJABAT SEDANG CUTI.</p>";
+            }
+        }
+
+        function renderList(files) {
+            newsContainer.innerHTML = '';
+            files.filter(f => f.name.endsWith('.md')).forEach((file, index) => {
+                const title = file.name.replace('.md', '').replace(/-/g, ' ').toUpperCase();
+                const num = (index + 1).toString().padStart(2, '0');
+                
+                const div = document.createElement('div');
+                div.className = "border-b border-gray-800 pb-4 cursor-pointer group";
+                div.innerHTML = `
+                    <span class="text-2xl font-black text-gray-800 group-hover:text-white transition">${num}.</span>
+                    <h4 class="font-bold uppercase text-xs hover:underline leading-tight">${title}</h4>
+                `;
+                div.onclick = () => openModal(file.download_url);
+                newsContainer.appendChild(div);
+            });
+        }
+
+        async function openModal(url) {
+            mdRender.innerHTML = "<p class='animate-pulse italic'>Mencuri dokumen...</p>";
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            const fileCache = localStorage.getItem(`file_${url}`);
+            if (fileCache) {
+                mdRender.innerHTML = marked.parse(fileCache);
+                return;
+            }
+
+            try {
+                const res = await fetch(url);
+                const txt = await res.text();
+                localStorage.setItem(`file_${url}`, txt);
+                mdRender.innerHTML = marked.parse(txt);
+            } catch (e) {
+                mdRender.innerHTML = "GAGAL MEMBACA ARSIP.";
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        fetchNews();
+    </script>
+</body>
+</html>
