@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRC-20 Token Creator - Automated Service</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://bundle.run/buffer@6.0.3"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-black text-white min-h-screen">
+  
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    
+    <header class="glass rounded-2xl p-8 mb-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-3">PRC-20 Token Creator</h1>
+      <p class="text-gray-400">Automated token deployment service on Paxi Network</p>
+      <div class="mt-4 inline-block glass px-6 py-2 rounded-full">
+        <span class="text-yellow-400 font-bold">Service Fee: 10 PAXI</span>
+        <span class="text-gray-400 mx-2">+</span>
+        <span class="text-gray-400">6 PAXI Gas = 16 PAXI Total</span>
+      </div>
+    </header>
+    
+    <div class="glass rounded-xl p-6 mb-6" id="walletSection">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl font-semibold mb-2">Connect Your Wallet</h3>
+          <p class="text-gray-400 text-sm">Connect Keplr wallet to start creating your token</p>
+        </div>
+        <button onclick="connectKeplr()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
+          <i class="fas fa-wallet mr-2"></i>Connect Keplr
+        </button>
+      </div>
+      <div id="walletInfo" class="hidden mt-4 pt-4 border-t border-white/10">
+        <p class="text-sm text-gray-400">Connected Address:</p>
+        <p class="font-mono text-sm mt-1" id="walletAddress"></p>
+      </div>
+    </div>
+    
+    <div class="glass rounded-xl p-8 mb-6" id="tokenForm" style="display: none;">
+      <h3 class="text-2xl font-semibold mb-6">Token Configuration</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Token Name</label>
+          <input type="text" id="tokenName" placeholder="My Amazing Token" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Token Symbol</label>
+          <input type="text" id="tokenSymbol" placeholder="MAT" maxlength="10" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none uppercase">
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Total Supply</label>
+            <input type="number" id="totalSupply" placeholder="1000000" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Decimals</label>
+            <input type="number" id="decimals" value="6" min="0" max="18" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Description</label>
+          <textarea id="description" placeholder="Describe your token..." rows="3" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none"></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-2">Logo URL (optional)</label>
+          <input type="text" id="logoUrl" placeholder="https://... or ipfs://..." class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+        </div>
+      </div>
+      
+      <button onclick="createToken()" id="createBtn" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-8 py-4 rounded-lg font-semibold text-lg transition disabled:opacity-50">
+        <i class="fas fa-rocket mr-2"></i>Create Token (16 PAXI)
+      </button>
+    </div>
+    
+    <div id="statusSection" class="hidden">
+      <div class="glass rounded-xl p-8">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full glass mb-4">
+            <i class="fas fa-spinner fa-spin text-3xl text-purple-400"></i>
+          </div>
+          <h3 class="text-2xl font-semibold mb-2">Processing Your Request</h3>
+          <p class="text-gray-400 mb-6">Please approve the transaction in Keplr</p>
+          
+          <div class="space-y-4 text-left max-w-md mx-auto">
+            <div class="flex items-center gap-3" id="step1">
+              <i class="fas fa-circle-notch fa-spin text-purple-400"></i>
+              <span>Payment & Verification</span>
+            </div>
+            <div class="flex items-center gap-3" id="step2">
+              <i class="fas fa-circle text-gray-600"></i>
+              <span class="text-gray-500">Deploying Smart Contract</span>
+            </div>
+            <div class="flex items-center gap-3" id="step3">
+              <i class="fas fa-circle text-gray-600"></i>
+              <span class="text-gray-500">Generating Response</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="successSection" class="hidden">
+      <div class="glass rounded-xl p-8 border-2 border-green-500/30">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
+            <i class="fas fa-check text-3xl text-green-400"></i>
+          </div>
+          <h3 class="text-2xl font-semibold mb-2">Token Created Successfully!</h3>
+          <p class="text-gray-400 mb-6">Your token has been deployed to Paxi Network</p>
+          
+          <div class="space-y-3 text-left max-w-md mx-auto">
+            <div class="glass rounded-lg p-4">
+              <p class="text-sm text-gray-400 mb-1">Token Name:</p>
+              <p class="font-semibold text-green-400" id="successName"></p>
+            </div>
+            <div class="glass rounded-lg p-4">
+              <p class="text-sm text-gray-400 mb-1">Contract Address:</p>
+              <div class="flex items-center gap-2">
+                <code class="flex-1 text-sm font-mono break-all" id="successContract"></code>
+                <button onclick="copyToClipboard('successContract')" class="glass px-2 py-1 rounded hover:bg-white/10 text-sm">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <a id="explorerLink" href="#" target="_blank" class="inline-block mt-6 bg-white/10 px-6 py-3 rounded-lg hover:bg-white/20 transition">
+            <i class="fas fa-external-link-alt mr-2"></i>View Transaction
+          </a>
+          
+          <button onclick="location.reload()" class="block w-full mt-4 text-gray-400 hover:text-white transition">
+            Create Another Token
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="text-center mt-12 text-gray-500 text-sm">
+      <p>© 2025 PaxiHub Automated Token Service</p>
+    </footer>
+    
+  </div>
+  
+  <script>
+    // --- CONFIGURATION ---
+    const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
+    const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
+    const CHAIN_ID = 'paxihub-1';
+    
+    let userAddress = '';
+    
+    // Helper untuk konversi TxHash dari Keplr
+    function toHexString(byteArray) {
+      return Array.from(byteArray, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+      }).join('').toUpperCase();
+    }
+    
+    async function connectKeplr() {
+      if (!window.keplr) {
+        alert('Please install Keplr extension');
+        return;
+      }
+      
+      const chainId = "paxihub-1";
+      
+      // Konfigurasi jaringan Paxi untuk Keplr
+      await window.keplr.experimentalSuggestChain({
+        chainId: chainId,
+        chainName: "Paxi Network",
+        rpc: "https://mainnet-rpc.paxinet.io",
+        rest: "https://mainnet-lcd.paxinet.io",
+        bip44: { coinType: 118 },
+        bech32Config: {
+          bech32PrefixAccAddr: "paxi",
+          bech32PrefixAccPub: "paxipub",
+          bech32PrefixValAddr: "paxivaloper",
+          bech32PrefixValPub: "paxivaloperpub",
+          bech32PrefixConsAddr: "paxivalcons",
+          bech32PrefixConsPub: "paxivalconspub",
+        },
+        currencies: [{
+          coinDenom: "PAXI",
+          coinMinimalDenom: "upaxi",
+          coinDecimals: 6,
+        }],
+        feeCurrencies: [{
+          coinDenom: "PAXI",
+          coinMinimalDenom: "upaxi",
+          coinDecimals: 6,
+          gasPriceStep: { low: 0.01, average: 0.025, high: 0.04 },
+        }],
+        stakeCurrency: {
+          coinDenom: "PAXI",
+          coinMinimalDenom: "upaxi",
+          coinDecimals: 6,
+        },
+      });
+      
+      try {
+        await window.keplr.enable(chainId);
+        const offlineSigner = window.keplr.getOfflineSigner(chainId);
+        const accounts = await offlineSigner.getAccounts();
+        userAddress = accounts[0].address;
+        
+        document.getElementById('walletAddress').textContent = userAddress;
+        document.getElementById('walletInfo').classList.remove('hidden');
+        document.getElementById('connectBtn').innerText = 'Connected';
+        document.getElementById('tokenForm').style.display = 'block';
+      } catch (err) {
+        alert('Failed to connect: ' + err.message);
+      }
+    }
+    
+    
+    async function createToken() {
+      const name = document.getElementById('tokenName').value;
+      const symbol = document.getElementById('tokenSymbol').value;
+      const supply = document.getElementById('totalSupply').value;
+      const dec = document.getElementById('decimals').value;
+      
+      if (!name || !symbol || !supply) return alert('Fill all required fields');
+      
+      try {
+        document.getElementById('tokenForm').style.display = 'none';
+        document.getElementById('statusSection').classList.remove('hidden');
+        
+        // 1. Payment Process
+        const amount = [{ denom: 'upaxi', amount: '16000000' }];
+        const sendMsg = {
+          type: 'cosmos-sdk/MsgSend',
+          value: { from_address: userAddress, to_address: SERVICE_ADDRESS, amount: amount }
+        };
+        
+        const tx = await window.keplr.sendTx(CHAIN_ID, {
+          msgs: [sendMsg],
+          fee: { amount: [{ denom: 'upaxi', amount: '5000' }], gas: '200000' },
+          memo: 'PRC-20 Token Creation'
+        }, 'sync');
+        
+        // Ambil TxHash (Keplr return format bisa berbeda, kita handle keduanya)
+        const txHash = typeof tx === 'string' ? tx : toHexString(tx);
+        
+        updateStepUI(1, 'Payment Sent! Verifying...');
+        
+        // 2. Call Backend
+        const response = await fetch(`${BACKEND_URL}/api/create-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userAddress,
+            txHash: txHash,
+            tokenName: name,
+            tokenSymbol: symbol,
+            totalSupply: parseInt(supply),
+            decimals: parseInt(dec),
+            description: document.getElementById('description').value,
+            logoUrl: document.getElementById('logoUrl').value
+          })
+        });
+        
+        updateStepUI(2, 'Contract Deployed!');
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          updateStepUI(3, 'Success!');
+          showSuccess(data);
+        } else {
+          throw new Error(data.error || 'Server error occurred');
+        }
+        
+      } catch (err) {
+        alert('Error: ' + err.message);
+        location.reload();
+      }
+    }
+    
+    function updateStepUI(stepId, text) {
+      const el = document.getElementById(`step${stepId}`);
+      el.querySelector('i').className = 'fas fa-check-circle text-green-400';
+      el.querySelector('span').textContent = text;
+      el.querySelector('span').className = 'text-green-400';
+      
+      // Highlight next step if exists
+      const next = document.getElementById(`step${stepId + 1}`);
+      if (next) {
+        next.querySelector('i').className = 'fas fa-circle-notch fa-spin text-purple-400';
+        next.querySelector('span').className = 'text-white';
+      }
+    }
+    
+    function showSuccess(data) {
+      document.getElementById('statusSection').classList.add('hidden');
+      document.getElementById('successSection').classList.remove('hidden');
+      document.getElementById('successName').textContent = `${data.tokenName} (${data.tokenSymbol})`;
+      document.getElementById('successContract').textContent = data.contractAddress;
+      document.getElementById('explorerLink').href = `https://explorer.paxinet.io/paxi/tx/${data.txHash}`;
+    }
+    
+    function copyToClipboard(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text);
+      alert('Copied!');
+    }
+  </script>
+</body>
+
+</html>
