@@ -6,12 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PRC-20 Token Creator - Automated Service</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://bundle.run/buffer@6.0.3"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@cosmjs/stargate@0.32.4/build/index.browser.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@cosmjs/proto-signing@0.32.4/build/index.browser.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@cosmjs/amino@0.32.4/build/index.browser.js"></script>
+  <!-- Paxi CosmJS Library -->
+  <script src="https://mainnet-api.paxinet.io/resources/js/paxi-cosmjs.umd.js"></script>
   
   <style>
     .glass {
@@ -27,7 +25,7 @@
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     
     <header class="glass rounded-2xl p-8 mb-8 text-center">
-      <h1 class="text-4xl md:text-5xl font-bold mb-3">PRC-20 Token Creator v1.0.5</h1>
+      <h1 class="text-4xl md:text-5xl font-bold mb-3">PRC-20 Token Creator v2.0</h1>
       <p class="text-gray-400">Automated token deployment service on Paxi Network</p>
       <div class="mt-4 inline-block glass px-6 py-2 rounded-full">
         <span class="text-yellow-400 font-bold">Service Fee: 10 PAXI</span>
@@ -38,7 +36,7 @@
 
     <!-- Debug Info Section -->
     <div class="glass rounded-xl p-4 mb-6 text-xs">
-      <p class="text-gray-400 mb-2">Debug Info:</p>
+      <p class="text-gray-400 mb-2">🔍 Debug Info:</p>
       <div id="debugInfo" class="text-green-400 font-mono space-y-1"></div>
     </div>
     
@@ -46,15 +44,16 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-xl font-semibold mb-2">Connect Your Wallet</h3>
-          <p class="text-gray-400 text-sm">Connect wallet to start creating your token</p>
+          <p class="text-gray-400 text-sm">Open this page in PaxiHub app to connect</p>
         </div>
         <button onclick="connectWallet()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
-          <i class="fas fa-wallet mr-2"></i>Connect Wallet
+          <i class="fas fa-wallet mr-2"></i>Connect PaxiHub
         </button>
       </div>
       <div id="walletInfo" class="hidden mt-4 pt-4 border-t border-white/10">
         <p class="text-sm text-gray-400">Connected Address:</p>
         <p class="font-mono text-sm mt-1" id="walletAddress"></p>
+        <p class="text-xs text-green-400 mt-2">✓ PaxiHub Connected</p>
       </div>
     </div>
     
@@ -106,7 +105,7 @@
             <i class="fas fa-spinner fa-spin text-3xl text-purple-400"></i>
           </div>
           <h3 class="text-2xl font-semibold mb-2">Processing Your Request</h3>
-          <p class="text-gray-400 mb-6">Please approve the transaction in your wallet</p>
+          <p class="text-gray-400 mb-6">Please approve the transaction in PaxiHub</p>
           
           <div class="space-y-4 text-left max-w-md mx-auto">
             <div class="flex items-center gap-3" id="step1">
@@ -181,21 +180,23 @@
     
     <footer class="text-center mt-12 text-gray-500 text-sm">
       <p>© 2025 PaxiHub Automated Token Service</p>
+      <p class="text-xs mt-2">Built with Paxi CosmJS SDK</p>
     </footer>
     
   </div>
   
   <script>
-    // --- KONFIGURASI RESMI PAXI ---
+    // === KONFIGURASI RESMI PAXI ===
     const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
     const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
-    const CHAIN_ID = 'paxihub-1';
-    const RPC_URL = "https://mainnet-rpc.paxinet.io";
-    const LCD_URL = "https://mainnet-lcd.paxinet.io";
+    const RPC = 'https://mainnet-rpc.paxinet.io';
+    const LCD = 'https://mainnet-lcd.paxinet.io';
+    const DENOM = 'upaxi';
     
     let userAddress = '';
+    let chainId = '';
     
-    // Debug function
+    // === HELPER FUNCTIONS ===
     function addDebug(msg) {
       const debugDiv = document.getElementById('debugInfo');
       const line = document.createElement('div');
@@ -204,108 +205,82 @@
       console.log(msg);
     }
 
-    // Check wallet availability on load
-    window.addEventListener('load', () => {
+    function showError(msg, err) {
+      document.getElementById('errorSection').classList.remove('hidden');
+      document.getElementById('errorMessage').textContent = msg;
+      if (err) {
+        document.getElementById('errorDebug').textContent = JSON.stringify({
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        }, null, 2);
+      }
+    }
+
+    const toBase64 = bytes => btoa(String.fromCharCode(...bytes));
+
+    async function buildCommon(address) {
+      const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
+      const { account } = await res.json();
+      const ba = account.base_account || account;
+      return {
+        accountNumber: Number(ba.account_number),
+        sequence: Number(ba.sequence)
+      };
+    }
+    
+    // === CHECK PAXIHUB ON LOAD ===
+    window.addEventListener('load', async () => {
       addDebug('Page loaded');
-      addDebug('window.keplr: ' + (window.keplr ? 'Found' : 'Not found'));
-      addDebug('window.paxi: ' + (window.paxi ? 'Found' : 'Not found'));
-      addDebug('window.getOfflineSigner: ' + (window.getOfflineSigner ? 'Found' : 'Not found'));
-      addDebug('UserAgent: ' + navigator.userAgent.substring(0, 50));
+      addDebug('window.paxihub: ' + (typeof window.paxihub !== 'undefined' ? 'Found ✓' : 'Not found ✗'));
+      addDebug('UserAgent: ' + navigator.userAgent.substring(0, 60));
+      
+      // Auto-check if PaxiHub injected
+      if (typeof window.paxihub === 'undefined') {
+        if (/Mobi/.test(navigator.userAgent)) {
+          addDebug('Mobile detected, preparing deep-link...');
+          showError('PaxiHub not detected. Please open this page in PaxiHub app.');
+        } else {
+          showError('PaxiHub not detected. Please install PaxiHub app or open in PaxiHub browser.');
+        }
+      } else {
+        addDebug('PaxiHub is ready!');
+      }
+
+      // Fetch chainId
+      try {
+        const statusRes = await fetch(`${RPC}/status`);
+        const statusData = await statusRes.json();
+        chainId = statusData.result.node_info.network;
+        addDebug('ChainID: ' + chainId);
+      } catch (e) {
+        addDebug('Failed to fetch chainId: ' + e.message);
+      }
     });
     
-    // FUNGSI: Deteksi & Konek ke Wallet
+    // === CONNECT WALLET ===
     async function connectWallet() {
       addDebug('Starting wallet connection...');
       
-      // Prioritas deteksi wallet:
-      // 1. window.keplr (standar Keplr/Cosmos wallet)
-      // 2. window.paxi (jika ada implementasi khusus)
-      // 3. window.getOfflineSigner (fallback untuk beberapa dApp browser)
-      let wallet = null;
-      
-      if (window.keplr) {
-        wallet = window.keplr;
-        addDebug('Using window.keplr');
-      } else if (window.paxi) {
-        wallet = window.paxi;
-        addDebug('Using window.paxi');
-      } else if (window.getOfflineSigner) {
-        addDebug('Using window.getOfflineSigner (fallback)');
-        // Buat wrapper objek untuk compatibility
-        wallet = {
-          enable: async (chainId) => {
-            addDebug('Fallback enable called');
-            return true;
-          },
-          getOfflineSigner: (chainId) => {
-            addDebug('Fallback getOfflineSigner called');
-            return window.getOfflineSigner(chainId);
-          },
-          experimentalSuggestChain: async (config) => {
-            addDebug('Fallback suggestChain (skipped)');
-            // Mungkin tidak perlu suggest chain di dApp browser
-            return true;
-          }
-        };
-      }
-      
-      if (!wallet) {
-        const msg = "Wallet tidak ditemukan! Pastikan Anda membuka ini melalui dApp Browser Paxi atau menginstall Keplr extension.";
-        addDebug('ERROR: ' + msg);
-        showError(msg);
+      // Check if PaxiHub is injected
+      if (typeof window.paxihub === 'undefined') {
+        if (/Mobi/.test(navigator.userAgent)) {
+          addDebug('Redirecting to PaxiHub...');
+          window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
+          setTimeout(() => {
+            window.location.href = 'https://paxinet.io/paxi_docs/paxihub#paxihub-application';
+          }, 1000);
+        } else {
+          showError('PaxiHub not detected. Please install PaxiHub app.');
+        }
         return;
       }
       
       try {
-        addDebug('Attempting to suggest chain...');
+        addDebug('Getting address from PaxiHub...');
+        const addressInfo = await window.paxihub.paxi.getAddress();
+        userAddress = addressInfo.address;
         
-        // Suggest Chain (bisa skip jika error, karena mungkin sudah ada)
-        try {
-          await wallet.experimentalSuggestChain({
-            chainId: CHAIN_ID,
-            chainName: "Paxi Network",
-            rpc: RPC_URL,
-            rest: LCD_URL,
-            bip44: { coinType: 118 },
-            bech32Config: {
-              bech32PrefixAccAddr: "paxi",
-              bech32PrefixAccPub: "paxipub",
-              bech32PrefixValAddr: "paxivaloper",
-              bech32PrefixValPub: "paxivaloperpub",
-              bech32PrefixConsAddr: "paxivalcons",
-              bech32PrefixConsPub: "paxivalconspub",
-            },
-            currencies: [{ coinDenom: "PAXI", coinMinimalDenom: "upaxi", coinDecimals: 6 }],
-            feeCurrencies: [{
-              coinDenom: "PAXI",
-              coinMinimalDenom: "upaxi",
-              coinDecimals: 6,
-              gasPriceStep: { low: 0.01, average: 0.025, high: 0.04 },
-            }],
-            stakeCurrency: { coinDenom: "PAXI", coinMinimalDenom: "upaxi", coinDecimals: 6 },
-          });
-          addDebug('Chain suggested successfully');
-        } catch (suggestErr) {
-          addDebug('SuggestChain failed (might be OK): ' + suggestErr.message);
-        }
-        
-        addDebug('Enabling wallet...');
-        await wallet.enable(CHAIN_ID);
-        addDebug('Wallet enabled');
-        
-        addDebug('Getting offline signer...');
-        const offlineSigner = wallet.getOfflineSigner(CHAIN_ID);
-        addDebug('Got offline signer');
-        
-        addDebug('Getting accounts...');
-        const accounts = await offlineSigner.getAccounts();
-        addDebug('Got accounts: ' + accounts.length);
-        
-        if (!accounts || accounts.length === 0) {
-          throw new Error('No accounts found in wallet');
-        }
-        
-        userAddress = accounts[0].address;
         addDebug('Connected address: ' + userAddress);
         
         // Update UI
@@ -316,90 +291,157 @@
         document.getElementById('connectBtn').classList.add('bg-green-600');
         document.getElementById('tokenForm').style.display = 'block';
         
-        addDebug('UI updated successfully');
+        addDebug('Wallet connected successfully!');
         
       } catch (err) {
-        const msg = "Gagal konek ke wallet: " + err.message;
+        const msg = "Failed to connect: " + err.message;
         addDebug('ERROR: ' + msg);
-        addDebug('Stack: ' + err.stack);
         showError(msg, err);
       }
     }
     
-    // FUNGSI: Buat Token PRC-20
+    // === BUILD AND SEND TRANSACTION ===
+    async function buildAndSendTx(messages, memo = "") {
+      addDebug('Building transaction...');
+      
+      // Get account info
+      const { accountNumber, sequence } = await buildCommon(userAddress);
+      addDebug(`Account: ${accountNumber}, Sequence: ${sequence}`);
+      
+      // TxBody
+      const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
+      
+      // Fee
+      const fee = {
+        amount: [PaxiCosmJS.coins("30000", DENOM)[0]],
+        gasLimit: 600_000
+      };
+      
+      // Get public key
+      const addressInfo = await window.paxihub.paxi.getAddress();
+      const pubkeyBytes = new Uint8Array(addressInfo.public_key);
+      const pubkeyAny = {
+        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+        value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish()
+      };
+      
+      // AuthInfo
+      const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
+        signerInfos: [{
+          publicKey: pubkeyAny,
+          modeInfo: { single: { mode: 1 } },
+          sequence: BigInt(sequence)
+        }],
+        fee
+      });
+      
+      // SignDoc
+      const signDoc = PaxiCosmJS.SignDoc.fromPartial({
+        bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
+        authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
+        chainId,
+        accountNumber: BigInt(accountNumber)
+      });
+      
+      addDebug('Requesting signature from PaxiHub...');
+      
+      // Sign with PaxiHub
+      const txObj = {
+        bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
+        authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
+        chainId,
+        accountNumber: signDoc.accountNumber.toString()
+      };
+      
+      const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
+      
+      if (!result.success) {
+        throw new Error('Transaction signing failed');
+      }
+      
+      const sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
+      
+      // Assemble TxRaw
+      const txRaw = PaxiCosmJS.TxRaw.fromPartial({
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        signatures: [sigBytes]
+      });
+      
+      const txBytes = PaxiCosmJS.TxRaw.encode(txRaw).finish();
+      const base64Tx = toBase64(txBytes);
+      
+      addDebug('Broadcasting transaction...');
+      
+      // Broadcast
+      const broadcastResult = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tx_bytes: base64Tx, mode: "BROADCAST_MODE_SYNC" })
+      }).then(r => r.json());
+      
+      addDebug('Broadcast result: ' + JSON.stringify(broadcastResult));
+      
+      if (broadcastResult.tx_response && broadcastResult.tx_response.code === 0) {
+        return broadcastResult.tx_response.txhash;
+      } else {
+        throw new Error(broadcastResult.tx_response?.raw_log || 'Transaction failed');
+      }
+    }
+    
+    // === CREATE TOKEN ===
     async function createToken() {
       addDebug('Starting token creation...');
       
-      // Validasi data input
+      // Validate inputs
       const name = document.getElementById('tokenName').value.trim();
       const symbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
       const supply = document.getElementById('totalSupply').value;
       
       if (!name || !symbol || !supply) {
-        showError('Harap isi data token dengan lengkap!');
+        showError('Please fill all required fields!');
         return;
       }
       
-      const wallet = window.keplr || window.paxi || (window.getOfflineSigner ? {
-        enable: async () => true,
-        getOfflineSigner: window.getOfflineSigner
-      } : null);
-      
-      const stargateLib = window.cosmjs?.stargate;
-      
-      if (!stargateLib) {
-        showError('Library transaksi (CosmJS) belum termuat. Silakan refresh halaman.');
+      if (typeof window.paxihub === 'undefined') {
+        showError('PaxiHub not detected. Please open in PaxiHub app.');
         return;
       }
       
-      if (!wallet) {
-        showError('Wallet tidak terdeteksi.');
+      if (!window.PaxiCosmJS) {
+        showError('Paxi CosmJS library not loaded. Please refresh the page.');
         return;
       }
       
       try {
-        // Tampilan Loading
+        // Show loading
         document.getElementById('tokenForm').style.display = 'none';
         document.getElementById('statusSection').classList.remove('hidden');
         
-        updateStepUI(1, 'Menghubungkan ke Blockchain Paxi...');
-        addDebug('Connecting to blockchain...');
+        updateStepUI(1, 'Preparing transaction...');
         
-        await wallet.enable(CHAIN_ID);
-        const offlineSigner = wallet.getOfflineSigner(CHAIN_ID);
+        // Build MsgSend for payment
+        const msg = PaxiCosmJS.MsgSend.fromPartial({
+          fromAddress: userAddress,
+          toAddress: SERVICE_ADDRESS,
+          amount: [PaxiCosmJS.coins("16000000", DENOM)[0]]
+        });
         
-        addDebug('Creating signing client...');
-        const client = await stargateLib.SigningStargateClient.connectWithSigner(
-          RPC_URL,
-          offlineSigner
-        );
+        const anyMsg = PaxiCosmJS.Any.fromPartial({
+          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+          value: PaxiCosmJS.MsgSend.encode(msg).finish()
+        });
         
-        const amount = [{ denom: "upaxi", amount: "16000000" }];
-        const fee = {
-          amount: [{ denom: "upaxi", amount: "5000" }],
-          gas: "200000"
-        };
+        updateStepUI(1, 'Please approve in PaxiHub...');
         
-        updateStepUI(1, 'Silakan Konfirmasi Pembayaran di Wallet...');
-        addDebug('Sending transaction...');
+        // Send transaction
+        const txHash = await buildAndSendTx([anyMsg], "PRC-20 Token Creation Fee");
         
-        const result = await client.sendTokens(
-          userAddress,
-          SERVICE_ADDRESS,
-          amount,
-          fee,
-          "PRC-20 Token Creation Fee"
-        );
+        addDebug('Payment sent! TxHash: ' + txHash);
+        updateStepUI(1, 'Payment successful!');
         
-        if (result.code !== 0) {
-          throw new Error(`Transaksi Gagal: ${result.rawLog}`);
-        }
-        
-        const txHash = result.transactionHash;
-        addDebug('Transaction sent: ' + txHash);
-        updateStepUI(1, 'Pembayaran Berhasil! Mengirim Data ke Server...');
-        
-        updateStepUI(2, 'Menunggu Server Mendeploy Token...');
+        // Call backend
+        updateStepUI(2, 'Deploying token contract...');
         addDebug('Calling backend API...');
         
         const response = await fetch(`${BACKEND_URL}/api/create-token`, {
@@ -421,8 +463,8 @@
         addDebug('Backend response: ' + JSON.stringify(data));
         
         if (data.success) {
-          updateStepUI(2, 'Deployment Sukses!');
-          updateStepUI(3, 'Semua Selesai!');
+          updateStepUI(2, 'Deployment successful!');
+          updateStepUI(3, 'All done!');
           showSuccess(data);
           addDebug('Token created successfully!');
         } else {
@@ -431,13 +473,14 @@
         
       } catch (err) {
         addDebug('ERROR in createToken: ' + err.message);
-        showError("Terjadi Kesalahan: " + err.message, err);
+        showError("Transaction failed: " + err.message, err);
         
         document.getElementById('tokenForm').style.display = 'block';
         document.getElementById('statusSection').classList.add('hidden');
       }
     }
     
+    // === UI HELPERS ===
     function updateStepUI(stepId, text) {
       const el = document.getElementById(`step${stepId}`);
       if (el) {
@@ -460,21 +503,9 @@
       document.getElementById('explorerLink').href = `https://explorer.paxinet.io/paxi/tx/${data.txHash}`;
     }
     
-    function showError(msg, err) {
-      document.getElementById('errorSection').classList.remove('hidden');
-      document.getElementById('errorMessage').textContent = msg;
-      if (err) {
-        document.getElementById('errorDebug').textContent = JSON.stringify({
-          message: err.message,
-          stack: err.stack,
-          name: err.name
-        }, null, 2);
-      }
-    }
-    
     function copyToClipboard(id) {
       const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text).then(() => alert('Tersalin!'));
+      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
     }
   </script>
   
