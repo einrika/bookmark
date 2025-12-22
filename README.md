@@ -6,10 +6,6 @@ https://einrika.github.io/bookmark/paxi-prc20/create-token.html
 
 https://einrika.github.io/bookmark/paxi-prc20/token-manager.html
 
-link web berita: 
-https://einrika.github.io/bookmark//web%20berita/web-janji.html
-
-
 # json data manga
 ```json
 
