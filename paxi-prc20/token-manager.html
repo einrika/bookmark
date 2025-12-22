@@ -279,36 +279,42 @@
 
   </div>
   
-  <script>
+  
+    <script>
     const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
-    const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
     const RPC = 'https://mainnet-rpc.paxinet.io';
     const LCD = 'https://mainnet-lcd.paxinet.io';
     const DENOM = 'upaxi';
-    const PLATFORM_FEE = '1000000'; // 1 PAXI
     
     let userAddress = '';
     let chainId = '';
     let currentToken = null;
     let userTokens = [];
 
+    // Gunakan Polling untuk memastikan PaxiHub terinjeksi sebelum dijalankan
     window.addEventListener('load', async () => {
-      if (typeof window.paxihub === 'undefined') {
-        alert('Please open this page in PaxiHub app');
-        return;
-      }
-      try {
-        const statusRes = await fetch(`${RPC}/status`);
-        const statusData = await statusRes.json();
-        chainId = statusData.result.node_info.network;
-      } catch (e) {
-        console.error('Failed to fetch chainId:', e);
-      }
+      let attempts = 0;
+      const checkHub = setInterval(async () => {
+        attempts++;
+        if (typeof window.paxihub !== 'undefined') {
+          clearInterval(checkHub);
+          try {
+            const statusRes = await fetch(`${RPC}/status`);
+            const statusData = await statusRes.json();
+            chainId = statusData.result.node_info.network;
+          } catch (e) {
+            chainId = 'paxi-mainnet'; // Fallback
+          }
+        } else if (attempts >= 5) {
+          clearInterval(checkHub);
+          console.log('PaxiHub not detected after 2.5s');
+        }
+      }, 500);
     });
 
     async function connectWallet() {
       if (typeof window.paxihub === 'undefined') {
-        alert('PaxiHub not detected');
+        alert('PaxiHub not detected. Please open in PaxiHub App.');
         return;
       }
       try {
@@ -329,9 +335,7 @@
       try {
         const stored = localStorage.getItem(`paxi_tokens_${userAddress}`);
         return stored ? JSON.parse(stored) : [];
-      } catch (e) {
-        return [];
-      }
+      } catch (e) { return []; }
     }
 
     function saveLocalToken(tokenData) {
@@ -342,62 +346,31 @@
           tokens.push(tokenData);
           localStorage.setItem(`paxi_tokens_${userAddress}`, JSON.stringify(tokens));
         }
-      } catch (e) {
-        console.error('Failed to save token:', e);
-      }
+      } catch (e) { console.error('Failed to save token:', e); }
     }
 
     async function refreshTokens() {
-      document.getElementById('tokenList').innerHTML = `
-        <div class="text-center py-8 text-gray-500">
-          <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
-          <p>Loading your tokens...</p>
-        </div>
-      `;
+      document.getElementById('tokenList').innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-spinner fa-spin text-3xl mb-3"></i><p>Loading tokens...</p></div>`;
       try {
         const response = await fetch(`${BACKEND_URL}/api/user-tokens/${userAddress}`);
         const data = await response.json();
-        let tokens = [];
-        
-        if (data.success && data.tokens.length > 0) {
-          // Backend returns array of strings (contract addresses)
-          tokens = data.tokens;
-        } else {
-          tokens = getLocalTokens();
-        }
+        let tokens = (data.success && data.tokens.length > 0) ? data.tokens : getLocalTokens();
         
         if (tokens.length > 0) {
-          // Fetch full info for each token
           await enrichTokensInfo(tokens);
         } else {
-          document.getElementById('tokenList').innerHTML = `
-            <div class="text-center py-8 text-gray-500">
-              <i class="fas fa-inbox text-4xl mb-3"></i>
-              <p>No tokens found</p>
-            </div>
-          `;
+          document.getElementById('tokenList').innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-inbox text-4xl mb-3"></i><p>No tokens found</p></div>`;
         }
       } catch (err) {
-        console.error('Refresh tokens error:', err);
         const tokens = getLocalTokens();
-        if (tokens.length > 0) {
-          await enrichTokensInfo(tokens);
-        }
+        if (tokens.length > 0) await enrichTokensInfo(tokens);
       }
     }
     
     async function enrichTokensInfo(tokenAddresses) {
       const enrichedTokens = [];
-      
       for (const tokenAddr of tokenAddresses) {
         try {
-          // If it's already an object with full info, use it
-          if (typeof tokenAddr === 'object' && tokenAddr.contractAddress) {
-            enrichedTokens.push(tokenAddr);
-            continue;
-          }
-          
-          // If it's a string (contract address), fetch info
           const contractAddress = typeof tokenAddr === 'string' ? tokenAddr : tokenAddr.contractAddress;
           const query = btoa(JSON.stringify({ token_info: {} }));
           const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`);
@@ -405,106 +378,53 @@
           if (res.ok) {
             const data = await res.json();
             const tokenData = {
-              contractAddress: contractAddress,
+              contractAddress,
               name: data.data.name,
               symbol: data.data.symbol,
               decimals: data.data.decimals,
               totalSupply: data.data.total_supply
             };
             enrichedTokens.push(tokenData);
-            // Save to localStorage
             saveLocalToken(tokenData);
-          } else {
-            // If fetch fails, use minimal info
-            enrichedTokens.push({
-              contractAddress: contractAddress,
-              name: 'Unknown',
-              symbol: 'TKN',
-              decimals: 6
-            });
           }
-        } catch (e) {
-          console.error('Error enriching token:', e);
-        }
+        } catch (e) { console.error('Enrich error:', e); }
       }
-      
       userTokens = enrichedTokens;
       renderTokenList(enrichedTokens);
     }
 
     function renderTokenList(tokens) {
-      if (!Array.isArray(tokens) || tokens.length === 0) {
-        document.getElementById('tokenList').innerHTML = `
-          <div class="text-center py-8 text-gray-500">
-            <i class="fas fa-inbox text-4xl mb-3"></i>
-            <p>No tokens found</p>
-          </div>
-        `;
-        return;
-      }
-      
-      const html = tokens.map(token => {
-        const name = token.name || 'Unknown Token';
-        const symbol = token.symbol || 'TKN';
-        const contractAddress = token.contractAddress || token;
-        const symbolInitials = symbol.length >= 2 ? symbol.substring(0, 2) : symbol;
-        
-        return `
-          <div class="glass rounded-lg p-4 hover:bg-white/5 transition cursor-pointer" onclick='openTokenModal(${JSON.stringify(token)})'>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold">
-                  ${symbolInitials}
-                </div>
-                <div>
-                  <p class="font-semibold">${name} (${symbol})</p>
-                  <p class="text-xs text-gray-400 font-mono">${contractAddress}</p>
-                </div>
+      const html = tokens.map(token => `
+        <div class="glass rounded-lg p-4 hover:bg-white/5 transition cursor-pointer" onclick='openTokenModal("${token.contractAddress}")'>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold">
+                ${(token.symbol || 'TK').substring(0, 2)}
               </div>
-              <button class="glass px-4 py-2 rounded-lg hover:bg-white/10">
-                <i class="fas fa-cog mr-2"></i>Manage
-              </button>
+              <div>
+                <p class="font-semibold">${token.name} (${token.symbol})</p>
+                <p class="text-xs text-gray-400 font-mono">${token.contractAddress}</p>
+              </div>
             </div>
+            <button class="glass px-4 py-2 rounded-lg hover:bg-white/10"><i class="fas fa-cog mr-2"></i>Manage</button>
           </div>
-        `;
-      }).join('');
-      
+        </div>`).join('');
       document.getElementById('tokenList').innerHTML = html;
     }
 
-    function openTokenModal(tokenData) {
-      // Accept token object directly from onclick
-      if (typeof tokenData === 'string') {
-        // Fallback: find in userTokens array
-        currentToken = userTokens.find(t => t.contractAddress === tokenData);
-      } else if (typeof tokenData === 'object') {
-        // Direct object passed
-        currentToken = tokenData;
-      }
-      
-      if (!currentToken || !currentToken.contractAddress) {
-        alert('Token data not found. Please refresh the page.');
-        console.error('Token not found:', tokenData);
-        return;
-      }
-      
-      // Ensure token has all required fields
-      currentToken.name = currentToken.name || 'Unknown Token';
-      currentToken.symbol = currentToken.symbol || 'TKN';
-      currentToken.decimals = currentToken.decimals || 6;
-      
+    function openTokenModal(contractAddr) {
+      currentToken = userTokens.find(t => t.contractAddress === contractAddr);
+      if (!currentToken) return alert('Token data not found');
+
       document.getElementById('modalTokenName').textContent = `${currentToken.name} (${currentToken.symbol})`;
       document.getElementById('modalTokenContract').textContent = currentToken.contractAddress;
       document.getElementById('actionModal').classList.remove('hidden');
-      
       switchTab('mint');
       loadTokenBalance();
     }
 
     function closeModal() {
       document.getElementById('actionModal').classList.add('hidden');
-      // DON'T set currentToken to null - keep it for potential re-opening
-      // currentToken = null;
     }
 
     function switchTab(tabName) {
@@ -515,67 +435,35 @@
     }
 
     async function loadTokenBalance() {
-      if (!currentToken || !currentToken.contractAddress) {
-        document.getElementById('userBalance').textContent = 'N/A';
-        return;
-      }
-      
+      if (!currentToken) return;
       try {
         const query = btoa(JSON.stringify({balance: {address: userAddress}}));
         const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
-        
-        if (!res.ok) {
-          throw new Error('Failed to fetch balance');
-        }
-        
         const data = await res.json();
-        const decimals = currentToken.decimals || 6;
-        const balance = (parseInt(data.data.balance) / Math.pow(10, decimals)).toFixed(2);
-        const symbol = currentToken.symbol || 'tokens';
-        document.getElementById('userBalance').textContent = `${balance} ${symbol}`;
-      } catch (e) {
-        console.error('Load balance error:', e);
-        document.getElementById('userBalance').textContent = 'Error loading';
-      }
+        const balance = (parseInt(data.data.balance) / Math.pow(10, currentToken.decimals || 6)).toFixed(2);
+        document.getElementById('userBalance').textContent = `${balance} ${currentToken.symbol}`;
+      } catch (e) { document.getElementById('userBalance').textContent = 'Error loading'; }
     }
 
-    // ========== EXECUTE ACTIONS (USER SELF-EXECUTE + PAY FEE AFTER) ==========
+    // ========== ACTIONS WITHOUT PLATFORM FEE ==========
 
     async function executeMint() {
-      if (!currentToken || !currentToken.contractAddress) {
-        alert('Token information not available. Please refresh and try again.');
-        return;
-      }
-      
+      if (!currentToken) return alert('Token info missing');
       const mintAmt = document.getElementById('mintAmount').value;
-      if (!mintAmt || mintAmt <= 0) {
-        alert('Please enter a valid amount');
-        return;
-      }
+      if (!mintAmt || mintAmt <= 0) return alert('Invalid amount');
       
       const recipient = document.getElementById('mintRecipient').value.trim() || userAddress;
-
       closeModal();
-      showProcessing('Preparing mint transaction...');
+      showProcessing('Approving Mint...');
 
       try {
-        const query = btoa(JSON.stringify({ token_info: {} }));
-        const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
-        
-        if (!infoRes.ok) {
-          throw new Error('Failed to fetch token info');
-        }
-        
-        const infoData = await infoRes.json();
-        const decimals = infoData.data?.decimals || 6;
-        const amount = (BigInt(Math.floor(mintAmt * Math.pow(10, decimals)))).toString();
-
+        const amount = (BigInt(Math.floor(mintAmt * Math.pow(10, currentToken.decimals || 6)))).toString();
         const executeMsg = { mint: { recipient, amount } };
+        
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
-          msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
-          funds: []
+          msg: new TextEncoder().encode(JSON.stringify(executeMsg))
         });
 
         const anyMsg = PaxiCosmJS.Any.fromPartial({
@@ -583,56 +471,28 @@
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
 
-        showProcessing('Please approve mint in PaxiHub...');
-        const mintTxHash = await buildAndSendTx([anyMsg], 'Mint Tokens');
-
-        showProcessing('Mint successful! Now paying platform fee...');
-        await new Promise(r => setTimeout(r, 2000));
-
-        const feeTxHash = await payPlatformFee('mint');
-        
+        const txHash = await buildAndSendTx([anyMsg], 'Mint Tokens');
         hideProcessing();
-        showSuccess('Mint completed and platform fee paid!', mintTxHash);
-
-      } catch (err) {
-        hideProcessing();
-        alert('Failed: ' + err.message);
-      }
+        showSuccess('Mint Successful!', txHash);
+      } catch (err) { hideProcessing(); alert('Failed: ' + err.message); }
     }
 
     async function executeBurn() {
-      if (!currentToken || !currentToken.contractAddress) {
-        alert('Token information not available. Please refresh and try again.');
-        return;
-      }
-      
+      if (!currentToken) return alert('Token info missing');
       const burnAmt = document.getElementById('burnAmount').value;
-      if (!burnAmt || burnAmt <= 0) {
-        alert('Please enter a valid amount');
-        return;
-      }
+      if (!burnAmt || burnAmt <= 0) return alert('Invalid amount');
 
       closeModal();
-      showProcessing('Preparing burn transaction...');
+      showProcessing('Approving Burn...');
 
       try {
-        const query = btoa(JSON.stringify({ token_info: {} }));
-        const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
-        
-        if (!infoRes.ok) {
-          throw new Error('Failed to fetch token info');
-        }
-        
-        const infoData = await infoRes.json();
-        const decimals = infoData.data?.decimals || 6;
-        const amount = (BigInt(Math.floor(burnAmt * Math.pow(10, decimals)))).toString();
-
+        const amount = (BigInt(Math.floor(burnAmt * Math.pow(10, currentToken.decimals || 6)))).toString();
         const executeMsg = { burn: { amount } };
+        
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
-          msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
-          funds: []
+          msg: new TextEncoder().encode(JSON.stringify(executeMsg))
         });
 
         const anyMsg = PaxiCosmJS.Any.fromPartial({
@@ -640,60 +500,26 @@
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
 
-        showProcessing('Please approve burn in PaxiHub...');
-        const burnTxHash = await buildAndSendTx([anyMsg], 'Burn Tokens');
-
-        showProcessing('Burn successful! Now paying platform fee...');
-        await new Promise(r => setTimeout(r, 2000));
-
-        const feeTxHash = await payPlatformFee('burn');
-        
+        const txHash = await buildAndSendTx([anyMsg], 'Burn Tokens');
         hideProcessing();
-        showSuccess('Burn completed and platform fee paid!', burnTxHash);
-
-      } catch (err) {
-        hideProcessing();
-        alert('Failed: ' + err.message);
-      }
+        showSuccess('Burn Successful!', txHash);
+      } catch (err) { hideProcessing(); alert('Failed: ' + err.message); }
     }
 
     async function executeAddLP() {
-      if (!currentToken || !currentToken.contractAddress) {
-        alert('Token information not available. Please refresh and try again.');
-        return;
-      }
-      
+      if (!currentToken) return alert('Token info missing');
       const paxiAmt = document.getElementById('paxiAmount').value;
       const tokenAmt = document.getElementById('tokenAmount').value;
-      
-      if (!paxiAmt || paxiAmt <= 0 || !tokenAmt || tokenAmt <= 0) {
-        alert('Please fill all fields with valid amounts');
-        return;
-      }
+      if (!paxiAmt || !tokenAmt) return alert('Fill all fields');
 
       closeModal();
-      showProcessing('Preparing add liquidity transaction...');
+      showProcessing('Adding Liquidity...');
 
       try {
-        const query = btoa(JSON.stringify({ token_info: {} }));
-        const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
-        
-        if (!infoRes.ok) {
-          throw new Error('Failed to fetch token info');
-        }
-        
-        const infoData = await infoRes.json();
-        const decimals = infoData.data?.decimals || 6;
-        const tokenAmount = (BigInt(Math.floor(tokenAmt * Math.pow(10, decimals)))).toString();
+        const tokenAmount = (BigInt(Math.floor(tokenAmt * Math.pow(10, currentToken.decimals || 6)))).toString();
         const paxiAmount = (BigInt(Math.floor(paxiAmt * 1000000))).toString();
 
-        const executeMsg = {
-          add_liquidity: {
-            token: currentToken.contractAddress,
-            token_amount: tokenAmount
-          }
-        };
-
+        const executeMsg = { add_liquidity: { token: currentToken.contractAddress, token_amount: tokenAmount } };
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
@@ -706,59 +532,26 @@
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
 
-        showProcessing('Please approve add LP in PaxiHub...');
-        const lpTxHash = await buildAndSendTx([anyMsg], 'Add Liquidity');
-
-        showProcessing('Add LP successful! Now paying platform fee...');
-        await new Promise(r => setTimeout(r, 2000));
-
-        const feeTxHash = await payPlatformFee('addlp');
-        
+        const txHash = await buildAndSendTx([anyMsg], 'Add Liquidity');
         hideProcessing();
-        showSuccess('Liquidity added and platform fee paid!', lpTxHash);
-
-      } catch (err) {
-        hideProcessing();
-        alert('Failed: ' + err.message);
-      }
+        showSuccess('Liquidity Added!', txHash);
+      } catch (err) { hideProcessing(); alert('Failed: ' + err.message); }
     }
 
     async function executeMetadata() {
-      if (!currentToken || !currentToken.contractAddress) {
-        alert('Token information not available. Please refresh and try again.');
-        return;
-      }
-      
+      if (!currentToken) return alert('Token info missing');
       const project = document.getElementById('metaProject').value;
-      const description = document.getElementById('metaDescription').value;
-      const logo = document.getElementById('metaLogo').value;
-      const marketing = document.getElementById('metaMarketing').value;
-
-      if (!project && !description && !logo && !marketing) {
-        return alert('Please fill at least one field');
-      }
-
+      const desc = document.getElementById('metaDescription').value;
+      
       closeModal();
-      showProcessing('Preparing metadata update...');
+      showProcessing('Updating Metadata...');
 
       try {
-        const executeMsg = { 
-          update_marketing: { 
-            project: project || undefined,
-            description: description || undefined,
-            marketing: marketing || userAddress
-          } 
-        };
-        
-        if (logo) {
-          executeMsg.update_marketing.logo = { url: logo };
-        }
-
+        const executeMsg = { update_marketing: { project: project || undefined, description: desc || undefined, marketing: userAddress } };
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
-          msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
-          funds: []
+          msg: new TextEncoder().encode(JSON.stringify(executeMsg))
         });
 
         const anyMsg = PaxiCosmJS.Any.fromPartial({
@@ -766,221 +559,91 @@
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
 
-        showProcessing('Please approve metadata update in PaxiHub...');
-        const metaTxHash = await buildAndSendTx([anyMsg], 'Update Metadata');
-
-        showProcessing('Metadata updated! Now paying platform fee...');
-        await new Promise(r => setTimeout(r, 2000));
-
-        const feeTxHash = await payPlatformFee('metadata');
-        
+        const txHash = await buildAndSendTx([anyMsg], 'Update Metadata');
         hideProcessing();
-        showSuccess('Metadata updated and platform fee paid!', metaTxHash);
-
-      } catch (err) {
-        hideProcessing();
-        alert('Failed: ' + err.message);
-      }
+        showSuccess('Metadata Updated!', txHash);
+      } catch (err) { hideProcessing(); alert('Failed: ' + err.message); }
     }
 
-    // ========== PAY PLATFORM FEE ==========
-    
-    async function payPlatformFee(action) {
-      showProcessing('Sending platform fee (1 PAXI)...');
-      
-      const msg = PaxiCosmJS.MsgSend.fromPartial({
-        fromAddress: userAddress,
-        toAddress: SERVICE_ADDRESS,
-        amount: [PaxiCosmJS.coins(PLATFORM_FEE, DENOM)[0]]
-      });
-      
-      const anyMsg = PaxiCosmJS.Any.fromPartial({
-        typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-        value: PaxiCosmJS.MsgSend.encode(msg).finish()
-      });
-      
-      showProcessing('Please approve platform fee payment...');
-      const feeTxHash = await buildAndSendTx([anyMsg], `Platform Fee: ${action}`);
-      
-      showProcessing('Verifying platform fee payment...');
-      await new Promise(r => setTimeout(r, 3000));
-      
-      // Verify with backend
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/verify-fee`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            txHash: feeTxHash,
-            action: action,
-            amount: PLATFORM_FEE
-          })
-        });
-        
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error('Platform fee verification failed');
-        }
-      } catch (err) {
-        console.error('Fee verification error:', err);
-        // Continue anyway - user already paid
-      }
-      
-      return feeTxHash;
-    }
-
-    // ========== TRANSACTION UTILITIES ==========
+    // ========== UTILITIES ==========
 
     async function buildAndSendTx(messages, memo = "") {
       const { accountNumber, sequence } = await buildCommon(userAddress);
       const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
-      const fee = {
-        amount: [PaxiCosmJS.coins("30000", DENOM)[0]],
-        gasLimit: 600_000
-      };
+      const fee = { amount: [PaxiCosmJS.coins("30000", DENOM)[0]], gasLimit: 600_000 };
       
       const addressInfo = await window.paxihub.paxi.getAddress();
-      const pubkeyBytes = new Uint8Array(addressInfo.public_key);
       const pubkeyAny = {
         typeUrl: "/cosmos.crypto.secp256k1.PubKey",
-        value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish()
+        value: PaxiCosmJS.PubKey.encode({ key: new Uint8Array(addressInfo.public_key) }).finish()
       };
       
       const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
-        signerInfos: [{
-          publicKey: pubkeyAny,
-          modeInfo: { single: { mode: 1 } },
-          sequence: BigInt(sequence)
-        }],
+        signerInfos: [{ publicKey: pubkeyAny, modeInfo: { single: { mode: 1 } }, sequence: BigInt(sequence) }],
         fee
       });
       
       const signDoc = PaxiCosmJS.SignDoc.fromPartial({
         bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
         authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
-        chainId,
-        accountNumber: BigInt(accountNumber)
+        chainId, accountNumber: BigInt(accountNumber)
       });
       
-      const txObj = {
+      const result = await window.paxihub.paxi.signAndSendTransaction({
         bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
         authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
-        chainId,
-        accountNumber: signDoc.accountNumber.toString()
-      };
+        chainId, accountNumber: signDoc.accountNumber.toString()
+      });
       
-      const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
-      if (!result.success) throw new Error('Transaction signing failed');
-      
-      const sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
+      if (!result.success) throw new Error('Signing failed');
       const txRaw = PaxiCosmJS.TxRaw.fromPartial({
         bodyBytes: signDoc.bodyBytes,
         authInfoBytes: signDoc.authInfoBytes,
-        signatures: [sigBytes]
+        signatures: [Uint8Array.from(atob(result.success), c => c.charCodeAt(0))]
       });
       
-      const txBytes = PaxiCosmJS.TxRaw.encode(txRaw).finish();
-      const base64Tx = btoa(String.fromCharCode(...txBytes));
-      
-      const broadcastResult = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
+      const broadcast = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tx_bytes: base64Tx, mode: "BROADCAST_MODE_SYNC" })
+        body: JSON.stringify({ tx_bytes: btoa(String.fromCharCode(...PaxiCosmJS.TxRaw.encode(txRaw).finish())), mode: "BROADCAST_MODE_SYNC" })
       }).then(r => r.json());
       
-      if (broadcastResult.tx_response && broadcastResult.tx_response.code === 0) {
-        return broadcastResult.tx_response.txhash;
-      } else {
-        throw new Error(broadcastResult.tx_response?.raw_log || 'Transaction failed');
-      }
+      if (broadcast.tx_response?.code === 0) return broadcast.tx_response.txhash;
+      throw new Error(broadcast.tx_response?.raw_log || 'Broadcast failed');
     }
 
     async function buildCommon(address) {
       const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
-      const { account } = await res.json();
-      const ba = account.base_account || account;
-      return {
-        accountNumber: Number(ba.account_number),
-        sequence: Number(ba.sequence)
-      };
+      const data = await res.json();
+      const ba = data.account.base_account || data.account;
+      return { accountNumber: Number(ba.account_number), sequence: Number(ba.sequence) };
     }
 
-    // ========== UI UTILITIES ==========
-
-    function showProcessing(text) {
-      document.getElementById('processingText').textContent = text;
-      document.getElementById('processingModal').classList.remove('hidden');
-    }
-
-    function hideProcessing() {
-      document.getElementById('processingModal').classList.add('hidden');
-    }
-
+    function showProcessing(text) { document.getElementById('processingText').textContent = text; document.getElementById('processingModal').classList.remove('hidden'); }
+    function hideProcessing() { document.getElementById('processingModal').classList.add('hidden'); }
     function showSuccess(text, txHash) {
       document.getElementById('successText').textContent = text;
       document.getElementById('successTxLink').href = `https://explorer.paxinet.io/paxi/tx/${txHash}`;
       document.getElementById('successModal').classList.remove('hidden');
     }
-
-    function closeSuccessModal() {
-      document.getElementById('successModal').classList.add('hidden');
-      refreshTokens();
-    }
-
-    function showAddTokenModal() {
-      document.getElementById('addTokenModal').classList.remove('hidden');
-    }
-
-    function closeAddTokenModal() {
-      document.getElementById('addTokenModal').classList.add('hidden');
-      document.getElementById('addTokenContract').value = '';
-    }
+    function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); refreshTokens(); }
+    function showAddTokenModal() { document.getElementById('addTokenModal').classList.remove('hidden'); }
+    function closeAddTokenModal() { document.getElementById('addTokenModal').classList.add('hidden'); }
 
     async function addExistingToken() {
       const contractAddress = document.getElementById('addTokenContract').value.trim();
-      
-      if (!contractAddress || !contractAddress.startsWith('paxi')) {
-        alert('Please enter a valid contract address');
-        return;
-      }
-
-      showProcessing('Fetching token info from blockchain...');
-
+      if (!contractAddress.startsWith('paxi')) return alert('Invalid address');
+      showProcessing('Fetching...');
       try {
-        const tokenInfoQuery = btoa(JSON.stringify({ token_info: {} }));
-        const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${tokenInfoQuery}`);
-        
-        if (!infoRes.ok) {
-          throw new Error('Failed to fetch token info. Make sure the contract address is correct.');
-        }
-
-        const infoData = await infoRes.json();
-        const info = infoData.data;
-
-        const tokenData = {
-          name: info.name,
-          symbol: info.symbol,
-          contractAddress: contractAddress,
-          totalSupply: info.total_supply,
-          decimals: info.decimals,
-          description: '',
-          logoUrl: '',
-          createdAt: new Date().toISOString()
-        };
-
+        const query = btoa(JSON.stringify({ token_info: {} }));
+        const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`);
+        const data = await res.json();
+        const tokenData = { name: data.data.name, symbol: data.data.symbol, contractAddress, decimals: data.data.decimals };
         saveLocalToken(tokenData);
-
-        hideProcessing();
-        closeAddTokenModal();
-        alert(`Token ${info.name} (${info.symbol}) added successfully!`);
-        refreshTokens();
-
-      } catch (err) {
-        hideProcessing();
-        alert('Failed to add token: ' + err.message);
-      }
+        hideProcessing(); closeAddTokenModal(); refreshTokens();
+      } catch (err) { hideProcessing(); alert('Error: ' + err.message); }
     }
   </script>
-  
+
 </body>
 </html>
