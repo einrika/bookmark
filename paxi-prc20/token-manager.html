@@ -56,6 +56,9 @@
             <button onclick="refreshTokens()" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
               <i class="fas fa-sync-alt mr-2"></i>Refresh
             </button>
+            <button onclick="localStorage.clear(); location.reload();" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
+              <i class="fas fa-sync-alt mr-2"></i>Reset list token
+            </button>
           </div>
         </div>
         
@@ -64,9 +67,6 @@
             <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
             <p>Loading your tokens...</p>
           </div>
-          <button onclick="localStorage.clear(); location.reload();" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
-            <i class="fas fa-sync-alt mr-2"></i>Reset list token
-          </button>
         </div>
       </div>
       
