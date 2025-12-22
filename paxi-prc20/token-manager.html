@@ -1,296 +1,716 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRC-20 Token Manager (Stateless)</title>
+  <title>PRC-20 Token Manager Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://mainnet-api.paxinet.io/resources/js/paxi-cosmjs.umd.js"></script>
+  
   <style>
-    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    .tab-active { background: rgba(139, 92, 246, 0.3); border-bottom: 2px solid #8b5cf6; }
-    input, textarea { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.2) !important; color: white; }
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .tab-active {
+      background: rgba(139, 92, 246, 0.3);
+      border-bottom: 2px solid #8b5cf6;
+    }
   </style>
 </head>
+
 <body class="bg-black text-white min-h-screen">
   
   <div class="container mx-auto px-4 py-8 max-w-6xl">
+    
+    <!-- Header -->
     <header class="glass rounded-2xl p-8 mb-8">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-3xl font-bold mb-2">PRC-20 Manager v1.0.0</h1>
-          <p class="text-gray-400 text-sm">Decentralized Token Control Center</p>
+          <h1 class="text-4xl font-bold mb-2">Token Manager Dashboard</h1>
+          <p class="text-gray-400">Manage your PRC-20 tokens on Paxi Network</p>
         </div>
-        <button onclick="connectWallet()" id="connectBtn" class="bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 transition">
+        <button onclick="connectWallet()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
           <i class="fas fa-wallet mr-2"></i>Connect Wallet
         </button>
       </div>
       <div id="walletInfo" class="hidden mt-4 pt-4 border-t border-white/10">
-        <p class="font-mono text-xs text-purple-400" id="walletAddress"></p>
+        <p class="text-sm text-gray-400">Connected:</p>
+        <p class="font-mono text-sm" id="walletAddress"></p>
       </div>
     </header>
 
-    <div id="mainContent" class="hidden space-y-6">
-      <div class="glass rounded-xl p-6">
-        <h2 class="text-xl font-semibold mb-4">Manage by Contract Address</h2>
-        <div class="flex gap-2">
-          <input type="text" id="manualContract" placeholder="paxi1..." class="flex-1 rounded-lg px-4 py-2">
-          <button onclick="accessManualToken()" class="bg-white/10 px-6 py-2 rounded-lg hover:bg-white/20 transition">Manage</button>
-        </div>
-      </div>
-
-      <div class="glass rounded-xl p-6">
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden">
+      
+      <!-- Token List -->
+      <div class="glass rounded-xl p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Your Created Tokens</h2>
-          <span class="text-xs text-gray-500">(Saved locally)</span>
-        </div>
-        <div id="tokenList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 class="text-2xl font-semibold">Your Tokens</h2>
+          <div class="flex gap-2">
+            <button onclick="showAddTokenModal()" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
+              <i class="fas fa-plus mr-2"></i>Add Existing
+            </button>
+            <button onclick="refreshTokens()" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
+              <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
           </div>
+        </div>
+        
+        <div id="tokenList" class="space-y-3">
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+            <p>Loading your tokens...</p>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div id="actionModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="glass rounded-2xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold" id="modalTokenName">Token Manager</h3>
-          <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-        </div>
-
-        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-          <button onclick="switchTab('mint')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="mint">Mint</button>
-          <button onclick="switchTab('burn')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="burn">Burn</button>
-          <button onclick="switchTab('renounce')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="renounce">Renounce</button>
-          <button onclick="switchTab('metadata')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="metadata">Metadata</button>
-        </div>
-
-        <div id="tabContent" class="space-y-4">
-          <div id="tab-mint" class="tab-content hidden space-y-4">
-            <input type="text" id="mintRecipient" placeholder="Recipient Address (paxi1...)" class="w-full rounded-lg px-4 py-3">
-            <input type="number" id="mintAmount" placeholder="Amount to Mint" class="w-full rounded-lg px-4 py-3">
-            <button onclick="executeAction('mint')" class="w-full bg-green-600 py-3 rounded-lg font-bold">Execute Mint (1 PAXI)</button>
+      <!-- Action Modal -->
+      <div id="actionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="glass rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold" id="modalTitle">Manage Token</h3>
+            <button onclick="closeModal()" class="glass p-2 rounded-lg hover:bg-white/10">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
-          <div id="tab-burn" class="tab-content hidden space-y-4">
-            <input type="number" id="burnAmount" placeholder="Amount to Burn" class="w-full rounded-lg px-4 py-3">
-            <button onclick="executeAction('burn')" class="w-full bg-orange-600 py-3 rounded-lg font-bold">Execute Burn (1 PAXI)</button>
-          </div>
-
-          <div id="tab-renounce" class="tab-content hidden space-y-4 text-center">
-            <div class="p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-              WARNING: This will lock supply forever. You can NEVER mint again.
+          <!-- Token Info -->
+          <div class="glass rounded-lg p-4 mb-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center">
+                <i class="fas fa-coins text-purple-400 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-lg" id="modalTokenName"></p>
+                <p class="text-sm text-gray-400 font-mono" id="modalTokenContract"></p>
+              </div>
             </div>
-            <label class="flex items-center justify-center gap-2 cursor-pointer">
-              <input type="checkbox" id="confirmRenounce"> <span>I am sure</span>
-            </label>
-            <button onclick="executeAction('renounce')" class="w-full bg-red-600 py-3 rounded-lg font-bold">Renounce Minter (1 PAXI)</button>
           </div>
 
-          <div id="tab-metadata" class="tab-content hidden space-y-3">
-            <input type="text" id="metaProject" placeholder="Project Name" class="w-full rounded-lg px-4 py-2">
-            <textarea id="metaDescription" placeholder="Description" class="w-full rounded-lg px-4 py-2"></textarea>
-            <input type="text" id="metaLogo" placeholder="Logo URL" class="w-full rounded-lg px-4 py-2">
-            <button onclick="executeAction('metadata')" class="w-full bg-blue-600 py-3 rounded-lg font-bold">Update Metadata (1 PAXI)</button>
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-6 overflow-x-auto">
+            <button onclick="switchTab('addlp')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="addlp">
+              <i class="fas fa-layer-group mr-2"></i>Add Liquidity
+            </button>
+            <button onclick="switchTab('renounce')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="renounce">
+              <i class="fas fa-ban mr-2"></i>Renounce Minter
+            </button>
+            <button onclick="switchTab('burn')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="burn">
+              <i class="fas fa-fire mr-2"></i>Burn Tokens
+            </button>
+            <button onclick="switchTab('metadata')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="metadata">
+              <i class="fas fa-edit mr-2"></i>Edit Metadata
+            </button>
           </div>
+
+          <!-- Tab Content -->
+          <div id="tabContent">
+            
+            <!-- Add Liquidity -->
+            <div id="tab-addlp" class="tab-content">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">PAXI Amount</label>
+                  <input type="number" id="paxiAmount" placeholder="100" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Token Amount</label>
+                  <input type="number" id="tokenAmount" placeholder="1000" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                </div>
+                <div class="glass rounded-lg p-4 text-sm text-gray-400">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  This will create liquidity pool on Paxi DEX. Fee: 1 PAXI
+                </div>
+                <button onclick="executeAction('addlp')" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+                  Add Liquidity (1 PAXI Fee)
+                </button>
+              </div>
+            </div>
+
+            <!-- Renounce Minter -->
+            <div id="tab-renounce" class="tab-content hidden">
+              <div class="space-y-4">
+                <div class="glass rounded-lg p-4 border-2 border-yellow-500/30">
+                  <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mt-1"></i>
+                    <div>
+                      <p class="font-semibold text-yellow-500 mb-2">Warning: Irreversible Action!</p>
+                      <p class="text-sm text-gray-300">Once you renounce the minter role, you will no longer be able to mint new tokens. This action cannot be undone.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" id="confirmRenounce" class="w-5 h-5">
+                  <label for="confirmRenounce" class="text-sm">I understand this action is permanent</label>
+                </div>
+                <button onclick="executeAction('renounce')" class="w-full bg-gradient-to-r from-red-600 to-orange-600 px-6 py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50" id="renounceBtn" disabled>
+                  Renounce Minter (1 PAXI Fee)
+                </button>
+              </div>
+            </div>
+
+            <!-- Burn Tokens -->
+            <div id="tab-burn" class="tab-content hidden">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Amount to Burn</label>
+                  <input type="number" id="burnAmount" placeholder="1000" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                  <p class="text-xs text-gray-500 mt-1">Current balance: <span id="userBalance">Loading...</span></p>
+                </div>
+                <div class="glass rounded-lg p-4 text-sm text-gray-400">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  Burning tokens permanently removes them from circulation. Fee: 1 PAXI
+                </div>
+                <button onclick="executeAction('burn')" class="w-full bg-gradient-to-r from-orange-600 to-red-600 px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+                  Burn Tokens (1 PAXI Fee)
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit Metadata -->
+            <div id="tab-metadata" class="tab-content hidden">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Project Name</label>
+                  <input type="text" id="metaProject" placeholder="My Token Project" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Description</label>
+                  <textarea id="metaDescription" placeholder="Token description..." rows="3" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3"></textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Logo URL</label>
+                  <input type="text" id="metaLogo" placeholder="https://..." class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Marketing Address</label>
+                  <input type="text" id="metaMarketing" placeholder="paxi..." class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+                </div>
+                <button onclick="executeAction('metadata')" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+                  Update Metadata (1 PAXI Fee)
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="processingModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="glass rounded-xl p-8 max-w-md w-full mx-4">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full glass mb-4">
+            <i class="fas fa-spinner fa-spin text-3xl text-purple-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Processing...</h3>
+          <p class="text-gray-400" id="processingText">Please wait</p>
         </div>
       </div>
     </div>
 
-    <div id="processingModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[60]">
-      <div class="text-center"><i class="fas fa-spinner fa-spin text-4xl text-purple-500 mb-4"></i><p id="procText">Processing...</p></div>
-    </div>
-
-    <div id="successModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[60] p-4">
-      <div class="glass p-8 rounded-2xl text-center max-w-sm w-full">
-        <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
-        <h3 class="text-xl font-bold mb-2">Action Success!</h3>
-        <p id="successText" class="text-sm text-gray-400 mb-6"></p>
-        <button onclick="location.reload()" class="w-full bg-white text-black py-2 rounded-lg font-bold">Done</button>
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="glass rounded-xl p-8 max-w-md w-full mx-4 border-2 border-green-500/30">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
+            <i class="fas fa-check text-3xl text-green-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Success!</h3>
+          <p class="text-gray-400 mb-4" id="successText"></p>
+          <a id="successTxLink" href="#" target="_blank" class="inline-block bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 text-sm mb-3">
+            <i class="fas fa-external-link-alt mr-2"></i>View Transaction
+          </a>
+          <button onclick="closeSuccessModal()" class="block w-full glass px-4 py-2 rounded-lg hover:bg-white/10">Close</button>
+        </div>
       </div>
     </div>
+
+    <!-- Add Token Modal -->
+    <div id="addTokenModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="glass rounded-2xl p-8 max-w-md w-full">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-semibold">Add Existing Token</h3>
+          <button onclick="closeAddTokenModal()" class="glass p-2 rounded-lg hover:bg-white/10">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Token Contract Address</label>
+            <input type="text" id="addTokenContract" placeholder="paxi..." class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3">
+          </div>
+
+          <div class="glass rounded-lg p-4 text-sm text-gray-400">
+            <i class="fas fa-info-circle mr-2"></i>
+            Enter the contract address of your existing PRC-20 token. We'll fetch the info from blockchain.
+          </div>
+
+          <button onclick="addExistingToken()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+            <i class="fas fa-plus mr-2"></i>Add Token
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center mt-12 text-gray-500 text-sm">
+      <p>© 2025 PaxiHub Token Manager</p>
+    </footer>
 
   </div>
   
   <script>
-  const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
-  const SERVICE_ADDRESS = "paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t";
-  const LCD = "https://mainnet-lcd.paxinet.io";
-  const RPC = "https://mainnet-rpc.paxinet.io";
-  const DENOM = "upaxi";
-  
-  let userAddress = "";
-  let chainId = "paxi-1";
-  let currentToken = null;
-
-  // --- LOGIKA UTAMA EKSEKUSI ---
-  async function executeAction(action) {
-    if (!currentToken) return;
-
-    if (action === 'burn') {
-      // JALUR KHUSUS BURN: Langsung dari dompet user (Gratis Fee 1 PAXI)
-      return executeBurnDirectly();
-    }
-
-    // JALUR MINT/METADATA/RENOUNCE (Lewat Backend & Bayar 1 PAXI)
-    executeBackendAction(action);
-  }
-
-  // 1. FUNGSI BURN LANGSUNG (User ke Blockchain)
-  async function executeBurnDirectly() {
-    const amount = document.getElementById('burnAmount').value;
-    if (!amount) return alert("Masukkan jumlah!");
-
-    const microAmount = toMicroAmount(amount, currentToken.decimals);
+    const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
+    const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
+    const RPC = 'https://mainnet-rpc.paxinet.io';
+    const LCD = 'https://mainnet-lcd.paxinet.io';
+    const DENOM = 'upaxi';
     
-    showProc("Menyiapkan penghapusan token...");
-    try {
-      const msg = {
-        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-        value: PaxiCosmJS.MsgExecuteContract.encode({
-          sender: userAddress,
-          contract: currentToken.address,
-          msg: Uint8Array.from(JSON.stringify({ burn: { amount: microAmount } }), c => c.charCodeAt(0)),
-          funds: []
-        }).finish()
-      };
+    let userAddress = '';
+    let chainId = '';
+    let currentToken = null;
+    let userTokens = [];
 
-      showProc("Konfirmasi di PaxiHub...");
-      const txHash = await buildAndSendTx([msg], "Burn Tokens");
+    // Load on page load
+    window.addEventListener('load', async () => {
+      if (typeof window.paxihub === 'undefined') {
+        alert('Please open this page in PaxiHub app');
+        return;
+      }
       
-      hideProc();
-      showSuccessModal(`Berhasil membakar ${amount} token!`, txHash);
-    } catch (e) {
-      hideProc();
-      alert("Burn Gagal: " + e.message);
-    }
-  }
+      try {
+        const statusRes = await fetch(`${RPC}/status`);
+        const statusData = await statusRes.json();
+        chainId = statusData.result.node_info.network;
+      } catch (e) {
+        console.error('Failed to fetch chainId:', e);
+      }
+    });
 
-  // 2. FUNGSI BACKEND (Mint/Metadata/Renounce)
-  async function executeBackendAction(action) {
-    let actionData = {};
-    if (action === 'mint') {
-      actionData = { recipient: document.getElementById('mintRecipient').value, amount: document.getElementById('mintAmount').value };
-    } else if (action === 'metadata') {
-      actionData = { projectName: document.getElementById('metaProject').value, description: document.getElementById('metaDescription').value, logo: document.getElementById('metaLogo').value };
-    }
-
-    showProc("Mengirim Pembayaran 1 PAXI...");
-    try {
-      // Bayar dulu ke alamatmu
-      const payMsg = {
-        typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-        value: PaxiCosmJS.MsgSend.encode({
-          fromAddress: userAddress,
-          toAddress: SERVICE_ADDRESS,
-          amount: [{ denom: DENOM, amount: "1000000" }]
-        }).finish()
-      };
-
-      const txHash = await buildAndSendTx([payMsg], `Fee for ${action}`);
+    // Connect Wallet
+    async function connectWallet() {
+      if (typeof window.paxihub === 'undefined') {
+        alert('PaxiHub not detected');
+        return;
+      }
       
-      showProc("Memproses di Server (Sabar)...");
-      const res = await fetch(`${BACKEND_URL}/api/manage-token`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          userAddress, txHash, contractAddress: currentToken.address, action, 
-          actionData: { ...actionData, decimals: currentToken.decimals }
-        })
+      try {
+        const addressInfo = await window.paxihub.paxi.getAddress();
+        userAddress = addressInfo.address;
+        
+        document.getElementById('walletAddress').textContent = userAddress;
+        document.getElementById('walletInfo').classList.remove('hidden');
+        document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check mr-2"></i>Connected';
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('mainContent').classList.remove('hidden');
+        
+        await refreshTokens();
+        
+      } catch (err) {
+        alert('Failed to connect: ' + err.message);
+      }
+    }
+
+    // Load tokens from localStorage
+    function getLocalTokens() {
+      try {
+        const stored = localStorage.getItem(`paxi_tokens_${userAddress}`);
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // Save token to localStorage
+    function saveLocalToken(tokenData) {
+      try {
+        const tokens = getLocalTokens();
+        // Check if already exists
+        const exists = tokens.find(t => t.contractAddress === tokenData.contractAddress);
+        if (!exists) {
+          tokens.push(tokenData);
+          localStorage.setItem(`paxi_tokens_${userAddress}`, JSON.stringify(tokens));
+        }
+      } catch (e) {
+        console.error('Failed to save token:', e);
+      }
+    }
+
+    // Refresh Token List
+    async function refreshTokens() {
+      document.getElementById('tokenList').innerHTML = `
+        <div class="text-center py-8 text-gray-500">
+          <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+          <p>Loading your tokens...</p>
+        </div>
+      `;
+
+      try {
+        // Try backend first
+        const response = await fetch(`${BACKEND_URL}/api/user-tokens/${userAddress}`);
+        const data = await response.json();
+        
+        let tokens = [];
+        
+        if (data.success && data.tokens.length > 0) {
+          tokens = data.tokens;
+        } else {
+          // Fallback to localStorage
+          tokens = getLocalTokens();
+        }
+        
+        if (tokens.length > 0) {
+          userTokens = tokens;
+          renderTokenList(tokens);
+        } else {
+          document.getElementById('tokenList').innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-inbox text-4xl mb-3"></i>
+              <p>No tokens found</p>
+              <p class="text-sm mt-2">Create your first token to get started!</p>
+              <a href="create-token.html" class="inline-block mt-3 glass px-4 py-2 rounded-lg hover:bg-white/10">
+                <i class="fas fa-plus mr-2"></i>Create Token
+              </a>
+            </div>
+          `;
+        }
+      } catch (err) {
+        // Fallback to localStorage on error
+        const tokens = getLocalTokens();
+        if (tokens.length > 0) {
+          userTokens = tokens;
+          renderTokenList(tokens);
+        } else {
+          document.getElementById('tokenList').innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+              <p>Failed to load tokens</p>
+              <button onclick="refreshTokens()" class="mt-3 glass px-4 py-2 rounded-lg hover:bg-white/10">Retry</button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Render Token List
+    function renderTokenList(tokens) {
+      const html = tokens.map(token => `
+        <div class="glass rounded-lg p-4 hover:bg-white/5 transition cursor-pointer" onclick="openTokenModal('${token.contractAddress}')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold">
+                ${token.symbol.substring(0, 2)}
+              </div>
+              <div>
+                <p class="font-semibold">${token.name} (${token.symbol})</p>
+                <p class="text-xs text-gray-400 font-mono">${token.contractAddress}</p>
+              </div>
+            </div>
+            <button class="glass px-4 py-2 rounded-lg hover:bg-white/10">
+              <i class="fas fa-cog mr-2"></i>Manage
+            </button>
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('tokenList').innerHTML = html;
+    }
+
+    // Open Token Modal
+    function openTokenModal(contractAddress) {
+      currentToken = userTokens.find(t => t.contractAddress === contractAddress);
+      if (!currentToken) return;
+      
+      document.getElementById('modalTokenName').textContent = `${currentToken.name} (${currentToken.symbol})`;
+      document.getElementById('modalTokenContract').textContent = currentToken.contractAddress;
+      document.getElementById('actionModal').classList.remove('hidden');
+      
+      switchTab('addlp');
+      loadTokenBalance();
+    }
+
+    // Close Modal
+    function closeModal() {
+      document.getElementById('actionModal').classList.add('hidden');
+      currentToken = null;
+    }
+
+    // Switch Tab
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
       });
       
-      const result = await res.json();
-      if (!result.success) throw new Error(result.error);
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('tab-active');
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    }
+
+    // Checkbox for renounce
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkbox = document.getElementById('confirmRenounce');
+      const btn = document.getElementById('renounceBtn');
+      if (checkbox && btn) {
+        checkbox.addEventListener('change', (e) => {
+          btn.disabled = !e.target.checked;
+        });
+      }
+    });
+
+    // Load Token Balance
+    async function loadTokenBalance() {
+      try {
+        const query = btoa(JSON.stringify({balance: {address: userAddress}}));
+        const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
+        const data = await res.json();
+        const balance = (parseInt(data.data.balance) / 1000000).toFixed(2);
+        document.getElementById('userBalance').textContent = `${balance} ${currentToken.symbol}`;
+      } catch (e) {
+        document.getElementById('userBalance').textContent = 'Error loading';
+      }
+    }
+
+    // Execute Action
+    async function executeAction(action) {
+      if (!currentToken) return;
+
+      // Validate inputs
+      let actionData = {};
+      if (action === 'addlp') {
+        const paxiAmt = document.getElementById('paxiAmount').value;
+        const tokenAmt = document.getElementById('tokenAmount').value;
+        if (!paxiAmt || !tokenAmt) return alert('Please fill all fields');
+        actionData = { paxiAmount: paxiAmt, tokenAmount: tokenAmt };
+      } else if (action === 'burn') {
+        const burnAmt = document.getElementById('burnAmount').value;
+        if (!burnAmt) return alert('Please enter amount');
+        actionData = { amount: burnAmt };
+      } else if (action === 'metadata') {
+        actionData = {
+          project: document.getElementById('metaProject').value,
+          description: document.getElementById('metaDescription').value,
+          logo: document.getElementById('metaLogo').value,
+          marketing: document.getElementById('metaMarketing').value
+        };
+      } else if (action === 'renounce') {
+        if (!document.getElementById('confirmRenounce').checked) {
+          return alert('Please confirm by checking the box');
+        }
+      }
+
+      closeModal();
+      showProcessing('Preparing transaction...');
+
+      try {
+        // Build payment transaction
+        const msg = PaxiCosmJS.MsgSend.fromPartial({
+          fromAddress: userAddress,
+          toAddress: SERVICE_ADDRESS,
+          amount: [PaxiCosmJS.coins("1000000", DENOM)[0]] // 1 PAXI fee
+        });
+        
+        const anyMsg = PaxiCosmJS.Any.fromPartial({
+          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+          value: PaxiCosmJS.MsgSend.encode(msg).finish()
+        });
+        
+        showProcessing('Please approve in PaxiHub...');
+        const txHash = await buildAndSendTx([anyMsg], `Token Management: ${action}`);
+        
+        showProcessing('Waiting for confirmation...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        showProcessing('Executing action...');
+        
+        // Call backend
+        const response = await fetch(`${BACKEND_URL}/api/manage-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userAddress,
+            txHash,
+            contractAddress: currentToken.contractAddress,
+            action,
+            actionData
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          hideProcessing();
+          showSuccess(`${action} completed successfully!`, result.txHash);
+        } else {
+          throw new Error(result.error);
+        }
+        
+      } catch (err) {
+        hideProcessing();
+        alert('Failed: ' + err.message);
+      }
+    }
+
+    // Build and Send TX (same as token creator)
+    async function buildAndSendTx(messages, memo = "") {
+      const { accountNumber, sequence } = await buildCommon(userAddress);
+      const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
+      const fee = {
+        amount: [PaxiCosmJS.coins("30000", DENOM)[0]],
+        gasLimit: 600_000
+      };
       
-      hideProc();
-      showSuccessModal(`${action} Berhasil!`, result.txHash);
-    } catch (e) {
-      hideProc();
-      alert("Gagal: " + e.message);
+      const addressInfo = await window.paxihub.paxi.getAddress();
+      const pubkeyBytes = new Uint8Array(addressInfo.public_key);
+      const pubkeyAny = {
+        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+        value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish()
+      };
+      
+      const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
+        signerInfos: [{
+          publicKey: pubkeyAny,
+          modeInfo: { single: { mode: 1 } },
+          sequence: BigInt(sequence)
+        }],
+        fee
+      });
+      
+      const signDoc = PaxiCosmJS.SignDoc.fromPartial({
+        bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
+        authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
+        chainId,
+        accountNumber: BigInt(accountNumber)
+      });
+      
+      const txObj = {
+        bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
+        authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
+        chainId,
+        accountNumber: signDoc.accountNumber.toString()
+      };
+      
+      const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
+      if (!result.success) throw new Error('Transaction signing failed');
+      
+      const sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
+      const txRaw = PaxiCosmJS.TxRaw.fromPartial({
+        bodyBytes: signDoc.bodyBytes,
+        authInfoBytes: signDoc.authInfoBytes,
+        signatures: [sigBytes]
+      });
+      
+      const txBytes = PaxiCosmJS.TxRaw.encode(txRaw).finish();
+      const base64Tx = btoa(String.fromCharCode(...txBytes));
+      
+      const broadcastResult = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tx_bytes: base64Tx, mode: "BROADCAST_MODE_SYNC" })
+      }).then(r => r.json());
+      
+      if (broadcastResult.tx_response && broadcastResult.tx_response.code === 0) {
+        return broadcastResult.tx_response.txhash;
+      } else {
+        throw new Error(broadcastResult.tx_response?.raw_log || 'Transaction failed');
+      }
     }
-  }
 
-  // --- ENGINE TRANSAKSI (ANTI-ERROR STARGATE) ---
-  async function buildAndSendTx(messages, memo = "") {
-    const { accountNumber, sequence } = await fetchAccountInfo(userAddress);
-    
-    const txBody = {
-      messages: messages,
-      memo: memo,
-      timeoutHeight: 0n
-    };
-
-    const addressInfo = await window.paxihub.paxi.getAddress();
-    const pubkeyBytes = new Uint8Array(addressInfo.public_key);
-    
-    const authInfo = {
-      signerInfos: [{
-        publicKey: { typeUrl: "/cosmos.crypto.secp256k1.PubKey", value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish() },
-        modeInfo: { single: { mode: 1 } },
-        sequence: BigInt(sequence)
-      }],
-      fee: { amount: [{ denom: DENOM, amount: "25000" }], gasLimit: 500000n }
-    };
-
-    const signDoc = {
-      bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
-      authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
-      chainId: chainId,
-      accountNumber: BigInt(accountNumber)
-    };
-
-    const txObj = {
-      bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
-      authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
-      chainId: chainId,
-      accountNumber: signDoc.accountNumber.toString()
-    };
-
-    const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
-    if (!result.success) throw new Error("User menolak transaksi");
-
-    // Broadcast Manual via LCD
-    const txRaw = {
-      bodyBytes: signDoc.bodyBytes,
-      authInfoBytes: signDoc.authInfoBytes,
-      signatures: [Uint8Array.from(atob(result.success), c => c.charCodeAt(0))]
-    };
-
-    const broadcastRes = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tx_bytes: btoa(String.fromCharCode(...PaxiCosmJS.TxRaw.encode(txRaw).finish())), mode: "BROADCAST_MODE_SYNC" })
-    }).then(r => r.json());
-
-    if (broadcastRes.tx_response && broadcastRes.tx_response.code === 0) {
-      return broadcastRes.tx_response.txhash;
-    } else {
-      throw new Error(broadcastRes.tx_response?.raw_log || "Gagal Broadcast");
+    async function buildCommon(address) {
+      const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
+      const { account } = await res.json();
+      const ba = account.base_account || account;
+      return {
+        accountNumber: Number(ba.account_number),
+        sequence: Number(ba.sequence)
+      };
     }
-  }
 
-  // --- HELPERS ---
-  async function fetchAccountInfo(address) {
-    const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
-    const data = await res.json();
-    const acc = data.account.base_account || data.account;
-    return { accountNumber: acc.account_number, sequence: acc.sequence };
-  }
+    function showProcessing(text) {
+      document.getElementById('processingText').textContent = text;
+      document.getElementById('processingModal').classList.remove('hidden');
+    }
 
-  function toMicroAmount(amount, decimals) {
-    const [whole, frac = ""] = amount.toString().split(".");
-    const paddedFrac = (frac + "000000000000000000").slice(0, decimals);
-    return (BigInt(whole) * (10n ** BigInt(decimals)) + BigInt(paddedFrac)).toString();
-  }
+    function hideProcessing() {
+      document.getElementById('processingModal').classList.add('hidden');
+    }
 
-  function showSuccessModal(text, txHash) {
-    document.getElementById('successText').textContent = text;
-    document.getElementById('successModal').classList.remove('hidden');
-  }
+    function showSuccess(text, txHash) {
+      document.getElementById('successText').textContent = text;
+      document.getElementById('successTxLink').href = `https://explorer.paxinet.io/paxi/tx/${txHash}`;
+      document.getElementById('successModal').classList.remove('hidden');
+    }
 
-  function showProc(t) { document.getElementById('procText').textContent = t; document.getElementById('processingModal').classList.remove('hidden'); }
-  function hideProc() { document.getElementById('processingModal').classList.add('hidden'); }
-</script>
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+      refreshTokens();
+    }
 
+    function showAddTokenModal() {
+      document.getElementById('addTokenModal').classList.remove('hidden');
+    }
 
+    function closeAddTokenModal() {
+      document.getElementById('addTokenModal').classList.add('hidden');
+      document.getElementById('addTokenContract').value = '';
+    }
+
+    async function addExistingToken() {
+      const contractAddress = document.getElementById('addTokenContract').value.trim();
+      
+      if (!contractAddress || !contractAddress.startsWith('paxi')) {
+        alert('Please enter a valid contract address');
+        return;
+      }
+
+      showProcessing('Fetching token info from blockchain...');
+
+      try {
+        // Query token info from blockchain
+        const tokenInfoQuery = btoa(JSON.stringify({ token_info: {} }));
+        const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${tokenInfoQuery}`);
+        
+        if (!infoRes.ok) {
+          throw new Error('Failed to fetch token info. Make sure the contract address is correct.');
+        }
+
+        const infoData = await infoRes.json();
+        const info = infoData.data;
+
+        // Save to localStorage
+        const tokenData = {
+          name: info.name,
+          symbol: info.symbol,
+          contractAddress: contractAddress,
+          totalSupply: info.total_supply,
+          decimals: info.decimals,
+          description: '',
+          logoUrl: '',
+          createdAt: new Date().toISOString()
+        };
+
+        saveLocalToken(tokenData);
+
+        hideProcessing();
+        closeAddTokenModal();
+        alert(`Token ${info.name} (${info.symbol}) added successfully!`);
+        refreshTokens();
+
+      } catch (err) {
+        hideProcessing();
+        alert('Failed to add token: ' + err.message);
+      }
+    }
+  </script>
+  
 </body>
+
 </html>
