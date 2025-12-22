@@ -298,10 +298,27 @@
     let userTokens = [];
     
     window.addEventListener('load', async () => {
-      if (typeof window.paxihub === 'undefined') {
-        alert('Please open this page in PaxiHub app');
-        return;
-      }
+      // 1. Beri jeda sedikit (300-500ms) untuk memastikan provider terinjeksi
+      setTimeout(async () => {
+        if (typeof window.paxihub !== 'undefined') {
+          const hub = window.paxihub;
+          console.log("PaxiHub Connected!");
+          // Lanjutkan inisialisasi dApp kamu di sini
+          
+        } else if (/Mobi/.test(navigator.userAgent)) {
+          // 2. Hanya redirect jika TIDAK di dalam PaxiHub
+          // Biasanya PaxiHub browser punya identitas khusus di UserAgent
+          if (!navigator.userAgent.includes("PaxiHub")) {
+            window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
+            
+            setTimeout(() => {
+              window.location.href = 'https://paxinet.io/paxi_docs/paxihub#paxihub-application';
+            }, 1500);
+          }
+        }
+      }, 500);
+      
+      // 3. Fetch Chain ID tetap di luar biar cepat
       try {
         const statusRes = await fetch(`${RPC}/status`);
         const statusData = await statusRes.json();
