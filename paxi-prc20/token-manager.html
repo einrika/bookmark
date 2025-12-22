@@ -29,7 +29,7 @@
     <header class="glass rounded-2xl p-8 mb-8">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-4xl font-bold mb-2">Token Manager Dashboard</h1>
+          <h1 class="text-4xl font-bold mb-2">Token Manager v1.0.0</h1>
           <p class="text-gray-400">Manage your PRC-20 tokens on Paxi Network</p>
         </div>
         <button onclick="connectWallet()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
@@ -536,8 +536,10 @@
     }
     
     async function executeBurn() {
+      // Gunakan pengecekan yang lebih ketat
       if (!currentToken || !currentToken.contractAddress) {
-        alert('Token information not available. Please refresh and try again.');
+        console.error("Current Token Data:", currentToken);
+        alert('Data token hilang. Silakan tutup modal dan klik Manage lagi.');
         return;
       }
       
@@ -721,6 +723,10 @@
     // ========== PAY PLATFORM FEE ==========
     
     async function payPlatformFee(action) {
+      // 1. Beri jeda sedikit lebih lama agar blockchain memproses transaksi sebelumnya
+      showProcessing('Waiting for previous transaction to clear...');
+      await new Promise(r => setTimeout(r, 4500));
+      
       showProcessing('Sending platform fee (1 PAXI)...');
       
       const msg = PaxiCosmJS.MsgSend.fromPartial({
@@ -734,14 +740,17 @@
         value: PaxiCosmJS.MsgSend.encode(msg).finish()
       });
       
-      showProcessing('Please approve platform fee payment...');
-      const feeTxHash = await buildAndSendTx([anyMsg], `Platform Fee: ${action}`);
-      
-      showProcessing('Verifying platform fee payment...');
-      await new Promise(r => setTimeout(r, 3000));
-      
-      // Verify with backend
       try {
+        // 2. buildAndSendTx di dalam sudah memanggil buildCommon, 
+        // jadi pastikan buildCommon dipanggil di sana untuk mendapat sequence terbaru.
+        showProcessing('Please approve platform fee payment in PaxiHub...');
+        const feeTxHash = await buildAndSendTx([anyMsg], `Platform Fee: ${action}`);
+        
+        showProcessing('Verifying platform fee payment...');
+        // Jeda sebelum verifikasi backend agar indexer blockchain sinkron
+        await new Promise(r => setTimeout(r, 3000));
+        
+        // 3. Verifikasi dengan backend
         const response = await fetch(`${BACKEND_URL}/api/verify-fee`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -754,15 +763,16 @@
         
         const result = await response.json();
         if (!result.success) {
-          throw new Error('Platform fee verification failed');
+          console.warn('Backend verification failed, but user has paid.');
         }
+        
+        return feeTxHash;
       } catch (err) {
-        console.error('Fee verification error:', err);
-        // Continue anyway - user already paid
+        console.error('Error in payPlatformFee:', err);
+        throw err; // Lempar error agar ditangkap di fungsi execute utama
       }
-      
-      return feeTxHash;
     }
+    
     
     // ========== TRANSACTION UTILITIES ==========
     
