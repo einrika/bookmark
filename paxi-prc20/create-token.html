@@ -77,7 +77,7 @@
       </div>
     </div>
     
-    <div class="glass rounded-3xl p-6 mb-6 shadow-2xl border border-white/10" id="tokenForm" style="display: none; background: rgba(20, 20, 20, 0.8);">
+    <div class="glass rounded-3xl p-6 mb-6 shadow-2xl border border-white/10" id="tokenForm" style="display: ; background: rgba(20, 20, 20, 0.8);">
       <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
         <i class="fas fa-cog text-purple-400"></i> Token Configuration
       </h3>
@@ -99,7 +99,7 @@
           <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Token Name</label>
           <input type="text" id="tokenName" placeholder="e.g. Paxi Gold" class="input-field text-white placeholder-gray-500">
           <p class="text-[11px] text-gray-300 mt-1.5 ml-1 leading-relaxed">
-            <span class="text-purple-400">•</span> Minimal <span class="text-white font-semibold">3 - 32</span> karakter (Huruf & Angka).
+            <span class="text-purple-400">•</span> Minimal <span class="text-white font-semibold">3 - 20</span> karakter (Huruf & Angka).
           </p>
         </div>
         
@@ -141,6 +141,9 @@
           <input type="text" id="logoUrl" placeholder="https://..." class="input-field text-white placeholder-gray-500">
           <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
             <span class="text-purple-400">•</span> Harus format <span class="text-white font-semibold">HTTPS</span> atau <span class="text-white font-semibold">IPFS</span>.
+          <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
+            <span class="text-purple-400">•</span> DAN Maksimal <span class="text-white font-semibold">200</span> karakter.
+          </p>
           </p>
         </div>
       </div>
@@ -316,7 +319,7 @@
       }
 
       // C. Validasi Nama (3-32 Karakter)
-      if (name.length < 3 || name.length > 32) {
+      if (name.length < 3 || name.length > 20) {
         return showError('NAMA TIDAK VALID: Minimal 3 karakter, maksimal 32.');
       }
 
@@ -332,7 +335,7 @@
       }
 
       // F. Validasi Logo URL (Opsional, tapi jika diisi wajib HTTPS)
-      if (logo && !logo.startsWith('https://')) {
+      if (logo && !logo.startsWith('https://') && logo.length > 200) {
         return showError('LOGO URL TIDAK VALID: Wajib menggunakan protokol HTTPS (aman).');
       }
 
