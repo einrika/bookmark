@@ -77,48 +77,85 @@
       </div>
     </div>
     
-    <div class="glass rounded-3xl p-6 mb-6 shadow-2xl" id="tokenForm" style="display: none;">
-      <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+    <div class="glass rounded-3xl p-6 mb-6 shadow-2xl border border-white/10" id="tokenForm" style="display: none; background: rgba(20, 20, 20, 0.8);">
+      <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
         <i class="fas fa-cog text-purple-400"></i> Token Configuration
       </h3>
+
+      <div class="bg-red-500/20 border border-red-400/40 rounded-2xl p-4 mb-6 shadow-inner">
+        <div class="flex gap-3">
+          <i class="fas fa-exclamation-triangle text-red-400 mt-1"></i>
+          <div>
+            <h4 class="text-xs font-bold text-red-300 uppercase tracking-wider">Peringatan Penting!</h4>
+            <p class="text-[12px] text-gray-200 leading-relaxed mt-1 font-medium">
+              Pastikan semua data sesuai dengan <span class="text-white underline">syarat format</span> di bawah. Jika data tidak valid, pembuatan token bisa <span class="text-red-300 font-bold underline">GAGAL</span> dan sistem tidak dapat mengembalikan (refund) biaya/fee yang sudah dikirim.
+            </p>
+          </div>
+        </div>
+      </div>
       
-      <div class="space-y-5">
+      <div class="space-y-6">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Token Name</label>
-          <input type="text" id="tokenName" placeholder="e.g. Paxi Gold" class="input-field">
+          <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Token Name</label>
+          <input type="text" id="tokenName" placeholder="e.g. Paxi Gold" class="input-field text-white placeholder-gray-500">
+          <p class="text-[11px] text-gray-300 mt-1.5 ml-1 leading-relaxed">
+            <span class="text-purple-400">•</span> Minimal <span class="text-white font-semibold">3 - 32</span> karakter (Huruf & Angka).
+          </p>
         </div>
         
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Token Symbol</label>
-          <input type="text" id="tokenSymbol" placeholder="e.g. PGOLD" maxlength="10" class="input-field uppercase">
+          <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Token Symbol</label>
+          <input type="text" id="tokenSymbol" placeholder="e.g. PGOLD" maxlength="10" class="input-field uppercase text-white placeholder-gray-500">
+          <p class="text-[11px] text-gray-300 mt-1.5 ml-1 leading-relaxed">
+            <span class="text-purple-400">•</span> Minimal <span class="text-white font-semibold">3 - 6</span> karakter. (Contoh: BTC, PAXI).
+          </p>
         </div>
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Total Supply</label>
-            <input type="number" id="totalSupply" placeholder="1000000" class="input-field">
+            <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Total Supply</label>
+            <input type="number" id="totalSupply" placeholder="1000000" class="input-field text-white placeholder-gray-500">
+            <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
+              <span class="text-purple-400">•</span> Angka bulat positif.
+            </p>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Decimals</label>
-            <input type="number" id="decimals" value="6" readonly class="input-field opacity-60">
+            <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Decimals</label>
+            <input type="number" id="decimals" value="6" readonly class="input-field opacity-70 bg-gray-800 text-gray-300">
+            <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
+              <span class="text-purple-400">•</span> Standar: 6.
+            </p>
           </div>
         </div>
         
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Description</label>
-          <textarea id="description" placeholder="What is this token for?" rows="3" class="input-field"></textarea>
+          <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Description</label>
+          <textarea id="description" placeholder="What is this token for?" rows="3" class="input-field text-white placeholder-gray-500"></textarea>
+          <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
+            <span class="text-purple-400">•</span> Maksimal <span class="text-white font-semibold">250</span> karakter.
+          </p>
         </div>
         
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Logo URL (optional)</label>
-          <input type="text" id="logoUrl" placeholder="https://..." class="input-field">
+          <label class="block text-xs font-bold text-purple-300 uppercase tracking-widest mb-2 ml-1">Logo URL (optional)</label>
+          <input type="text" id="logoUrl" placeholder="https://..." class="input-field text-white placeholder-gray-500">
+          <p class="text-[11px] text-gray-300 mt-1.5 ml-1">
+            <span class="text-purple-400">•</span> Harus format <span class="text-white font-semibold">HTTPS</span> atau <span class="text-white font-semibold">IPFS</span>.
+          </p>
         </div>
       </div>
       
-      <button onclick="createToken()" id="createBtn" class="btn-primary w-full mt-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-purple-500/20">
+      <button onclick="createToken()" id="createBtn" class="btn-primary w-full mt-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-purple-500/40 text-white">
         Deploy Token
       </button>
+
+      <div class="mt-4 p-3 bg-white/5 rounded-xl">
+        <p class="text-center text-[11px] text-gray-300 italic leading-snug">
+          Dengan menekan tombol, Anda menyatakan bahwa semua data sudah benar dan siap menanggung risiko jika terjadi kesalahan input.
+        </p>
+      </div>
     </div>
+
     
     <div id="statusSection" class="hidden glass rounded-3xl p-8 text-center animate-pulse">
       <div class="w-20 h-20 mx-auto relative mb-6">
@@ -257,22 +294,63 @@
       } catch (err) { showError(err.message); }
     }
     
-    async function createToken() {
+        async function createToken() {
+      // 1. Ambil Data & Trim (Bersihkan spasi)
       const name = document.getElementById('tokenName').value.trim();
-      const symbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
-      const supply = document.getElementById('totalSupply').value;
+      const symbol = document.getElementById('tokenSymbol').value.trim();
+      const supply = document.getElementById('totalSupply').value.trim();
+      const desc = document.getElementById('description').value.trim();
+      const logo = document.getElementById('logoUrl').value.trim();
+
+      // --- VALIDASI KETAT DIMULAI ---
       
-      if (!name || !symbol || !supply) return showError('Fill all fields!');
-      
+      // A. Validasi Kekosongan
+      if (!name || !symbol || !supply) {
+        return showError('Nama, Simbol, dan Supply wajib diisi!');
+      }
+
+      // B. Validasi Simbol (3-12 Karakter, Harus Huruf Besar, Tanpa Spasi/Simbol)
+      const symbolRegex = /^[A-Z0-9]{3,12}$/;
+      if (!symbolRegex.test(symbol)) {
+        return showError('SIMBOL TIDAK VALID: Harus 3-12 karakter, HURUF BESAR SEMUA, dan tanpa spasi/karakter spesial.');
+      }
+
+      // C. Validasi Nama (3-32 Karakter)
+      if (name.length < 3 || name.length > 32) {
+        return showError('NAMA TIDAK VALID: Minimal 3 karakter, maksimal 32.');
+      }
+
+      // D. Validasi Total Supply (Harus Angka Bulat Positif > 0)
+      const supplyNum = Number(supply);
+      if (isNaN(supplyNum) || supplyNum <= 0 || !Number.isInteger(supplyNum)) {
+        return showError('SUPPLY TIDAK VALID: Harus berupa angka bulat positif.');
+      }
+
+      // E. Validasi Deskripsi (Opsional, tapi jika diisi max 250)
+      if (desc && desc.length > 250) {
+        return showError('DESKRIPSI TERLALU PANJANG: Maksimal 250 karakter.');
+      }
+
+      // F. Validasi Logo URL (Opsional, tapi jika diisi wajib HTTPS)
+      if (logo && !logo.startsWith('https://')) {
+        return showError('LOGO URL TIDAK VALID: Wajib menggunakan protokol HTTPS (aman).');
+      }
+
+      // --- VALIDASI SELESAI ---
+
       try {
+        // Hanya jika lolos semua validasi di atas, UI akan berubah dan fee ditarik
         document.getElementById('tokenForm').style.display = 'none';
         document.getElementById('statusSection').classList.remove('hidden');
         document.getElementById('errorSection').classList.add('hidden');
         
+        addDebug('Validation success ✓');
         addDebug('Building fee transaction...');
+        
         const accRes = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${userAddress}`).then(r=>r.json());
         const ba = accRes.account.base_account || accRes.account;
         
+        // Fee payment (16 PAXI)
         const msg = PaxiCosmJS.MsgSend.fromPartial({
           fromAddress: userAddress,
           toAddress: SERVICE_ADDRESS,
@@ -284,7 +362,11 @@
           value: PaxiCosmJS.MsgSend.encode(msg).finish()
         });
 
-        const txBody = PaxiCosmJS.TxBody.fromPartial({ messages: [anyMsg], memo: "PRC-20 Deployment Fee" });
+        const txBody = PaxiCosmJS.TxBody.fromPartial({ 
+          messages: [anyMsg], 
+          memo: `Deploying ${symbol}` 
+        });
+
         const addressInfo = await window.paxihub.paxi.getAddress();
         
         const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
@@ -309,10 +391,11 @@
           chainId, accountNumber: signDoc.accountNumber.toString()
         });
 
-        if (!result.success) throw new Error('Signing failed');
+        if (!result.success) throw new Error('Transaction rejected by user');
         
         const txRaw = PaxiCosmJS.TxRaw.fromPartial({
-          bodyBytes: signDoc.bodyBytes, authInfoBytes: signDoc.authInfoBytes,
+          bodyBytes: signDoc.bodyBytes, 
+          authInfoBytes: signDoc.authInfoBytes,
           signatures: [Uint8Array.from(atob(result.success), c => c.charCodeAt(0))]
         });
 
@@ -322,28 +405,31 @@
           body: JSON.stringify({ tx_bytes: btoa(String.fromCharCode(...PaxiCosmJS.TxRaw.encode(txRaw).finish())), mode: "BROADCAST_MODE_SYNC" })
         }).then(r => r.json());
 
-        if (broadcast.tx_response?.code !== 0) throw new Error(broadcast.tx_response?.raw_log || 'Tx Failed');
+        if (broadcast.tx_response?.code !== 0) throw new Error(broadcast.tx_response?.raw_log || 'Network Broadcast Error');
 
         const txHash = broadcast.tx_response.txhash;
-        addDebug('Payment Success: ' + txHash);
-        updateStepUI(1, 'Payment Verified');
+        addDebug('Payment Verified: ' + txHash.substring(0, 10) + '...');
+        updateStepUI(1, 'Payment Secured');
 
-        // Backend call
-        addDebug('Requesting contract deployment...');
+        // Backend call dengan data yang sudah bersih (Trimmed)
+        addDebug('Deploying to blockchain...');
         const apiRes = await fetch(`${BACKEND_URL}/api/create-token`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userAddress, txHash, tokenName: name, tokenSymbol: symbol,
-            totalSupply: parseInt(supply), decimals: 6,
-            description: document.getElementById('description').value,
-            logoUrl: document.getElementById('logoUrl').value
+            userAddress, txHash, 
+            tokenName: name, 
+            tokenSymbol: symbol,
+            totalSupply: supplyNum, 
+            decimals: 6,
+            description: desc,
+            logoUrl: logo
           })
         });
 
         const data = await apiRes.json();
-        if (!data.success) throw new Error(data.error);
+        if (!data.success) throw new Error(data.error || 'Server error during deployment');
 
-        updateStepUI(2, 'Contract Deployed');
+        updateStepUI(2, 'Token Live!');
         showSuccess(data);
         
       } catch (err) {
@@ -352,7 +438,7 @@
         document.getElementById('statusSection').classList.add('hidden');
       }
     }
-    
+
     function updateStepUI(id, text) {
       const el = document.getElementById(`step${id}`);
       el.innerHTML = `<i class="fas fa-check-circle text-green-500"></i><span class="text-green-500">${text}</span>`;
