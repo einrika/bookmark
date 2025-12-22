@@ -3,190 +3,192 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRC-20 Token Creator - Automated Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PRC-20 Token Creator - Automated</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Paxi CosmJS Library -->
   <script src="https://mainnet-api.paxinet.io/resources/js/paxi-cosmjs.umd.js"></script>
   
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap');
+    
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
     .glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    .input-field {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: #8b5cf6;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .break-address { word-break: break-all; }
   </style>
 </head>
 
-<body class="bg-black text-white min-h-screen">
+<body class="bg-[#050505] text-white min-h-screen pb-10">
   
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
+  <div class="container mx-auto px-4 py-6 max-w-xl">
     
-    <header class="glass rounded-2xl p-8 mb-8 text-center">
-      <h1 class="text-4xl md:text-5xl font-bold mb-3">PRC-20 Token Creator v2.0</h1>
-      <p class="text-gray-400">Automated token deployment service on Paxi Network</p>
-      <div class="mt-4 inline-block glass px-6 py-2 rounded-full">
-        <span class="text-yellow-400 font-bold">Service Fee: 10 PAXI</span>
-        <span class="text-gray-400 mx-2">+</span>
-        <span class="text-gray-400">6 PAXI Gas = 16 PAXI Total</span>
+    <header class="text-center mb-8 pt-4">
+      <div class="inline-block p-3 rounded-2xl bg-gradient-to-tr from-purple-600/20 to-blue-600/20 mb-4 border border-white/5">
+        <i class="fas fa-rocket text-3xl text-purple-400"></i>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">PRC-20 Creator</h1>
+      <p class="text-gray-500 text-sm mt-1">Deploy tokens instantly on Paxi Network</p>
+      
+      <div class="mt-5 glass px-4 py-3 rounded-2xl inline-flex items-center gap-2 border-yellow-500/20">
+        <span class="text-yellow-500 font-bold text-sm">16 PAXI</span>
+        <span class="text-gray-600 text-xs uppercase tracking-tighter">Total Fee (Service + Gas)</span>
       </div>
     </header>
     
-    <!-- Debug Info Section -->
-    <div class="glass rounded-xl p-4 mb-6 text-xs">
-      <p class="text-gray-400 mb-2">🔍 Debug Info:</p>
-      <div id="debugInfo" class="text-green-400 font-mono space-y-1"></div>
-    </div>
-    
-    <div class="glass rounded-xl p-6 mb-6" id="walletSection">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-xl font-semibold mb-2">Connect Your Wallet</h3>
-          <p class="text-gray-400 text-sm">Open this page in PaxiHub app to connect</p>
+    <div class="glass rounded-2xl p-5 mb-6 border-l-4 border-l-purple-500" id="walletSection">
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold">PaxiHub Wallet</h3>
+          <span id="paxiStatus" class="text-[10px] bg-red-500/10 text-red-400 px-2 py-1 rounded-full border border-red-500/20 uppercase tracking-widest font-bold">Disconnected</span>
         </div>
-        <button onclick="connectWallet()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
-          <i class="fas fa-wallet mr-2"></i>Connect PaxiHub
+        
+        <button onclick="connectWallet()" id="connectBtn" class="w-full glass py-4 rounded-xl font-bold hover:bg-white/5 transition flex items-center justify-center gap-2">
+          <i class="fas fa-wallet"></i> Connect PaxiHub
         </button>
-      </div>
-      <div id="walletInfo" class="hidden mt-4 pt-4 border-t border-white/10">
-        <p class="text-sm text-gray-400">Connected Address:</p>
-        <p class="font-mono text-sm mt-1" id="walletAddress"></p>
-        <p class="text-xs text-green-400 mt-2">✓ PaxiHub Connected</p>
+
+        <div id="walletInfo" class="hidden animate-fade-in">
+          <div class="bg-black/30 p-3 rounded-xl border border-white/5 break-address font-mono text-[11px] text-purple-200" id="walletAddress"></div>
+        </div>
       </div>
     </div>
     
-    <div class="glass rounded-xl p-8 mb-6" id="tokenForm" style="display: none;">
-      <h3 class="text-2xl font-semibold mb-6">Token Configuration</h3>
+    <div class="glass rounded-3xl p-6 mb-6 shadow-2xl" id="tokenForm" style="display: none;">
+      <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+        <i class="fas fa-cog text-purple-400"></i> Token Configuration
+      </h3>
       
-      <div class="space-y-4">
+      <div class="space-y-5">
         <div>
-          <label class="block text-sm font-medium mb-2">Token Name</label>
-          <input type="text" id="tokenName" placeholder="My Amazing Token" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Token Name</label>
+          <input type="text" id="tokenName" placeholder="e.g. Paxi Gold" class="input-field">
         </div>
         
         <div>
-          <label class="block text-sm font-medium mb-2">Token Symbol</label>
-          <input type="text" id="tokenSymbol" placeholder="MAT" maxlength="10" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none uppercase">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Token Symbol</label>
+          <input type="text" id="tokenSymbol" placeholder="e.g. PGOLD" maxlength="10" class="input-field uppercase">
         </div>
         
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-2">Total Supply</label>
-            <input type="number" id="totalSupply" placeholder="1000000" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Total Supply</label>
+            <input type="number" id="totalSupply" placeholder="1000000" class="input-field">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">Decimals</label>
-            <input type="number" id="decimals" value="6" min="0" max="18" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Decimals</label>
+            <input type="number" id="decimals" value="6" readonly class="input-field opacity-60">
           </div>
         </div>
         
         <div>
-          <label class="block text-sm font-medium mb-2">Description</label>
-          <textarea id="description" placeholder="Describe your token..." rows="3" class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none"></textarea>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Description</label>
+          <textarea id="description" placeholder="What is this token for?" rows="3" class="input-field"></textarea>
         </div>
         
         <div>
-          <label class="block text-sm font-medium mb-2">Logo URL (optional)</label>
-          <input type="text" id="logoUrl" placeholder="https://... or ipfs://..." class="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 focus:border-white/40 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Logo URL (optional)</label>
+          <input type="text" id="logoUrl" placeholder="https://..." class="input-field">
         </div>
       </div>
       
-      <button onclick="createToken()" id="createBtn" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-8 py-4 rounded-lg font-semibold text-lg transition disabled:opacity-50">
-        <i class="fas fa-rocket mr-2"></i>Create Token (16 PAXI)
+      <button onclick="createToken()" id="createBtn" class="btn-primary w-full mt-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-purple-500/20">
+        Deploy Token
       </button>
     </div>
     
-    <div id="statusSection" class="hidden">
-      <div class="glass rounded-xl p-8">
-        <div class="text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full glass mb-4">
-            <i class="fas fa-spinner fa-spin text-3xl text-purple-400"></i>
-          </div>
-          <h3 class="text-2xl font-semibold mb-2">Processing Your Request</h3>
-          <p class="text-gray-400 mb-6">Please approve the transaction in PaxiHub</p>
-          
-          <div class="space-y-4 text-left max-w-md mx-auto">
-            <div class="flex items-center gap-3" id="step1">
-              <i class="fas fa-circle-notch fa-spin text-purple-400"></i>
-              <span>Payment & Verification</span>
-            </div>
-            <div class="flex items-center gap-3" id="step2">
-              <i class="fas fa-circle text-gray-600"></i>
-              <span class="text-gray-500">Deploying Smart Contract</span>
-            </div>
-            <div class="flex items-center gap-3" id="step3">
-              <i class="fas fa-circle text-gray-600"></i>
-              <span class="text-gray-500">Generating Response</span>
-            </div>
-          </div>
+    <div id="statusSection" class="hidden glass rounded-3xl p-8 text-center animate-pulse">
+      <div class="w-20 h-20 mx-auto relative mb-6">
+        <div class="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin"></div>
+        <i class="fas fa-microchip absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-purple-400"></i>
+      </div>
+      <h3 class="text-xl font-bold mb-6">Processing...</h3>
+      
+      <div class="space-y-4 max-w-xs mx-auto text-left">
+        <div class="flex items-center gap-3 text-sm" id="step1">
+          <i class="fas fa-circle-notch fa-spin text-purple-500"></i>
+          <span class="text-gray-400">Fee Payment</span>
+        </div>
+        <div class="flex items-center gap-3 text-sm" id="step2">
+          <i class="fas fa-circle text-gray-800"></i>
+          <span class="text-gray-600">Contract Deployment</span>
         </div>
       </div>
     </div>
     
-    <div id="successSection" class="hidden">
-      <div class="glass rounded-xl p-8 border-2 border-green-500/30">
-        <div class="text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
-            <i class="fas fa-check text-3xl text-green-400"></i>
-          </div>
-          <h3 class="text-2xl font-semibold mb-2">Token Created Successfully!</h3>
-          <p class="text-gray-400 mb-6">Your token has been deployed to Paxi Network</p>
-          
-          <div class="space-y-3 text-left max-w-md mx-auto">
-            <div class="glass rounded-lg p-4">
-              <p class="text-sm text-gray-400 mb-1">Token Name:</p>
-              <p class="font-semibold text-green-400" id="successName"></p>
-            </div>
-            <div class="glass rounded-lg p-4">
-              <p class="text-sm text-gray-400 mb-1">Contract Address:</p>
-              <div class="flex items-center gap-2">
-                <code class="flex-1 text-sm font-mono break-all" id="successContract"></code>
-                <button onclick="copyToClipboard('successContract')" class="glass px-2 py-1 rounded hover:bg-white/10 text-sm">
-                  <i class="fas fa-copy"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <a id="explorerLink" href="#" target="_blank" class="inline-block mt-6 bg-white/10 px-6 py-3 rounded-lg hover:bg-white/20 transition">
-            <i class="fas fa-external-link-alt mr-2"></i>View Transaction
-          </a>
-          
-          <button onclick="location.reload()" class="block w-full mt-4 text-gray-400 hover:text-white transition">
-            Create Another Token
-          </button>
+    <div id="successSection" class="hidden glass rounded-3xl p-8 text-center border-green-500/20">
+      <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-check text-2xl text-green-500"></i>
+      </div>
+      <h3 class="text-xl font-bold mb-2">Success!</h3>
+      <p class="text-sm text-gray-500 mb-6" id="successName"></p>
+      
+      <div class="bg-black/40 p-4 rounded-2xl border border-white/5 mb-6">
+        <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Contract Address</p>
+        <div class="flex items-center gap-2">
+          <code class="flex-1 text-[11px] font-mono break-all text-purple-300" id="successContract"></code>
+          <button onclick="copyToClipboard('successContract')" class="text-gray-400 p-2"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-3">
+        <a id="explorerLink" href="#" target="_blank" class="glass py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+          <i class="fas fa-external-link-alt text-xs"></i> View Transaction
+        </a>
+        <button onclick="location.reload()" class="text-xs text-gray-500 hover:text-white transition">Create Another</button>
+      </div>
+    </div>
+
+    <div id="errorSection" class="hidden mt-4 glass border-red-500/30 rounded-2xl p-4 bg-red-500/5">
+      <div class="flex gap-3">
+        <i class="fas fa-circle-exclamation text-red-500 text-lg"></i>
+        <div class="min-w-0">
+          <h4 class="text-sm font-bold text-red-400">Transaction Failed</h4>
+          <p id="errorMessage" class="text-xs text-gray-400 mt-1 break-address"></p>
+          <button onclick="location.reload()" class="mt-3 text-[10px] font-bold uppercase tracking-widest text-white/50 hover:text-white">Dismiss</button>
         </div>
       </div>
     </div>
-    
-    <div id="errorSection" class="hidden">
-      <div class="glass border-red-500/50 rounded-xl p-4 bg-red-500/10">
-        <div class="flex items-start gap-3">
-          <i class="fas fa-exclamation-triangle text-red-500 mt-1"></i>
-          <div class="flex-1">
-            <h4 class="text-red-500 font-bold">Error Occurred</h4>
-            <p id="errorMessage" class="text-sm text-gray-300 mt-1"></p>
-            <details class="mt-2">
-              <summary class="text-xs text-gray-500 cursor-pointer hover:text-gray-400">Technical Details</summary>
-              <pre id="errorDebug" class="text-[10px] text-red-400/80 mt-2 bg-black/40 p-2 rounded overflow-x-auto"></pre>
-            </details>
-            <button onclick="location.reload()" class="mt-3 text-xs bg-white/10 px-3 py-1 rounded hover:bg-white/20">Try Again</button>
-          </div>
-        </div>
+
+    <details class="mt-10 group">
+      <summary class="list-none text-center">
+        <span class="text-[10px] text-gray-600 uppercase font-bold tracking-widest cursor-pointer group-open:text-green-500 transition">View System Logs</span>
+      </summary>
+      <div class="mt-4 glass rounded-xl p-4 font-mono text-[9px] text-green-500/70 max-h-40 overflow-y-auto no-scrollbar" id="debugInfo">
       </div>
-    </div>
+    </details>
     
-    <footer class="text-center mt-12 text-gray-500 text-sm">
+    <footer class="text-center mt-10 text-[10px] text-gray-600 uppercase tracking-widest">
       <p>© 2025 PaxiHub Automated Token Service</p>
-      <p class="text-xs mt-2">Built with Paxi CosmJS SDK</p>
     </footer>
     
   </div>
   
   <script>
-    // === KONFIGURASI RESMI PAXI ===
     const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
     const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t';
     const RPC = 'https://mainnet-rpc.paxinet.io';
@@ -196,261 +198,81 @@
     let userAddress = '';
     let chainId = '';
     
-    // === HELPER FUNCTIONS ===
     function addDebug(msg) {
       const debugDiv = document.getElementById('debugInfo');
       const line = document.createElement('div');
-      line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      line.textContent = `> ${msg}`;
       debugDiv.appendChild(line);
-      console.log(msg);
+      debugDiv.scrollTop = debugDiv.scrollHeight;
     }
     
-    function showError(msg, err) {
+    function showError(msg) {
       document.getElementById('errorSection').classList.remove('hidden');
       document.getElementById('errorMessage').textContent = msg;
-      if (err) {
-        document.getElementById('errorDebug').textContent = JSON.stringify({
-          message: err.message,
-          stack: err.stack,
-          name: err.name
-        }, null, 2);
-      }
+      addDebug("ERROR: " + msg);
     }
     
-    const toBase64 = bytes => btoa(String.fromCharCode(...bytes));
-    
-    async function buildCommon(address) {
-      const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
-      const { account } = await res.json();
-      const ba = account.base_account || account;
-      return {
-        accountNumber: Number(ba.account_number),
-        sequence: Number(ba.sequence)
-      };
-    }
-    
-    // === CHECK PAXIHUB ON LOAD ===
     window.addEventListener('load', async () => {
-      addDebug('Page loaded, waiting for provider...');
-      
-      // 1. Fungsi untuk mengecek keberadaan PaxiHub dengan polling
-      const checkPaxiHub = () => {
-        return new Promise((resolve) => {
-          let attempts = 0;
-          const maxAttempts = 5; // Cek selama ~2.5 detik
-          
-          const interval = setInterval(() => {
-            attempts++;
-            if (typeof window.paxihub !== 'undefined') {
-              clearInterval(interval);
-              resolve(true);
-            } else if (attempts >= maxAttempts) {
-              clearInterval(interval);
-              resolve(false);
-            }
-          }, 500);
-        });
-      };
-      
-      const isPaxiReady = await checkPaxiHub();
-      addDebug('window.paxihub: ' + (isPaxiReady ? 'Found ✓' : 'Not found ✗'));
-      
-      if (!isPaxiReady) {
-        if (/Mobi/.test(navigator.userAgent)) {
-          addDebug('Mobile detected, preparing deep-link...');
-          // Jangan langsung showError, arahkan ke aplikasi agar UX lebih lancar
-          window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
-          
-          // Berikan instruksi jika redirect gagal (misal app belum terinstall)
-          setTimeout(() => {
-            showError('PaxiHub not detected. If the app didn\'t open, please install it or open this link inside PaxiHub Browser.');
-          }, 2000);
-        } else {
-          showError('PaxiHub not detected. Please install PaxiHub app or open in PaxiHub browser.');
+      addDebug('Initializing system...');
+      let attempts = 0;
+      const checkHub = setInterval(async () => {
+        attempts++;
+        if (typeof window.paxihub !== 'undefined') {
+          clearInterval(checkHub);
+          addDebug('PaxiHub detected ✓');
+          try {
+            const res = await fetch(`${RPC}/status`);
+            const data = await res.json();
+            chainId = data.result.node_info.network;
+            addDebug('Network: ' + chainId);
+          } catch (e) { chainId = 'paxi-mainnet'; }
+        } else if (attempts >= 6) {
+          clearInterval(checkHub);
+          addDebug('PaxiHub not found ✗');
         }
-      } else {
-        addDebug('PaxiHub is ready!');
-        // Opsional: Langsung panggil connectWallet() jika ingin auto-connect
-        // connectWallet();
-      }
-      
-      // 2. Fetch chainId tetap dilakukan di latar belakang
-      try {
-        const statusRes = await fetch(`${RPC}/status`);
-        const statusData = await statusRes.json();
-        chainId = statusData.result.node_info.network;
-        addDebug('ChainID: ' + chainId);
-      } catch (e) {
-        addDebug('Failed to fetch chainId: ' + e.message);
-        // Fallback chainId jika RPC down
-        chainId = 'paxi-mainnet';
-      }
+      }, 500);
     });
     
-    
-    // === CONNECT WALLET ===
     async function connectWallet() {
-      addDebug('Starting wallet connection...');
-      
-      // Check if PaxiHub is injected
       if (typeof window.paxihub === 'undefined') {
         if (/Mobi/.test(navigator.userAgent)) {
-          addDebug('Redirecting to PaxiHub...');
           window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
-          setTimeout(() => {
-            window.location.href = 'https://paxinet.io/paxi_docs/paxihub#paxihub-application';
-          }, 1000);
         } else {
-          showError('PaxiHub not detected. Please install PaxiHub app.');
+          showError('PaxiHub not detected. Use PaxiHub app.');
         }
         return;
       }
       
       try {
-        addDebug('Getting address from PaxiHub...');
-        const addressInfo = await window.paxihub.paxi.getAddress();
-        userAddress = addressInfo.address;
-        
-        addDebug('Connected address: ' + userAddress);
-        
-        // Update UI
+        const info = await window.paxihub.paxi.getAddress();
+        userAddress = info.address;
         document.getElementById('walletAddress').textContent = userAddress;
         document.getElementById('walletInfo').classList.remove('hidden');
-        document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check mr-2"></i>Connected';
-        document.getElementById('connectBtn').disabled = true;
-        document.getElementById('connectBtn').classList.add('bg-green-600');
+        document.getElementById('paxiStatus').textContent = "Connected";
+        document.getElementById('paxiStatus').classList.replace('text-red-400', 'text-green-400');
+        document.getElementById('paxiStatus').classList.replace('border-red-500/20', 'border-green-500/20');
+        document.getElementById('connectBtn').classList.add('hidden');
         document.getElementById('tokenForm').style.display = 'block';
-        
-        addDebug('Wallet connected successfully!');
-        
-      } catch (err) {
-        const msg = "Failed to connect: " + err.message;
-        addDebug('ERROR: ' + msg);
-        showError(msg, err);
-      }
+        addDebug('Wallet connected: ' + userAddress);
+      } catch (err) { showError(err.message); }
     }
     
-    // === BUILD AND SEND TRANSACTION ===
-    async function buildAndSendTx(messages, memo = "") {
-      addDebug('Building transaction...');
-      
-      // Get account info
-      const { accountNumber, sequence } = await buildCommon(userAddress);
-      addDebug(`Account: ${accountNumber}, Sequence: ${sequence}`);
-      
-      // TxBody
-      const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
-      
-      // Fee
-      const fee = {
-        amount: [PaxiCosmJS.coins("30000", DENOM)[0]],
-        gasLimit: 600_000
-      };
-      
-      // Get public key
-      const addressInfo = await window.paxihub.paxi.getAddress();
-      const pubkeyBytes = new Uint8Array(addressInfo.public_key);
-      const pubkeyAny = {
-        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
-        value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish()
-      };
-      
-      // AuthInfo
-      const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
-        signerInfos: [{
-          publicKey: pubkeyAny,
-          modeInfo: { single: { mode: 1 } },
-          sequence: BigInt(sequence)
-        }],
-        fee
-      });
-      
-      // SignDoc
-      const signDoc = PaxiCosmJS.SignDoc.fromPartial({
-        bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
-        authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
-        chainId,
-        accountNumber: BigInt(accountNumber)
-      });
-      
-      addDebug('Requesting signature from PaxiHub...');
-      
-      // Sign with PaxiHub
-      const txObj = {
-        bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
-        authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
-        chainId,
-        accountNumber: signDoc.accountNumber.toString()
-      };
-      
-      const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
-      
-      if (!result.success) {
-        throw new Error('Transaction signing failed');
-      }
-      
-      const sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
-      
-      // Assemble TxRaw
-      const txRaw = PaxiCosmJS.TxRaw.fromPartial({
-        bodyBytes: signDoc.bodyBytes,
-        authInfoBytes: signDoc.authInfoBytes,
-        signatures: [sigBytes]
-      });
-      
-      const txBytes = PaxiCosmJS.TxRaw.encode(txRaw).finish();
-      const base64Tx = toBase64(txBytes);
-      
-      addDebug('Broadcasting transaction...');
-      
-      // Broadcast
-      const broadcastResult = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tx_bytes: base64Tx, mode: "BROADCAST_MODE_SYNC" })
-      }).then(r => r.json());
-      
-      addDebug('Broadcast result: ' + JSON.stringify(broadcastResult));
-      
-      if (broadcastResult.tx_response && broadcastResult.tx_response.code === 0) {
-        return broadcastResult.tx_response.txhash;
-      } else {
-        throw new Error(broadcastResult.tx_response?.raw_log || 'Transaction failed');
-      }
-    }
-    
-    // === CREATE TOKEN ===
     async function createToken() {
-      addDebug('Starting token creation...');
-      
-      // Validate inputs
       const name = document.getElementById('tokenName').value.trim();
       const symbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
       const supply = document.getElementById('totalSupply').value;
       
-      if (!name || !symbol || !supply) {
-        showError('Please fill all required fields!');
-        return;
-      }
-      
-      if (typeof window.paxihub === 'undefined') {
-        showError('PaxiHub not detected. Please open in PaxiHub app.');
-        return;
-      }
-      
-      if (!window.PaxiCosmJS) {
-        showError('Paxi CosmJS library not loaded. Please refresh the page.');
-        return;
-      }
+      if (!name || !symbol || !supply) return showError('Fill all fields!');
       
       try {
-        // Show loading
         document.getElementById('tokenForm').style.display = 'none';
         document.getElementById('statusSection').classList.remove('hidden');
+        document.getElementById('errorSection').classList.add('hidden');
         
-        updateStepUI(1, 'Preparing transaction...');
+        addDebug('Building fee transaction...');
+        const accRes = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${userAddress}`).then(r=>r.json());
+        const ba = accRes.account.base_account || accRes.account;
         
-        // Build MsgSend for payment
         const msg = PaxiCosmJS.MsgSend.fromPartial({
           fromAddress: userAddress,
           toAddress: SERVICE_ADDRESS,
@@ -461,68 +283,81 @@
           typeUrl: "/cosmos.bank.v1beta1.MsgSend",
           value: PaxiCosmJS.MsgSend.encode(msg).finish()
         });
+
+        const txBody = PaxiCosmJS.TxBody.fromPartial({ messages: [anyMsg], memo: "PRC-20 Deployment Fee" });
+        const addressInfo = await window.paxihub.paxi.getAddress();
         
-        updateStepUI(1, 'Please approve in PaxiHub...');
+        const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
+          signerInfos: [{
+            publicKey: { typeUrl: "/cosmos.crypto.secp256k1.PubKey", value: PaxiCosmJS.PubKey.encode({ key: new Uint8Array(addressInfo.public_key) }).finish() },
+            modeInfo: { single: { mode: 1 } },
+            sequence: BigInt(ba.sequence)
+          }],
+          fee: { amount: [PaxiCosmJS.coins("30000", DENOM)[0]], gasLimit: 600_000 }
+        });
+
+        const signDoc = PaxiCosmJS.SignDoc.fromPartial({
+          bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
+          authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
+          chainId, accountNumber: BigInt(ba.account_number)
+        });
+
+        addDebug('Signing transaction...');
+        const result = await window.paxihub.paxi.signAndSendTransaction({
+          bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
+          authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
+          chainId, accountNumber: signDoc.accountNumber.toString()
+        });
+
+        if (!result.success) throw new Error('Signing failed');
         
-        // Send transaction
-        const txHash = await buildAndSendTx([anyMsg], "PRC-20 Token Creation Fee");
-        
-        addDebug('Payment sent! TxHash: ' + txHash);
-        updateStepUI(1, 'Payment successful!');
-        
-        // Call backend
-        updateStepUI(2, 'Deploying token contract...');
-        addDebug('Calling backend API...');
-        
-        const response = await fetch(`${BACKEND_URL}/api/create-token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const txRaw = PaxiCosmJS.TxRaw.fromPartial({
+          bodyBytes: signDoc.bodyBytes, authInfoBytes: signDoc.authInfoBytes,
+          signatures: [Uint8Array.from(atob(result.success), c => c.charCodeAt(0))]
+        });
+
+        addDebug('Broadcasting payment...');
+        const broadcast = await fetch(`${LCD}/cosmos/tx/v1beta1/txs`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tx_bytes: btoa(String.fromCharCode(...PaxiCosmJS.TxRaw.encode(txRaw).finish())), mode: "BROADCAST_MODE_SYNC" })
+        }).then(r => r.json());
+
+        if (broadcast.tx_response?.code !== 0) throw new Error(broadcast.tx_response?.raw_log || 'Tx Failed');
+
+        const txHash = broadcast.tx_response.txhash;
+        addDebug('Payment Success: ' + txHash);
+        updateStepUI(1, 'Payment Verified');
+
+        // Backend call
+        addDebug('Requesting contract deployment...');
+        const apiRes = await fetch(`${BACKEND_URL}/api/create-token`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userAddress: userAddress,
-            txHash: txHash,
-            tokenName: name,
-            tokenSymbol: symbol,
-            totalSupply: parseInt(supply),
-            decimals: 6,
+            userAddress, txHash, tokenName: name, tokenSymbol: symbol,
+            totalSupply: parseInt(supply), decimals: 6,
             description: document.getElementById('description').value,
             logoUrl: document.getElementById('logoUrl').value
           })
         });
-        
-        const data = await response.json();
-        addDebug('Backend response: ' + JSON.stringify(data));
-        
-        if (data.success) {
-          updateStepUI(2, 'Deployment successful!');
-          updateStepUI(3, 'All done!');
-          showSuccess(data);
-          addDebug('Token created successfully!');
-        } else {
-          throw new Error(`Server Error: ${data.error}. (TX Hash: ${txHash})`);
-        }
+
+        const data = await apiRes.json();
+        if (!data.success) throw new Error(data.error);
+
+        updateStepUI(2, 'Contract Deployed');
+        showSuccess(data);
         
       } catch (err) {
-        addDebug('ERROR in createToken: ' + err.message);
-        showError("Transaction failed: " + err.message, err);
-        
+        showError(err.message);
         document.getElementById('tokenForm').style.display = 'block';
         document.getElementById('statusSection').classList.add('hidden');
       }
     }
     
-    // === UI HELPERS ===
-    function updateStepUI(stepId, text) {
-      const el = document.getElementById(`step${stepId}`);
-      if (el) {
-        el.querySelector('i').className = 'fas fa-check-circle text-green-400';
-        el.querySelector('span').textContent = text;
-        el.querySelector('span').className = 'text-green-400';
-      }
-      const next = document.getElementById(`step${stepId + 1}`);
-      if (next) {
-        next.querySelector('i').className = 'fas fa-circle-notch fa-spin text-purple-400';
-        next.querySelector('span').className = 'text-white';
-      }
+    function updateStepUI(id, text) {
+      const el = document.getElementById(`step${id}`);
+      el.innerHTML = `<i class="fas fa-check-circle text-green-500"></i><span class="text-green-500">${text}</span>`;
+      const next = document.getElementById(`step${id+1}`);
+      if(next) next.innerHTML = `<i class="fas fa-circle-notch fa-spin text-purple-500"></i><span class="text-white">Processing...</span>`;
     }
     
     function showSuccess(data) {
@@ -535,10 +370,8 @@
     
     function copyToClipboard(id) {
       const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+      navigator.clipboard.writeText(text).then(() => alert('Copied!'));
     }
   </script>
-  
 </body>
-
 </html>
