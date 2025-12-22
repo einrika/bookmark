@@ -428,13 +428,26 @@
     }
 
     async function loadTokenBalance() {
+      if (!currentToken || !currentToken.contractAddress) {
+        document.getElementById('userBalance').textContent = 'N/A';
+        return;
+      }
+      
       try {
         const query = btoa(JSON.stringify({balance: {address: userAddress}}));
         const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
+        
+        if (!res.ok) {
+          throw new Error('Failed to fetch balance');
+        }
+        
         const data = await res.json();
-        const balance = (parseInt(data.data.balance) / 1000000).toFixed(2);
-        document.getElementById('userBalance').textContent = `${balance} ${currentToken.symbol}`;
+        const decimals = currentToken.decimals || 6;
+        const balance = (parseInt(data.data.balance) / Math.pow(10, decimals)).toFixed(2);
+        const symbol = currentToken.symbol || 'tokens';
+        document.getElementById('userBalance').textContent = `${balance} ${symbol}`;
       } catch (e) {
+        console.error('Load balance error:', e);
         document.getElementById('userBalance').textContent = 'Error loading';
       }
     }
@@ -442,9 +455,17 @@
     // ========== EXECUTE ACTIONS (USER SELF-EXECUTE + PAY FEE AFTER) ==========
 
     async function executeMint() {
-      if (!currentToken) return;
+      if (!currentToken || !currentToken.contractAddress) {
+        alert('Token information not available. Please refresh and try again.');
+        return;
+      }
+      
       const mintAmt = document.getElementById('mintAmount').value;
-      if (!mintAmt) return alert('Please enter amount');
+      if (!mintAmt || mintAmt <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+      
       const recipient = document.getElementById('mintRecipient').value.trim() || userAddress;
 
       closeModal();
@@ -453,6 +474,11 @@
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
+        
+        if (!infoRes.ok) {
+          throw new Error('Failed to fetch token info');
+        }
+        
         const infoData = await infoRes.json();
         const decimals = infoData.data?.decimals || 6;
         const amount = (BigInt(Math.floor(mintAmt * Math.pow(10, decimals)))).toString();
@@ -488,9 +514,16 @@
     }
 
     async function executeBurn() {
-      if (!currentToken) return;
+      if (!currentToken || !currentToken.contractAddress) {
+        alert('Token information not available. Please refresh and try again.');
+        return;
+      }
+      
       const burnAmt = document.getElementById('burnAmount').value;
-      if (!burnAmt) return alert('Please enter amount');
+      if (!burnAmt || burnAmt <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
 
       closeModal();
       showProcessing('Preparing burn transaction...');
@@ -498,6 +531,11 @@
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
+        
+        if (!infoRes.ok) {
+          throw new Error('Failed to fetch token info');
+        }
+        
         const infoData = await infoRes.json();
         const decimals = infoData.data?.decimals || 6;
         const amount = (BigInt(Math.floor(burnAmt * Math.pow(10, decimals)))).toString();
@@ -533,10 +571,18 @@
     }
 
     async function executeAddLP() {
-      if (!currentToken) return;
+      if (!currentToken || !currentToken.contractAddress) {
+        alert('Token information not available. Please refresh and try again.');
+        return;
+      }
+      
       const paxiAmt = document.getElementById('paxiAmount').value;
       const tokenAmt = document.getElementById('tokenAmount').value;
-      if (!paxiAmt || !tokenAmt) return alert('Please fill all fields');
+      
+      if (!paxiAmt || paxiAmt <= 0 || !tokenAmt || tokenAmt <= 0) {
+        alert('Please fill all fields with valid amounts');
+        return;
+      }
 
       closeModal();
       showProcessing('Preparing add liquidity transaction...');
@@ -544,6 +590,11 @@
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
+        
+        if (!infoRes.ok) {
+          throw new Error('Failed to fetch token info');
+        }
+        
         const infoData = await infoRes.json();
         const decimals = infoData.data?.decimals || 6;
         const tokenAmount = (BigInt(Math.floor(tokenAmt * Math.pow(10, decimals)))).toString();
@@ -586,7 +637,11 @@
     }
 
     async function executeMetadata() {
-      if (!currentToken) return;
+      if (!currentToken || !currentToken.contractAddress) {
+        alert('Token information not available. Please refresh and try again.');
+        return;
+      }
+      
       const project = document.getElementById('metaProject').value;
       const description = document.getElementById('metaDescription').value;
       const logo = document.getElementById('metaLogo').value;
