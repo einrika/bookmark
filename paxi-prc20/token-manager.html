@@ -3,395 +3,283 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PRC-20 Manager Pro</title>
+  <title>PRC-20 Ultimate Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://mainnet-api.paxinet.io/resources/js/paxi-cosmjs.umd.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap');
-    
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     .tab-active { background: #8b5cf6 !important; color: white !important; }
-    .break-address { word-break: break-all; overflow-wrap: break-word; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input, textarea { background: rgba(0,0,0,0.4) !important; color: white !important; }
   </style>
 </head>
 
-<body class="bg-[#050505] text-white min-h-screen pb-10">
+<body class="min-h-screen pb-10">
   <div class="container mx-auto px-4 py-4 max-w-xl">
     
-    <header class="flex justify-between items-center mb-6 pt-2">
+    <header class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">PRC-20 Manager</h1>
-        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Paxi Network Mainnet</p>
+        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">PRC-20 Pro</h1>
+        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Manager Mode</p>
       </div>
-      <button onclick="connectWallet()" id="connectBtn" class="glass px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/5 transition border-purple-500/30">
+      <button onclick="connectWallet()" id="connectBtn" class="glass px-4 py-2 rounded-xl text-sm font-bold border-purple-500/30 active:scale-95 transition">
         <i class="fas fa-wallet mr-2 text-purple-400"></i>Connect
       </button>
     </header>
 
-    <div id="walletInfo" class="hidden glass rounded-2xl p-4 mb-6 border-l-4 border-l-purple-500">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-          <i class="fas fa-user-shield text-purple-400 text-sm"></i>
-        </div>
-        <div class="min-w-0 flex-1">
-          <p class="text-[10px] text-gray-500 uppercase font-bold">Your Address</p>
-          <p class="text-xs font-mono text-purple-200 truncate break-address" id="walletAddress"></p>
-        </div>
+    <div id="walletInfo" class="hidden glass rounded-2xl p-4 mb-6 border-l-4 border-l-purple-500 flex justify-between items-center">
+      <div>
+        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Wallet Connected</p>
+        <p class="text-sm font-mono text-purple-200" id="walletAddressDisplay"></p>
       </div>
+      <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
     </div>
 
     <main id="mainContent" class="hidden space-y-6">
-      
       <section>
         <div class="flex justify-between items-end mb-4 px-1">
-          <h2 class="text-lg font-bold">Asset Portfolio</h2>
-          <div class="flex gap-2">
-            <button onclick="showAddTokenModal()" class="text-blue-400 text-xs font-bold uppercase tracking-tight"><i class="fas fa-plus-circle mr-1"></i>Add</button>
-            <button onclick="refreshTokens()" class="text-gray-500 text-xs font-bold uppercase tracking-tight"><i class="fas fa-sync-alt mr-1"></i>Sync</button>
+          <h2 class="text-lg font-bold">Assets</h2>
+          <div class="flex gap-3">
+            <button onclick="showAddTokenModal()" class="text-blue-400 text-xs font-bold uppercase"><i class="fas fa-plus-circle mr-1"></i>Import</button>
+            <button onclick="refreshTokens()" class="text-gray-500 text-xs font-bold uppercase"><i class="fas fa-sync-alt"></i></button>
           </div>
         </div>
-        
-        <div id="tokenList" class="grid gap-3">
-          <div class="glass rounded-2xl p-8 text-center">
-            <i class="fas fa-circle-notch fa-spin text-purple-500 mb-2"></i>
-            <p class="text-xs text-gray-500">Fetching assets...</p>
-          </div>
-        </div>
+        <div id="tokenList" class="grid gap-3"></div>
       </section>
-
-      <section class="glass rounded-3xl p-6 bg-gradient-to-br from-yellow-500/10 to-transparent border-yellow-500/20 relative overflow-hidden">
-        <i class="fas fa-mug-hot absolute -right-4 -bottom-4 text-6xl text-yellow-500/5 rotate-12"></i>
-        <div class="relative z-10 text-center">
-          <h3 class="text-yellow-500 font-bold mb-1">Support This Tool! ☕</h3>
-          <p class="text-xs text-gray-400 mb-4 px-4">Free to use with 0 platform fees. Your support keeps me coding!</p>
-          <div class="flex gap-2 max-w-[280px] mx-auto">
-            <input type="number" id="donateAmount" placeholder="10" value="10" class="w-20 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-center text-sm focus:border-yellow-500 outline-none transition">
-            <button onclick="donatePaxi()" class="flex-1 bg-yellow-500 text-black rounded-xl text-sm font-bold hover:bg-yellow-400 transition active:scale-95">Send Support</button>
-          </div>
-        </div>
-      </section>
-
     </main>
 
-    <div id="actionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col justify-end md:justify-center p-0 md:p-4">
-      <div class="glass w-full max-w-xl mx-auto rounded-t-[2.5rem] md:rounded-3xl p-6 md:p-8 transform transition-transform shadow-2xl overflow-y-auto max-h-[90vh]">
+    <div id="actionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col justify-end">
+      <div class="glass w-full max-w-xl mx-auto rounded-t-[2.5rem] p-6 overflow-y-auto max-h-[90vh]">
         
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center gap-3">
-            <div id="modalIcon" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center font-bold shadow-lg">TK</div>
+            <div id="modalIcon" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center font-bold text-lg">TK</div>
             <div>
               <h3 id="modalTokenName" class="font-bold text-lg leading-tight">--</h3>
-              <p id="modalTokenContract" class="text-[10px] font-mono text-gray-500 truncate max-w-[180px]"></p>
+              <p id="modalTokenContract" class="text-[10px] font-mono text-gray-500"></p>
             </div>
           </div>
           <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-times"></i></button>
         </div>
 
         <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 border-b border-white/5 pb-2">
-          <button onclick="switchTab('mint')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400 transition" data-tab="mint">MINT</button>
-          <button onclick="switchTab('burn')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400 transition" data-tab="burn">BURN</button>
-          <button onclick="switchTab('addlp')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400 transition" data-tab="addlp">LIQUIDITY</button>
-          <button onclick="switchTab('metadata')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400 transition" data-tab="metadata">METADATA</button>
+          <button onclick="switchTab('mint')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400" data-tab="mint">MINT</button>
+          <button onclick="switchTab('metadata')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400" data-tab="metadata">METADATA / LOGO</button>
+          <button onclick="switchTab('security')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400" data-tab="security">SECURITY</button>
+          <button onclick="switchTab('burn')" class="tab-btn px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-white/5 text-gray-400" data-tab="burn">BURN</button>
         </div>
 
         <div id="tabContent">
           <div id="tab-mint" class="tab-content space-y-4">
-            <div class="bg-blue-500/5 border border-blue-500/20 p-3 rounded-xl text-[11px] text-blue-300">
-              <i class="fas fa-magic mr-1"></i> Mint tokens directly to any address. Free of platform fees.
+            <input type="number" id="mintAmount" placeholder="Amount" class="w-full border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500">
+            <input type="text" id="mintRecipient" placeholder="Recipient address" class="w-full border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500">
+            <button onclick="executeMint()" class="w-full bg-white text-black py-4 rounded-2xl font-bold">Mint Tokens</button>
+          </div>
+
+          <div id="tab-metadata" class="tab-content hidden space-y-4">
+            <input type="text" id="metaProject" placeholder="New Project Name" class="w-full border border-white/10 rounded-xl px-4 py-3 outline-none">
+            <input type="text" id="metaLogo" placeholder="New Logo URL (https://...)" class="w-full border border-white/10 rounded-xl px-4 py-3 outline-none">
+            <textarea id="metaDescription" placeholder="Description" rows="3" class="w-full border border-white/10 rounded-xl px-4 py-3 outline-none"></textarea>
+            <button onclick="executeMetadata()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">Save Info & Logo</button>
+          </div>
+
+          <div id="tab-security" class="tab-content hidden space-y-4">
+            <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+              <h4 class="text-red-400 font-bold text-sm mb-1">MENCABUT IZIN MENCETAK</h4>
+              <p class="text-[11px] text-gray-400 leading-relaxed">Status: <b>Minter aktif</b>. Jika Anda menekan tombol di bawah, izin mencetak akan dicabut selamanya (Renounce). Token Anda akan menjadi Fixed Supply.</p>
             </div>
-            <input type="number" id="mintAmount" placeholder="Amount to mint" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 transition">
-            <input type="text" id="mintRecipient" placeholder="Recipient address (optional)" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 transition">
-            <button onclick="executeMint()" class="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-gray-200 transition active:scale-[0.98]">Confirm Minting</button>
+            <button onclick="executeRenounce()" class="w-full bg-red-600/20 border border-red-500/40 text-red-500 py-4 rounded-2xl font-bold active:scale-95 transition">RENOUNCE MINTING RIGHTS</button>
           </div>
 
-          <div id="tab-burn" class="tab-content hidden space-y-4">
-            <div class="text-center py-2">
-              <p class="text-xs text-gray-500 uppercase font-bold">Available Balance</p>
-              <h4 id="userBalance" class="text-2xl font-bold text-red-400">0.00</h4>
-            </div>
-            <input type="number" id="burnAmount" placeholder="Amount to destroy" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-red-500 text-center font-bold">
-            <button onclick="executeBurn()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-bold hover:bg-red-500 transition active:scale-[0.98]">Burn Forever</button>
-          </div>
-
-          <div id="tab-addlp" class="tab-content hidden space-y-4">
-            <input type="number" id="paxiAmount" placeholder="PAXI Amount" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none">
-            <input type="number" id="tokenAmount" placeholder="Token Amount" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 outline-none">
-            <button onclick="executeAddLP()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold hover:bg-green-500 transition">Add Liquidity</button>
-          </div>
-
-          <div id="tab-metadata" class="tab-content hidden space-y-3">
-            <input type="text" id="metaProject" placeholder="New Project Name" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500">
-            <textarea id="metaDescription" placeholder="New Token Description" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500"></textarea>
-            <button onclick="executeMetadata()" class="w-full bg-purple-600 text-white py-4 rounded-2xl font-bold transition">Save Changes</button>
+          <div id="tab-burn" class="tab-content hidden space-y-4 text-center">
+             <p class="text-[10px] text-gray-500 uppercase font-bold">Your Balance</p>
+             <p id="userBalance" class="text-2xl font-bold text-red-400">0.00</p>
+             <input type="number" id="burnAmount" placeholder="Amount to destroy" class="w-full border border-white/10 rounded-2xl px-5 py-4 outline-none text-center font-bold">
+             <button onclick="executeBurn()" class="w-full bg-red-600 py-4 rounded-2xl font-bold">Burn Permanently</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="processingModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-6">
-      <div class="text-center">
-        <div class="relative w-24 h-24 mx-auto mb-6">
-          <div class="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
-          <div class="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin"></div>
-          <i class="fas fa-rocket absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-purple-400"></i>
-        </div>
-        <h3 class="text-xl font-bold mb-2">Broadcasting...</h3>
-        <p id="processingText" class="text-sm text-gray-500">Waiting for PaxiHub approval</p>
-      </div>
-    </div>
-
-    <div id="addTokenModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6">
-      <div class="glass w-full max-w-sm rounded-[2rem] p-8 border-blue-500/20">
-        <h3 class="text-xl font-bold mb-6 text-center">Add Custom Token</h3>
-        <input type="text" id="addTokenContract" placeholder="paxi1..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 mb-4 outline-none focus:border-blue-500 font-mono text-xs">
-        <div class="flex gap-3">
-          <button onclick="closeAddTokenModal()" class="flex-1 bg-white/5 py-4 rounded-2xl font-bold text-xs">CANCEL</button>
-          <button onclick="addExistingToken()" class="flex-[2] bg-blue-600 py-4 rounded-2xl font-bold text-xs">IMPORT TOKEN</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="successModal" class="hidden fixed top-6 left-4 right-4 z-[70] glass rounded-2xl p-4 border-green-500/30 bg-green-500/5 animate-bounce">
-      <div class="flex items-center gap-4">
-        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
-        <div class="flex-1 min-w-0">
-          <p class="font-bold text-sm" id="successText">Action Success!</p>
-          <a id="successTxLink" href="#" target="_blank" class="text-[10px] text-green-400 underline truncate block font-mono">View Transaction</a>
-        </div>
-        <button onclick="closeSuccessModal()" class="text-gray-400"><i class="fas fa-times"></i></button>
+    <div id="processingModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-6 text-center">
+      <div>
+        <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p id="processingText" class="text-sm font-bold text-gray-300">Broadcasting...</p>
       </div>
     </div>
 
   </div>
 
   <script>
-    const BACKEND_URL = "https://paxihub-prc20-production.up.railway.app";
-    const SERVICE_ADDRESS = 'paxi153swt0m7nlld2wlptzgquhedvge4jtgx6m549t'; // DONATION TARGET
     const RPC = 'https://mainnet-rpc.paxinet.io';
     const LCD = 'https://mainnet-lcd.paxinet.io';
     const DENOM = 'upaxi';
-    
-    let userAddress = '';
-    let chainId = '';
-    let currentToken = null;
-    let userTokens = [];
+    let userAddress = '', chainId = '', currentToken = null, userTokens = [];
 
-    // --- Core Startup ---
-    window.addEventListener('load', async () => {
-      let attempts = 0;
-      const checkHub = setInterval(async () => {
-        attempts++;
-        if (typeof window.paxihub !== 'undefined') {
-          clearInterval(checkHub);
-          try {
-            const res = await fetch(`${RPC}/status`);
-            const data = await res.json();
-            chainId = data.result.node_info.network;
-          } catch (e) { chainId = 'paxi-mainnet'; }
-        } else if (attempts >= 10) { clearInterval(checkHub); }
-      }, 500);
-    });
+    // FUNGSI SHORT ADDRESS
+    const shortAddr = (a) => a ? `${a.substring(0, 8)}...${a.substring(a.length - 4)}` : '...';
 
     async function connectWallet() {
-      if (typeof window.paxihub === 'undefined') return alert('Open in PaxiHub Browser!');
+      if (typeof window.paxihub === 'undefined') return alert('Open in PaxiHub Browser');
       try {
         const info = await window.paxihub.paxi.getAddress();
         userAddress = info.address;
-        document.getElementById('walletAddress').textContent = userAddress;
+        document.getElementById('walletAddressDisplay').textContent = shortAddr(userAddress);
         document.getElementById('walletInfo').classList.remove('hidden');
-        document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check text-green-400"></i>';
+        document.getElementById('connectBtn').innerHTML = '<i class="fas fa-check text-green-500"></i> Connected';
         document.getElementById('mainContent').classList.remove('hidden');
+        
+        const res = await fetch(`${RPC}/status`).then(r=>r.json());
+        chainId = res.result.node_info.network;
         refreshTokens();
-      } catch (e) { alert('Connect Failed: ' + e.message); }
+      } catch (e) { alert('Connect Failed'); }
     }
 
-    // --- Token Logistics ---
     async function refreshTokens() {
       const listEl = document.getElementById('tokenList');
-      listEl.innerHTML = '<div class="p-8 text-center"><i class="fas fa-sync fa-spin text-purple-500"></i></div>';
-      
+      listEl.innerHTML = '<p class="text-center py-10 text-xs text-gray-500">Syncing Assets...</p>';
       try {
-        const res = await fetch(`${BACKEND_URL}/api/user-tokens/${userAddress}`);
-        const data = await res.json();
-        let addrs = (data.success && data.tokens.length > 0) ? data.tokens : getLocalTokens();
-        
+        let addrs = JSON.parse(localStorage.getItem(`paxi_tokens_${userAddress}`) || "[]");
         const enriched = [];
         for (const addr of addrs) {
-          const contract = typeof addr === 'string' ? addr : addr.contractAddress;
           try {
-            const query = btoa(JSON.stringify({ token_info: {} }));
-            const r = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contract}/smart/${query}`);
-            const d = await r.json();
-            if(d.data) enriched.push({ contractAddress: contract, ...d.data });
-          } catch (e) { console.warn("Skip token:", contract); }
+            const q = btoa(JSON.stringify({ token_info: {} }));
+            const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${addr}/smart/${q}`).then(r=>r.json());
+            if(res.data) enriched.push({ contractAddress: addr, ...res.data });
+          } catch(e) {}
         }
         userTokens = enriched;
         renderTokenList(enriched);
-      } catch (e) { listEl.innerHTML = '<p class="text-center text-xs text-gray-500">Failed to load assets.</p>'; }
+      } catch (e) { listEl.innerHTML = '<p class="text-center text-xs">Error loading assets.</p>'; }
     }
 
     function renderTokenList(tokens) {
       document.getElementById('tokenList').innerHTML = tokens.map(t => `
-        <div onclick='openTokenModal("${t.contractAddress}")' class="glass rounded-2xl p-4 flex items-center justify-between active:scale-[0.97] transition border border-white/5">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex-shrink-0 flex items-center justify-center font-bold text-xs">${(t.symbol||'TK').substring(0,2)}</div>
-            <div class="min-w-0">
-              <h4 class="font-bold text-sm truncate">${t.name}</h4>
-              <p class="text-[10px] text-gray-500 font-mono truncate break-address">${t.contractAddress}</p>
+        <div onclick='openTokenModal("${t.contractAddress}")' class="glass rounded-2xl p-4 flex items-center justify-between border border-white/5 active:scale-[0.98] transition">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center font-bold text-xs text-purple-400">${t.symbol.substring(0,2)}</div>
+            <div>
+              <h4 class="font-bold text-sm">${t.name}</h4>
+              <p class="text-[10px] font-mono text-gray-500">${shortAddr(t.contractAddress)}</p>
             </div>
           </div>
-          <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
-        </div>`).join('') || '<p class="text-center py-4 text-xs text-gray-500">No tokens found.</p>';
+          <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
+        </div>`).join('');
     }
 
-    function openTokenModal(addr) {
+    async function openTokenModal(addr) {
       currentToken = userTokens.find(t => t.contractAddress === addr);
-      if(!currentToken) return;
       document.getElementById('modalTokenName').textContent = currentToken.name;
-      document.getElementById('modalTokenContract').textContent = addr;
-      document.getElementById('modalIcon').textContent = (currentToken.symbol||'TK').substring(0,2);
+      document.getElementById('modalTokenContract').textContent = shortAddr(addr);
       document.getElementById('actionModal').classList.remove('hidden');
       switchTab('mint');
-      loadTokenBalance();
-    }
-
-    async function loadTokenBalance() {
-      const balEl = document.getElementById('userBalance');
-      balEl.textContent = "...";
+      
+      // Load balance for burn tab
       try {
-        const query = btoa(JSON.stringify({balance:{address:userAddress}}));
-        const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
-        const data = await res.json();
-        const val = (parseInt(data.data.balance) / Math.pow(10, currentToken.decimals||6)).toFixed(2);
-        balEl.textContent = `${val} ${currentToken.symbol}`;
-      } catch (e) { balEl.textContent = "0.00"; }
+        const q = btoa(JSON.stringify({ balance: { address: userAddress } }));
+        const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${addr}/smart/${q}`).then(r=>r.json());
+        const bal = (parseInt(res.data.balance) / Math.pow(10, currentToken.decimals)).toFixed(2);
+        document.getElementById('userBalance').textContent = `${bal} ${currentToken.symbol}`;
+      } catch(e) { document.getElementById('userBalance').textContent = "0.00"; }
     }
 
-    // --- Transaction Actions (0 Fee Platform) ---
+    // --- FULL LOGIC FUNCTIONS ---
+
+    async function executeMetadata() {
+      const prj = document.getElementById('metaProject').value;
+      const logo = document.getElementById('metaLogo').value;
+      const dsc = document.getElementById('metaDescription').value;
+      showProcessing('Updating metadata & logo...');
+      try {
+        const msg = { update_marketing: { 
+          project: prj || undefined, 
+          description: dsc || undefined, 
+          logo: logo ? { url: logo } : undefined 
+        } };
+        await buildAndBroadcast(currentToken.contractAddress, msg);
+        alert('Update Success!');
+        closeModal();
+      } catch (e) { alert(e.message); } finally { hideProcessing(); }
+    }
+
+    async function executeRenounce() {
+      if(!confirm("PERINGATAN! Anda akan mematikan fitur mencetak selamanya. Lanjutkan?")) return;
+      showProcessing('Renouncing...');
+      try {
+        const msg = { update_minter: { new_minter: null } };
+        await buildAndBroadcast(currentToken.contractAddress, msg);
+        alert('Renounce Success! Minter has been disabled.');
+        closeModal();
+      } catch (e) { alert(e.message); } finally { hideProcessing(); }
+    }
+
     async function executeMint() {
       const amt = document.getElementById('mintAmount').value;
-      const rec = document.getElementById('mintRecipient').value.trim() || userAddress;
-      if(!amt || amt <= 0) return alert('Invalid amount');
-      
-      closeModal();
-      showProcessing('Minting tokens...');
+      const rec = document.getElementById('mintRecipient').value || userAddress;
+      if(!amt) return;
+      showProcessing('Minting...');
       try {
-        const amount = (BigInt(Math.floor(amt * Math.pow(10, currentToken.decimals||6)))).toString();
-        const msg = { mint: { recipient: rec, amount } };
-        const txHash = await buildAndBroadcast(currentToken.contractAddress, msg);
-        showSuccess('Minting Successful!', txHash);
-      } catch (e) { hideProcessing(); alert(e.message); }
+        const amount = (BigInt(Math.floor(amt * Math.pow(10, currentToken.decimals)))).toString();
+        await buildAndBroadcast(currentToken.contractAddress, { mint: { recipient: rec, amount } });
+        alert('Mint Success!');
+        closeModal();
+      } catch (e) { alert(e.message); } finally { hideProcessing(); }
     }
 
     async function executeBurn() {
       const amt = document.getElementById('burnAmount').value;
-      if(!amt || amt <= 0) return alert('Invalid amount');
+      if(!amt) return;
+      showProcessing('Burning...');
+      try {
+        const amount = (BigInt(Math.floor(amt * Math.pow(10, currentToken.decimals)))).toString();
+        await buildAndBroadcast(currentToken.contractAddress, { burn: { amount } });
+        alert('Burn Success!');
+        closeModal();
+      } catch (e) { alert(e.message); } finally { hideProcessing(); }
+    }
+
+    async function buildAndBroadcast(contract, msg) {
+      const acc = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${userAddress}`).then(r=>r.json());
+      const ba = acc.account.base_account || acc.account;
       
-      closeModal();
-      showProcessing('Burning tokens...');
-      try {
-        const amount = (BigInt(Math.floor(amt * Math.pow(10, currentToken.decimals||6)))).toString();
-        const msg = { burn: { amount } };
-        const txHash = await buildAndBroadcast(currentToken.contractAddress, msg);
-        showSuccess('Tokens Burned!', txHash);
-      } catch (e) { hideProcessing(); alert(e.message); }
-    }
-
-    async function executeAddLP() {
-      const pAmt = document.getElementById('paxiAmount').value;
-      const tAmt = document.getElementById('tokenAmount').value;
-      if(!pAmt || !tAmt) return alert('Check amounts');
-
-      closeModal();
-      showProcessing('Adding Liquidity...');
-      try {
-        const tAmount = (BigInt(Math.floor(tAmt * Math.pow(10, currentToken.decimals||6)))).toString();
-        const pAmount = (BigInt(Math.floor(pAmt * 1000000))).toString();
-        const msg = { add_liquidity: { token: currentToken.contractAddress, token_amount: tAmount } };
-        const txHash = await buildAndBroadcast(currentToken.contractAddress, msg, [PaxiCosmJS.coins(pAmount, DENOM)[0]]);
-        showSuccess('Liquidity Added!', txHash);
-      } catch (e) { hideProcessing(); alert(e.message); }
-    }
-
-    async function executeMetadata() {
-      const prj = document.getElementById('metaProject').value;
-      const dsc = document.getElementById('metaDescription').value;
-      
-      closeModal();
-      showProcessing('Updating metadata...');
-      try {
-        const msg = { update_marketing: { project: prj||undefined, description: dsc||undefined, marketing: userAddress } };
-        const txHash = await buildAndBroadcast(currentToken.contractAddress, msg);
-        showSuccess('Metadata Updated!', txHash);
-      } catch (e) { hideProcessing(); alert(e.message); }
-    }
-
-    // --- Donation Logic ---
-    async function donatePaxi() {
-      const val = document.getElementById('donateAmount').value;
-      if(!val || val <= 0) return;
-      showProcessing(`Sending ${val} PAXI donation ❤️`);
-      try {
-        const amount = (BigInt(Math.floor(val * 1000000))).toString();
-        const msg = PaxiCosmJS.MsgSend.fromPartial({
-          fromAddress: userAddress, toAddress: SERVICE_ADDRESS,
-          amount: [PaxiCosmJS.coins(amount, DENOM)[0]]
-        });
-        const anyMsg = PaxiCosmJS.Any.fromPartial({
-          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-          value: PaxiCosmJS.MsgSend.encode(msg).finish()
-        });
-        await buildAndSendRaw([anyMsg], 'Donation for PRC-20 Tool');
-        hideProcessing();
-        alert('Thank you! Your support means a lot! ❤️');
-      } catch (e) { hideProcessing(); alert('Donation failed: ' + e.message); }
-    }
-
-    // --- Blockchain Utils ---
-    async function buildAndBroadcast(contract, executeMsg, funds = []) {
       const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
-        sender: userAddress, contract, funds,
-        msg: new TextEncoder().encode(JSON.stringify(executeMsg))
+        sender: userAddress, contract, 
+        msg: new TextEncoder().encode(JSON.stringify(msg))
       });
       const anyMsg = PaxiCosmJS.Any.fromPartial({
         typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
         value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
       });
-      return await buildAndSendRaw([anyMsg], 'PRC-20 Transaction');
-    }
 
-    async function buildAndSendRaw(messages, memo) {
-      const acc = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${userAddress}`).then(r=>r.json());
-      const ba = acc.account.base_account || acc.account;
+      const txBody = PaxiCosmJS.TxBody.fromPartial({ messages: [anyMsg] });
+      const addressInfo = await window.paxihub.paxi.getAddress();
       
-      const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
       const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
         signerInfos: [{
-          publicKey: { typeUrl: "/cosmos.crypto.secp256k1.PubKey", value: PaxiCosmJS.PubKey.encode({ key: new Uint8Array((await window.paxihub.paxi.getAddress()).public_key) }).finish() },
+          publicKey: { typeUrl: "/cosmos.crypto.secp256k1.PubKey", value: PaxiCosmJS.PubKey.encode({ key: new Uint8Array(addressInfo.public_key) }).finish() },
           modeInfo: { single: { mode: 1 } },
           sequence: BigInt(ba.sequence)
         }],
         fee: { amount: [PaxiCosmJS.coins("40000", DENOM)[0]], gasLimit: 800_000 }
       });
-      
+
       const signDoc = PaxiCosmJS.SignDoc.fromPartial({
         bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
         authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
         chainId, accountNumber: BigInt(ba.account_number)
       });
-      
+
       const signRes = await window.paxihub.paxi.signAndSendTransaction({
         bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
         authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
-        chainId, accountNumber: signDoc.accountNumber.toString()
+        chainId, accountNumber: ba.account_number.toString()
       });
-      
-      if(!signRes.success) throw new Error('Signature Rejected');
+
+      if(!signRes.success) throw new Error('Transaction Rejected by User');
       
       const txRaw = PaxiCosmJS.TxRaw.fromPartial({
         bodyBytes: signDoc.bodyBytes, authInfoBytes: signDoc.authInfoBytes,
@@ -402,12 +290,10 @@
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tx_bytes: btoa(String.fromCharCode(...PaxiCosmJS.TxRaw.encode(txRaw).finish())), mode: "BROADCAST_MODE_SYNC" })
       }).then(r => r.json());
-      
-      if(broadcast.tx_response?.code === 0) return broadcast.tx_response.txhash;
-      throw new Error(broadcast.tx_response?.raw_log || 'Tx Failed');
+
+      if(broadcast.tx_response?.code !== 0) throw new Error(broadcast.tx_response?.raw_log || 'Tx Failed');
     }
 
-    // --- UI Helpers ---
     function switchTab(t) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('tab-active', b.dataset.tab === t));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${t}`));
@@ -415,33 +301,12 @@
     function closeModal() { document.getElementById('actionModal').classList.add('hidden'); }
     function showProcessing(t) { document.getElementById('processingText').textContent = t; document.getElementById('processingModal').classList.remove('hidden'); }
     function hideProcessing() { document.getElementById('processingModal').classList.add('hidden'); }
-    function showSuccess(t, h) {
-      hideProcessing();
-      document.getElementById('successText').textContent = t;
-      document.getElementById('successTxLink').href = `https://explorer.paxinet.io/paxi/tx/${h}`;
-      document.getElementById('successModal').classList.remove('hidden');
-      setTimeout(closeSuccessModal, 6000);
-    }
-    function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); refreshTokens(); }
-    function showAddTokenModal() { document.getElementById('addTokenModal').classList.remove('hidden'); }
-    function closeAddTokenModal() { document.getElementById('addTokenModal').classList.add('hidden'); }
-    
-    function getLocalTokens() { return JSON.parse(localStorage.getItem(`paxi_tokens_${userAddress}`) || "[]"); }
-    function saveLocalToken(d) {
-      const t = getLocalTokens();
-      if(!t.find(x => x.contractAddress === d.contractAddress)) {
-        t.push(d);
-        localStorage.setItem(`paxi_tokens_${userAddress}`, JSON.stringify(t));
-      }
-    }
-    async function addExistingToken() {
-      const addr = document.getElementById('addTokenContract').value.trim();
-      if(!addr.startsWith('paxi')) return;
-      try {
-        const q = btoa(JSON.stringify({token_info:{}}));
-        const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${addr}/smart/${q}`).then(r=>r.json());
-        if(res.data) { saveLocalToken({contractAddress: addr, ...res.data}); closeAddTokenModal(); refreshTokens(); }
-      } catch(e) { alert('Token not found'); }
+    function showAddTokenModal() {
+        const addr = prompt("Enter contract address (paxi1...):");
+        if(addr && addr.startsWith('paxi1')) {
+            let t = JSON.parse(localStorage.getItem(`paxi_tokens_${userAddress}`) || "[]");
+            if(!t.includes(addr)) { t.push(addr); localStorage.setItem(`paxi_tokens_${userAddress}`, JSON.stringify(t)); refreshTokens(); }
+        }
     }
   </script>
 </body>
