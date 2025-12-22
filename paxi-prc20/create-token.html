@@ -33,7 +33,7 @@
         <span class="text-gray-400">6 PAXI Gas = 16 PAXI Total</span>
       </div>
     </header>
-
+    
     <!-- Debug Info Section -->
     <div class="glass rounded-xl p-4 mb-6 text-xs">
       <p class="text-gray-400 mb-2">🔍 Debug Info:</p>
@@ -160,7 +160,7 @@
         </div>
       </div>
     </div>
-
+    
     <div id="errorSection" class="hidden">
       <div class="glass border-red-500/50 rounded-xl p-4 bg-red-500/10">
         <div class="flex items-start gap-3">
@@ -204,7 +204,7 @@
       debugDiv.appendChild(line);
       console.log(msg);
     }
-
+    
     function showError(msg, err) {
       document.getElementById('errorSection').classList.remove('hidden');
       document.getElementById('errorMessage').textContent = msg;
@@ -216,9 +216,9 @@
         }, null, 2);
       }
     }
-
+    
     const toBase64 = bytes => btoa(String.fromCharCode(...bytes));
-
+    
     async function buildCommon(address) {
       const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
       const { account } = await res.json();
@@ -231,23 +231,50 @@
     
     // === CHECK PAXIHUB ON LOAD ===
     window.addEventListener('load', async () => {
-      addDebug('Page loaded');
-      addDebug('window.paxihub: ' + (typeof window.paxihub !== 'undefined' ? 'Found ✓' : 'Not found ✗'));
-      addDebug('UserAgent: ' + navigator.userAgent.substring(0, 60));
+      addDebug('Page loaded, waiting for provider...');
       
-      // Auto-check if PaxiHub injected
-      if (typeof window.paxihub === 'undefined') {
+      // 1. Fungsi untuk mengecek keberadaan PaxiHub dengan polling
+      const checkPaxiHub = () => {
+        return new Promise((resolve) => {
+          let attempts = 0;
+          const maxAttempts = 5; // Cek selama ~2.5 detik
+          
+          const interval = setInterval(() => {
+            attempts++;
+            if (typeof window.paxihub !== 'undefined') {
+              clearInterval(interval);
+              resolve(true);
+            } else if (attempts >= maxAttempts) {
+              clearInterval(interval);
+              resolve(false);
+            }
+          }, 500);
+        });
+      };
+      
+      const isPaxiReady = await checkPaxiHub();
+      addDebug('window.paxihub: ' + (isPaxiReady ? 'Found ✓' : 'Not found ✗'));
+      
+      if (!isPaxiReady) {
         if (/Mobi/.test(navigator.userAgent)) {
           addDebug('Mobile detected, preparing deep-link...');
-          showError('PaxiHub not detected. Please open this page in PaxiHub app.');
+          // Jangan langsung showError, arahkan ke aplikasi agar UX lebih lancar
+          window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
+          
+          // Berikan instruksi jika redirect gagal (misal app belum terinstall)
+          setTimeout(() => {
+            showError('PaxiHub not detected. If the app didn\'t open, please install it or open this link inside PaxiHub Browser.');
+          }, 2000);
         } else {
           showError('PaxiHub not detected. Please install PaxiHub app or open in PaxiHub browser.');
         }
       } else {
         addDebug('PaxiHub is ready!');
+        // Opsional: Langsung panggil connectWallet() jika ingin auto-connect
+        // connectWallet();
       }
-
-      // Fetch chainId
+      
+      // 2. Fetch chainId tetap dilakukan di latar belakang
       try {
         const statusRes = await fetch(`${RPC}/status`);
         const statusData = await statusRes.json();
@@ -255,8 +282,11 @@
         addDebug('ChainID: ' + chainId);
       } catch (e) {
         addDebug('Failed to fetch chainId: ' + e.message);
+        // Fallback chainId jika RPC down
+        chainId = 'paxi-mainnet';
       }
     });
+    
     
     // === CONNECT WALLET ===
     async function connectWallet() {

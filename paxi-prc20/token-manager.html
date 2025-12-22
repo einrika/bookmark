@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +13,6 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
     .tab-active {
       background: rgba(139, 92, 246, 0.3);
       border-bottom: 2px solid #8b5cf6;
@@ -29,7 +27,7 @@
     <header class="glass rounded-2xl p-8 mb-8">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-4xl font-bold mb-2">Token Manager v1.0.0</h1>
+          <h1 class="text-4xl font-bold mb-2">Token Manager Dashboard</h1>
           <p class="text-gray-400">Manage your PRC-20 tokens on Paxi Network</p>
         </div>
         <button onclick="connectWallet()" id="connectBtn" class="glass px-6 py-3 rounded-lg hover:bg-white/10 transition">
@@ -41,7 +39,7 @@
         <p class="font-mono text-sm" id="walletAddress"></p>
       </div>
     </header>
-    
+
     <!-- Main Content -->
     <div id="mainContent" class="hidden">
       
@@ -56,9 +54,6 @@
             <button onclick="refreshTokens()" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
               <i class="fas fa-sync-alt mr-2"></i>Refresh
             </button>
-            <button onclick="localStorage.clear(); location.reload();" class="glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm">
-              <i class="fas fa-sync-alt mr-2"></i>Reset list token
-            </button>
           </div>
         </div>
         
@@ -69,7 +64,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Action Modal -->
       <div id="actionModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="glass rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -79,7 +74,7 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          
+
           <!-- Token Info -->
           <div class="glass rounded-lg p-4 mb-6">
             <div class="flex items-center gap-4">
@@ -92,7 +87,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Tabs -->
           <div class="flex gap-2 mb-6 overflow-x-auto">
             <button onclick="switchTab('mint')" class="tab-btn px-4 py-2 rounded-lg whitespace-nowrap" data-tab="mint">
@@ -108,7 +103,7 @@
               <i class="fas fa-edit mr-2"></i>Metadata
             </button>
           </div>
-          
+
           <!-- Tab Content -->
           <div id="tabContent">
             
@@ -137,7 +132,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Burn Tokens -->
             <div id="tab-burn" class="tab-content hidden">
               <div class="space-y-4">
@@ -160,7 +155,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Add Liquidity -->
             <div id="tab-addlp" class="tab-content hidden">
               <div class="space-y-4">
@@ -186,7 +181,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Edit Metadata -->
             <div id="tab-metadata" class="tab-content hidden">
               <div class="space-y-4">
@@ -220,13 +215,13 @@
                 </button>
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
-      
+
     </div>
-    
+
     <!-- Processing Modal -->
     <div id="processingModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="glass rounded-xl p-8 max-w-md w-full mx-4">
@@ -239,7 +234,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Success Modal -->
     <div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="glass rounded-xl p-8 max-w-md w-full mx-4 border-2 border-green-500/30">
@@ -256,7 +251,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Add Token Modal -->
     <div id="addTokenModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div class="glass rounded-2xl p-8 max-w-md w-full">
@@ -277,11 +272,11 @@
         </div>
       </div>
     </div>
-    
+
     <footer class="text-center mt-12 text-gray-500 text-sm">
       <p>© 2025 PaxiHub Token Manager</p>
     </footer>
-    
+
   </div>
   
   <script>
@@ -296,29 +291,12 @@
     let chainId = '';
     let currentToken = null;
     let userTokens = [];
-    
+
     window.addEventListener('load', async () => {
-      // 1. Beri jeda sedikit (300-500ms) untuk memastikan provider terinjeksi
-      setTimeout(async () => {
-        if (typeof window.paxihub !== 'undefined') {
-          const hub = window.paxihub;
-          console.log("PaxiHub Connected!");
-          // Lanjutkan inisialisasi dApp kamu di sini
-          
-        } else if (/Mobi/.test(navigator.userAgent)) {
-          // 2. Hanya redirect jika TIDAK di dalam PaxiHub
-          // Biasanya PaxiHub browser punya identitas khusus di UserAgent
-          if (!navigator.userAgent.includes("PaxiHub")) {
-            window.location.href = `paxi://hub/explorer?url=${encodeURIComponent(window.location.href)}`;
-            
-            setTimeout(() => {
-              window.location.href = 'https://paxinet.io/paxi_docs/paxihub#paxihub-application';
-            }, 1500);
-          }
-        }
-      }, 500);
-      
-      // 3. Fetch Chain ID tetap di luar biar cepat
+      if (typeof window.paxihub === 'undefined') {
+        alert('Please open this page in PaxiHub app');
+        return;
+      }
       try {
         const statusRes = await fetch(`${RPC}/status`);
         const statusData = await statusRes.json();
@@ -327,7 +305,7 @@
         console.error('Failed to fetch chainId:', e);
       }
     });
-    
+
     async function connectWallet() {
       if (typeof window.paxihub === 'undefined') {
         alert('PaxiHub not detected');
@@ -346,7 +324,7 @@
         alert('Failed to connect: ' + err.message);
       }
     }
-    
+
     function getLocalTokens() {
       try {
         const stored = localStorage.getItem(`paxi_tokens_${userAddress}`);
@@ -355,7 +333,7 @@
         return [];
       }
     }
-    
+
     function saveLocalToken(tokenData) {
       try {
         const tokens = getLocalTokens();
@@ -368,7 +346,7 @@
         console.error('Failed to save token:', e);
       }
     }
-    
+
     async function refreshTokens() {
       document.getElementById('tokenList').innerHTML = `
         <div class="text-center py-8 text-gray-500">
@@ -380,14 +358,17 @@
         const response = await fetch(`${BACKEND_URL}/api/user-tokens/${userAddress}`);
         const data = await response.json();
         let tokens = [];
+        
         if (data.success && data.tokens.length > 0) {
+          // Backend returns array of strings (contract addresses)
           tokens = data.tokens;
         } else {
           tokens = getLocalTokens();
         }
+        
         if (tokens.length > 0) {
-          userTokens = tokens;
-          renderTokenList(tokens);
+          // Fetch full info for each token
+          await enrichTokensInfo(tokens);
         } else {
           document.getElementById('tokenList').innerHTML = `
             <div class="text-center py-8 text-gray-500">
@@ -397,58 +378,142 @@
           `;
         }
       } catch (err) {
+        console.error('Refresh tokens error:', err);
         const tokens = getLocalTokens();
         if (tokens.length > 0) {
-          userTokens = tokens;
-          renderTokenList(tokens);
+          await enrichTokensInfo(tokens);
         }
       }
     }
     
+    async function enrichTokensInfo(tokenAddresses) {
+      const enrichedTokens = [];
+      
+      for (const tokenAddr of tokenAddresses) {
+        try {
+          // If it's already an object with full info, use it
+          if (typeof tokenAddr === 'object' && tokenAddr.contractAddress) {
+            enrichedTokens.push(tokenAddr);
+            continue;
+          }
+          
+          // If it's a string (contract address), fetch info
+          const contractAddress = typeof tokenAddr === 'string' ? tokenAddr : tokenAddr.contractAddress;
+          const query = btoa(JSON.stringify({ token_info: {} }));
+          const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`);
+          
+          if (res.ok) {
+            const data = await res.json();
+            const tokenData = {
+              contractAddress: contractAddress,
+              name: data.data.name,
+              symbol: data.data.symbol,
+              decimals: data.data.decimals,
+              totalSupply: data.data.total_supply
+            };
+            enrichedTokens.push(tokenData);
+            // Save to localStorage
+            saveLocalToken(tokenData);
+          } else {
+            // If fetch fails, use minimal info
+            enrichedTokens.push({
+              contractAddress: contractAddress,
+              name: 'Unknown',
+              symbol: 'TKN',
+              decimals: 6
+            });
+          }
+        } catch (e) {
+          console.error('Error enriching token:', e);
+        }
+      }
+      
+      userTokens = enrichedTokens;
+      renderTokenList(enrichedTokens);
+    }
+
     function renderTokenList(tokens) {
-      const html = tokens.map(token => `
-        <div class="glass rounded-lg p-4 hover:bg-white/5 transition cursor-pointer" onclick="openTokenModal('${token.contractAddress}')">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold">
-                ${token.symbol.substring(0, 2)}
-              </div>
-              <div>
-                <p class="font-semibold">${token.name} (${token.symbol})</p>
-                <p class="text-xs text-gray-400 font-mono">${token.contractAddress}</p>
-              </div>
-            </div>
-            <button class="glass px-4 py-2 rounded-lg hover:bg-white/10">
-              <i class="fas fa-cog mr-2"></i>Manage
-            </button>
+      if (!Array.isArray(tokens) || tokens.length === 0) {
+        document.getElementById('tokenList').innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-3"></i>
+            <p>No tokens found</p>
           </div>
-        </div>
-      `).join('');
+        `;
+        return;
+      }
+      
+      const html = tokens.map(token => {
+        const name = token.name || 'Unknown Token';
+        const symbol = token.symbol || 'TKN';
+        const contractAddress = token.contractAddress || token;
+        const symbolInitials = symbol.length >= 2 ? symbol.substring(0, 2) : symbol;
+        
+        return `
+          <div class="glass rounded-lg p-4 hover:bg-white/5 transition cursor-pointer" onclick='openTokenModal(${JSON.stringify(token)})'>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-bold">
+                  ${symbolInitials}
+                </div>
+                <div>
+                  <p class="font-semibold">${name} (${symbol})</p>
+                  <p class="text-xs text-gray-400 font-mono">${contractAddress}</p>
+                </div>
+              </div>
+              <button class="glass px-4 py-2 rounded-lg hover:bg-white/10">
+                <i class="fas fa-cog mr-2"></i>Manage
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
       document.getElementById('tokenList').innerHTML = html;
     }
-    
-    function openTokenModal(contractAddress) {
-      currentToken = userTokens.find(t => t.contractAddress === contractAddress);
-      if (!currentToken) return;
+
+    function openTokenModal(tokenData) {
+      // Accept token object directly from onclick
+      if (typeof tokenData === 'string') {
+        // Fallback: find in userTokens array
+        currentToken = userTokens.find(t => t.contractAddress === tokenData);
+      } else if (typeof tokenData === 'object') {
+        // Direct object passed
+        currentToken = tokenData;
+      }
+      
+      if (!currentToken || !currentToken.contractAddress) {
+        alert('Token data not found. Please refresh the page.');
+        console.error('Token not found:', tokenData);
+        return;
+      }
+      
+      // Ensure token has all required fields
+      currentToken.name = currentToken.name || 'Unknown Token';
+      currentToken.symbol = currentToken.symbol || 'TKN';
+      currentToken.decimals = currentToken.decimals || 6;
+      
       document.getElementById('modalTokenName').textContent = `${currentToken.name} (${currentToken.symbol})`;
       document.getElementById('modalTokenContract').textContent = currentToken.contractAddress;
       document.getElementById('actionModal').classList.remove('hidden');
+      
       switchTab('mint');
       loadTokenBalance();
     }
-    
+
     function closeModal() {
       document.getElementById('actionModal').classList.add('hidden');
-      currentToken = null;
+      // DON'T set currentToken to null - keep it for potential re-opening
+      // currentToken = null;
     }
-    
+
     function switchTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
       document.querySelector(`[data-tab="${tabName}"]`).classList.add('tab-active');
       document.getElementById(`tab-${tabName}`).classList.remove('hidden');
     }
-    
+
     async function loadTokenBalance() {
       if (!currentToken || !currentToken.contractAddress) {
         document.getElementById('userBalance').textContent = 'N/A';
@@ -456,7 +521,7 @@
       }
       
       try {
-        const query = btoa(JSON.stringify({ balance: { address: userAddress } }));
+        const query = btoa(JSON.stringify({balance: {address: userAddress}}));
         const res = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
         
         if (!res.ok) {
@@ -473,9 +538,9 @@
         document.getElementById('userBalance').textContent = 'Error loading';
       }
     }
-    
+
     // ========== EXECUTE ACTIONS (USER SELF-EXECUTE + PAY FEE AFTER) ==========
-    
+
     async function executeMint() {
       if (!currentToken || !currentToken.contractAddress) {
         alert('Token information not available. Please refresh and try again.');
@@ -489,10 +554,10 @@
       }
       
       const recipient = document.getElementById('mintRecipient').value.trim() || userAddress;
-      
+
       closeModal();
       showProcessing('Preparing mint transaction...');
-      
+
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
@@ -504,7 +569,7 @@
         const infoData = await infoRes.json();
         const decimals = infoData.data?.decimals || 6;
         const amount = (BigInt(Math.floor(mintAmt * Math.pow(10, decimals)))).toString();
-        
+
         const executeMsg = { mint: { recipient, amount } };
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
@@ -512,34 +577,32 @@
           msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
           funds: []
         });
-        
+
         const anyMsg = PaxiCosmJS.Any.fromPartial({
           typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
-        
+
         showProcessing('Please approve mint in PaxiHub...');
         const mintTxHash = await buildAndSendTx([anyMsg], 'Mint Tokens');
-        
+
         showProcessing('Mint successful! Now paying platform fee...');
         await new Promise(r => setTimeout(r, 2000));
-        
+
         const feeTxHash = await payPlatformFee('mint');
         
         hideProcessing();
         showSuccess('Mint completed and platform fee paid!', mintTxHash);
-        
+
       } catch (err) {
         hideProcessing();
         alert('Failed: ' + err.message);
       }
     }
-    
+
     async function executeBurn() {
-      // Gunakan pengecekan yang lebih ketat
       if (!currentToken || !currentToken.contractAddress) {
-        console.error("Current Token Data:", currentToken);
-        alert('Data token hilang. Silakan tutup modal dan klik Manage lagi.');
+        alert('Token information not available. Please refresh and try again.');
         return;
       }
       
@@ -548,10 +611,10 @@
         alert('Please enter a valid amount');
         return;
       }
-      
+
       closeModal();
       showProcessing('Preparing burn transaction...');
-      
+
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
@@ -563,7 +626,7 @@
         const infoData = await infoRes.json();
         const decimals = infoData.data?.decimals || 6;
         const amount = (BigInt(Math.floor(burnAmt * Math.pow(10, decimals)))).toString();
-        
+
         const executeMsg = { burn: { amount } };
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
@@ -571,29 +634,29 @@
           msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
           funds: []
         });
-        
+
         const anyMsg = PaxiCosmJS.Any.fromPartial({
           typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
-        
+
         showProcessing('Please approve burn in PaxiHub...');
         const burnTxHash = await buildAndSendTx([anyMsg], 'Burn Tokens');
-        
+
         showProcessing('Burn successful! Now paying platform fee...');
         await new Promise(r => setTimeout(r, 2000));
-        
+
         const feeTxHash = await payPlatformFee('burn');
         
         hideProcessing();
         showSuccess('Burn completed and platform fee paid!', burnTxHash);
-        
+
       } catch (err) {
         hideProcessing();
         alert('Failed: ' + err.message);
       }
     }
-    
+
     async function executeAddLP() {
       if (!currentToken || !currentToken.contractAddress) {
         alert('Token information not available. Please refresh and try again.');
@@ -607,10 +670,10 @@
         alert('Please fill all fields with valid amounts');
         return;
       }
-      
+
       closeModal();
       showProcessing('Preparing add liquidity transaction...');
-      
+
       try {
         const query = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${currentToken.contractAddress}/smart/${query}`);
@@ -623,43 +686,43 @@
         const decimals = infoData.data?.decimals || 6;
         const tokenAmount = (BigInt(Math.floor(tokenAmt * Math.pow(10, decimals)))).toString();
         const paxiAmount = (BigInt(Math.floor(paxiAmt * 1000000))).toString();
-        
+
         const executeMsg = {
           add_liquidity: {
             token: currentToken.contractAddress,
             token_amount: tokenAmount
           }
         };
-        
+
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
           msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
           funds: [PaxiCosmJS.coins(paxiAmount, DENOM)[0]]
         });
-        
+
         const anyMsg = PaxiCosmJS.Any.fromPartial({
           typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
-        
+
         showProcessing('Please approve add LP in PaxiHub...');
         const lpTxHash = await buildAndSendTx([anyMsg], 'Add Liquidity');
-        
+
         showProcessing('Add LP successful! Now paying platform fee...');
         await new Promise(r => setTimeout(r, 2000));
-        
+
         const feeTxHash = await payPlatformFee('addlp');
         
         hideProcessing();
         showSuccess('Liquidity added and platform fee paid!', lpTxHash);
-        
+
       } catch (err) {
         hideProcessing();
         alert('Failed: ' + err.message);
       }
     }
-    
+
     async function executeMetadata() {
       if (!currentToken || !currentToken.contractAddress) {
         alert('Token information not available. Please refresh and try again.');
@@ -670,63 +733,59 @@
       const description = document.getElementById('metaDescription').value;
       const logo = document.getElementById('metaLogo').value;
       const marketing = document.getElementById('metaMarketing').value;
-      
+
       if (!project && !description && !logo && !marketing) {
         return alert('Please fill at least one field');
       }
-      
+
       closeModal();
       showProcessing('Preparing metadata update...');
-      
+
       try {
-        const executeMsg = {
-          update_marketing: {
+        const executeMsg = { 
+          update_marketing: { 
             project: project || undefined,
             description: description || undefined,
             marketing: marketing || userAddress
-          }
+          } 
         };
         
         if (logo) {
           executeMsg.update_marketing.logo = { url: logo };
         }
-        
+
         const wasmMsg = PaxiCosmJS.MsgExecuteContract.fromPartial({
           sender: userAddress,
           contract: currentToken.contractAddress,
           msg: new TextEncoder().encode(JSON.stringify(executeMsg)),
           funds: []
         });
-        
+
         const anyMsg = PaxiCosmJS.Any.fromPartial({
           typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
           value: PaxiCosmJS.MsgExecuteContract.encode(wasmMsg).finish()
         });
-        
+
         showProcessing('Please approve metadata update in PaxiHub...');
         const metaTxHash = await buildAndSendTx([anyMsg], 'Update Metadata');
-        
+
         showProcessing('Metadata updated! Now paying platform fee...');
         await new Promise(r => setTimeout(r, 2000));
-        
+
         const feeTxHash = await payPlatformFee('metadata');
         
         hideProcessing();
         showSuccess('Metadata updated and platform fee paid!', metaTxHash);
-        
+
       } catch (err) {
         hideProcessing();
         alert('Failed: ' + err.message);
       }
     }
-    
+
     // ========== PAY PLATFORM FEE ==========
     
     async function payPlatformFee(action) {
-      // 1. Beri jeda sedikit lebih lama agar blockchain memproses transaksi sebelumnya
-      showProcessing('Waiting for previous transaction to clear...');
-      await new Promise(r => setTimeout(r, 4500));
-      
       showProcessing('Sending platform fee (1 PAXI)...');
       
       const msg = PaxiCosmJS.MsgSend.fromPartial({
@@ -740,17 +799,14 @@
         value: PaxiCosmJS.MsgSend.encode(msg).finish()
       });
       
+      showProcessing('Please approve platform fee payment...');
+      const feeTxHash = await buildAndSendTx([anyMsg], `Platform Fee: ${action}`);
+      
+      showProcessing('Verifying platform fee payment...');
+      await new Promise(r => setTimeout(r, 3000));
+      
+      // Verify with backend
       try {
-        // 2. buildAndSendTx di dalam sudah memanggil buildCommon, 
-        // jadi pastikan buildCommon dipanggil di sana untuk mendapat sequence terbaru.
-        showProcessing('Please approve platform fee payment in PaxiHub...');
-        const feeTxHash = await buildAndSendTx([anyMsg], `Platform Fee: ${action}`);
-        
-        showProcessing('Verifying platform fee payment...');
-        // Jeda sebelum verifikasi backend agar indexer blockchain sinkron
-        await new Promise(r => setTimeout(r, 3000));
-        
-        // 3. Verifikasi dengan backend
         const response = await fetch(`${BACKEND_URL}/api/verify-fee`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -763,19 +819,18 @@
         
         const result = await response.json();
         if (!result.success) {
-          console.warn('Backend verification failed, but user has paid.');
+          throw new Error('Platform fee verification failed');
         }
-        
-        return feeTxHash;
       } catch (err) {
-        console.error('Error in payPlatformFee:', err);
-        throw err; // Lempar error agar ditangkap di fungsi execute utama
+        console.error('Fee verification error:', err);
+        // Continue anyway - user already paid
       }
+      
+      return feeTxHash;
     }
-    
-    
+
     // ========== TRANSACTION UTILITIES ==========
-    
+
     async function buildAndSendTx(messages, memo = "") {
       const { accountNumber, sequence } = await buildCommon(userAddress);
       const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
@@ -839,7 +894,7 @@
         throw new Error(broadcastResult.tx_response?.raw_log || 'Transaction failed');
       }
     }
-    
+
     async function buildCommon(address) {
       const res = await fetch(`${LCD}/cosmos/auth/v1beta1/accounts/${address}`);
       const { account } = await res.json();
@@ -849,38 +904,38 @@
         sequence: Number(ba.sequence)
       };
     }
-    
+
     // ========== UI UTILITIES ==========
-    
+
     function showProcessing(text) {
       document.getElementById('processingText').textContent = text;
       document.getElementById('processingModal').classList.remove('hidden');
     }
-    
+
     function hideProcessing() {
       document.getElementById('processingModal').classList.add('hidden');
     }
-    
+
     function showSuccess(text, txHash) {
       document.getElementById('successText').textContent = text;
       document.getElementById('successTxLink').href = `https://explorer.paxinet.io/paxi/tx/${txHash}`;
       document.getElementById('successModal').classList.remove('hidden');
     }
-    
+
     function closeSuccessModal() {
       document.getElementById('successModal').classList.add('hidden');
       refreshTokens();
     }
-    
+
     function showAddTokenModal() {
       document.getElementById('addTokenModal').classList.remove('hidden');
     }
-    
+
     function closeAddTokenModal() {
       document.getElementById('addTokenModal').classList.add('hidden');
       document.getElementById('addTokenContract').value = '';
     }
-    
+
     async function addExistingToken() {
       const contractAddress = document.getElementById('addTokenContract').value.trim();
       
@@ -888,9 +943,9 @@
         alert('Please enter a valid contract address');
         return;
       }
-      
+
       showProcessing('Fetching token info from blockchain...');
-      
+
       try {
         const tokenInfoQuery = btoa(JSON.stringify({ token_info: {} }));
         const infoRes = await fetch(`${LCD}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${tokenInfoQuery}`);
@@ -898,10 +953,10 @@
         if (!infoRes.ok) {
           throw new Error('Failed to fetch token info. Make sure the contract address is correct.');
         }
-        
+
         const infoData = await infoRes.json();
         const info = infoData.data;
-        
+
         const tokenData = {
           name: info.name,
           symbol: info.symbol,
@@ -912,14 +967,14 @@
           logoUrl: '',
           createdAt: new Date().toISOString()
         };
-        
+
         saveLocalToken(tokenData);
-        
+
         hideProcessing();
         closeAddTokenModal();
         alert(`Token ${info.name} (${info.symbol}) added successfully!`);
         refreshTokens();
-        
+
       } catch (err) {
         hideProcessing();
         alert('Failed to add token: ' + err.message);
@@ -928,5 +983,4 @@
   </script>
   
 </body>
-
 </html>
