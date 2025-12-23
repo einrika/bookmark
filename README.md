@@ -1,10 +1,6 @@
 # Web List Collection EinRika
 
 - link website : https://einrika.github.io/bookmark/
-- link tutorial token prc20 paxihub : https://einrika.github.io/bookmark/paxi-prc20/doc-paxihub-prc20.html
-https://einrika.github.io/bookmark/paxi-prc20/create-token.html
-
-https://einrika.github.io/bookmark/paxi-prc20/token-manager.html
 
 # json data manga
 ```json
