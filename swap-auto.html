@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paxi Auto Swap Bot - Enhanced v2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://mainnet-api.paxinet.io/resources/js/paxi-cosmjs.umd.js"></script>
+    <!-- Signing Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noble-secp256k1/1.10.0/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.0/crypto-js.min.js"></script>
+    <!-- Alternative signing library (backup) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl.js/1.0.3/tweetnacl.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        * { font-family: 'Poppins', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: #0a0e27;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.25) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(29, 78, 216, 0.2) 0px, transparent 50%);
+        }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .glass-light {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .spinner {
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 4px;
+        }
+        
+        .badge-new {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            animation: badge-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .3s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-3 sm:p-6">
+    <div class="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        
+        <!-- Header -->
+        <div class="glass rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-center sm:text-left">
+                    <h1 class="text-2xl sm:text-4xl font-bold gradient-text flex items-center justify-center sm:justify-start gap-3">
+                        <i class="fas fa-infinity"></i>
+                        Paxi Auto Swap Bot
+                        <span class="badge-new text-xs px-2 py-1 rounded-full text-white font-medium">v2 AUTO-SIGN</span>
+                    </h1>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-2">Smart Volume Booster with Auto-Sign & Emergency Stop-Loss</p>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-2 glass-light rounded-xl">
+                    <div class="pulse-dot w-2 h-2 rounded-full bg-green-400" id="statusDot"></div>
+                    <span class="text-white text-sm font-medium" id="status">Idle</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div class="glass-light rounded-xl sm:rounded-2xl p-3 sm:p-4 border-l-4 border-yellow-500">
+            <div class="flex gap-3">
+                <i class="fas fa-shield-halved text-yellow-400 text-lg sm:text-xl"></i>
+                <div class="text-xs sm:text-sm text-slate-300">
+                    <span class="font-semibold text-yellow-400">Protected Mode:</span> Auto slippage & gas. Blockchain verification. Emergency PRC20 sell on stop-loss.
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            
+            <!-- Settings Card -->
+            <div class="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
+                <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-sliders text-blue-400"></i>
+                    Configuration
+                </h2>
+                
+                <div class="space-y-3 sm:space-y-4">
+                    <div>
+                        <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                            <i class="fas fa-file-contract text-purple-400"></i>
+                            PRC20 Contract Address
+                        </label>
+                        <input type="text" id="prc20Address" 
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white text-sm placeholder-slate-500 transition-all font-mono"
+                            placeholder="paxi14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9snvcq0u" value="paxi14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9snvcq0u">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                                <i class="fas fa-coins text-yellow-400"></i>
+                                Amount (PAXI)
+                            </label>
+                            <input type="number" id="swapAmount" value="100"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 sm:py-3 text-white text-sm">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                                <i class="fas fa-clock text-cyan-400"></i>
+                                Delay (sec)
+                            </label>
+                            <input type="number" id="delaySeconds" value="10" min="5"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 sm:py-3 text-white text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                                <i class="fas fa-gear text-pink-400"></i>
+                                Slippage Mode
+                            </label>
+                            <select id="slippageMode" 
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 sm:py-3 text-white text-sm">
+                                <option value="auto" selected>Auto (Recommended)</option>
+                                <option value="manual">Manual</option>
+                            </select>
+                        </div>
+                        
+                        <div id="manualSlippageContainer" style="display: none;">
+                            <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                                <i class="fas fa-percentage text-pink-400"></i>
+                                Max Slippage (%)
+                            </label>
+                            <input type="number" id="maxSlippage" value="1" max="5" min="0.5" step="0.1"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 sm:py-3 text-white text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                            <i class="fas fa-hand-holding-dollar text-red-400"></i>
+                            Stop-Loss Threshold (PAXI)
+                        </label>
+                        <input type="number" id="stopLossThreshold" value="98"
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 sm:py-3 text-white text-sm">
+                        <small class="text-slate-500 text-xs mt-1 block">
+                            <i class="fas fa-info-circle"></i> Bot akan otomatis jual PRC20 ke PAXI saat stop-loss triggered
+                        </small>
+                    </div>
+
+                    <!-- Auto-Sign Toggle Section -->
+                    <div class="glass-light rounded-xl p-4 border-l-4 border-blue-500 space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <span class="text-white font-semibold text-sm block mb-1 flex items-center gap-2">
+                                    <i class="fas fa-key text-blue-400"></i>
+                                    Tentang Konfirmasi Transaksi
+                                </span>
+                                <div class="text-xs text-slate-300 space-y-1">
+                                    <p id="signModeText">Mode: Manual (PaxiHub akan minta konfirmasi)</p>
+                                    <p class="text-yellow-300 font-semibold">
+                                        💡 Toggle untuk auto-sign dengan Private Key
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 pt-2 border-t border-slate-700/50">
+                            <span class="text-xs text-slate-400">Auto-Sign Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoSignToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Private Key Input (Hidden by default) -->
+                    <div id="privateKeyContainer" style="display: none;" class="space-y-3 p-3 bg-red-900/10 rounded-lg border border-red-700/30">
+                        <div>
+                            <label class="text-xs sm:text-sm text-slate-400 font-medium flex items-center gap-2 mb-2">
+                                <i class="fas fa-lock text-red-400"></i>
+                                Private Key (Session Only)
+                            </label>
+                            <input type="password" id="privateKey" 
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white text-sm placeholder-slate-500"
+                                placeholder="Paste your private key (hex format)">
+                            <small class="text-orange-300 text-xs mt-2 block">
+                                <i class="fas fa-exclamation-triangle"></i> ⚠️ Hanya disimpan di memory, tidak tersimpan permanent
+                            </small>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="privateKeyConfirm" class="w-4 h-4 rounded">
+                            <label class="text-xs text-slate-400 cursor-pointer">
+                                Saya memahami risiko & bertanggung jawab atas keamanan key
+                            </label>
+                        </div>
+
+                    <div class="text-xs bg-slate-800/50 p-2 rounded border border-slate-700 text-slate-400">
+                        <span class="text-green-400" id="keyStatus">⏳ Menunggu input...</span>
+                    </div>
+
+                    <!-- Library Info -->
+                    <div class="text-xs bg-blue-900/20 p-2 rounded border border-blue-700/30 text-slate-300 mt-2">
+                        <span class="text-blue-300 font-semibold">📚 Libraries Status:</span>
+                        <ul class="mt-1 ml-2 space-y-0.5 text-slate-400 font-mono text-xs">
+                            <li id="libNoble">🔴 noble-secp256k1</li>
+                            <li id="libCrypto">🔴 crypto.subtle</li>
+                            <li id="libCryptoJS">🔴 CryptoJS</li>
+                            <li id="libPaxi">🔴 PaxiCosmJS</li>
+                        </ul>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 sm:gap-3 pt-2">
+                    <button id="startBtn" onclick="startBot()" 
+                        class="flex-1 btn-gradient text-white px-4 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-2">
+                        <i class="fas fa-rocket"></i>
+                        <span>Start Bot</span>
+                    </button>
+                    <button id="stopBtn" onclick="stopBot()" disabled
+                        class="flex-1 bg-red-600 text-white px-4 py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-2 opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition-all">
+                        <i class="fas fa-stop"></i>
+                        <span>Stop</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wallet Info Card -->
+            <div class="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
+                <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-wallet text-green-400"></i>
+                    Wallet Status
+                </h2>
+                
+                <div class="space-y-3">
+                    <div class="stat-card rounded-xl p-3 sm:p-4">
+                        <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                            <i class="fas fa-address-card"></i>
+                            Address
+                        </div>
+                        <div class="text-sm sm:text-base font-mono text-white break-all" id="walletAddress">Not Connected</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="stat-card rounded-xl p-3 sm:p-4">
+                            <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                                <i class="fas fa-dollar-sign"></i>
+                                Current Balance
+                            </div>
+                            <div class="text-lg sm:text-xl font-bold text-white" id="currentBalance">-</div>
+                            <div class="text-xs text-slate-500">PAXI</div>
+                        </div>
+
+                        <div class="stat-card rounded-xl p-3 sm:p-4">
+                            <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                                <i class="fas fa-flag-checkered"></i>
+                                Initial Balance
+                            </div>
+                            <div class="text-lg sm:text-xl font-bold text-white" id="initialBalance">-</div>
+                            <div class="text-xs text-slate-500">PAXI</div>
+                        </div>
+                    </div>
+
+                    <div id="balanceWarning"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-repeat"></i>
+                    Total Swaps
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-white" id="totalSwaps">0</div>
+            </div>
+
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                    Success
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-green-400" id="successSwaps">0</div>
+            </div>
+
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-times-circle text-red-400"></i>
+                    Failed
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-red-400" id="failedSwaps">0</div>
+            </div>
+
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-chart-simple"></i>
+                    Total Volume
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-cyan-400" id="totalVolume">0</div>
+                <div class="text-xs text-slate-500">PAXI</div>
+            </div>
+
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-receipt"></i>
+                    Total Fees
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-orange-400" id="totalFees">0</div>
+            </div>
+
+            <div class="stat-card rounded-xl p-3 sm:p-4">
+                <div class="text-xs text-slate-400 mb-1 flex items-center gap-2">
+                    <i class="fas fa-chart-line"></i>
+                    Avg Slip
+                </div>
+                <div class="text-xl sm:text-2xl font-bold text-purple-400" id="avgSlippage">0%</div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="glass rounded-xl sm:rounded-2xl p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2 mb-4">
+                <i class="fas fa-terminal text-cyan-400"></i>
+                Live Logs
+            </h2>
+            <div class="glass-light rounded-xl p-3 sm:p-4 h-40 sm:h-60 overflow-y-auto font-mono text-xs sm:text-sm" id="logContainer">
+                <div class="text-green-400">[System] Bot initialized with emergency stop-loss protection...</div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="glass rounded-xl sm:rounded-2xl p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-history text-indigo-400"></i>
+                    Swap History
+                </h2>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="downloadHistory()" 
+                        class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i class="fas fa-download"></i>
+                        <span>Download</span>
+                    </button>
+                    <button onclick="clearHistory()" 
+                        class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all">
+                        <i class="fas fa-trash"></i>
+                        <span>Clear</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-xs sm:text-sm">
+                    <thead class="bg-slate-800/50">
+                        <tr class="text-slate-400">
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">Time</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">Type</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left hidden sm:table-cell">Amount In</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left hidden sm:table-cell">Amount Out</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">Slip</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">Status</th>
+                            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">Tx</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody" class="text-slate-300">
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-slate-500">
+                                <i class="fas fa-inbox text-3xl mb-2 block"></i>
+                                No history yet
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const rpc = 'https://mainnet-rpc.paxinet.io';
+        const lcd = 'https://mainnet-lcd.paxinet.io';
+        const denom = 'upaxi';
+        const swapModuleAddress = "paxi1mfru9azs5nua2wxcd4sq64g5nt7nn4n80r745t";
+
+        let isRunning = false;
+        let swapCount = 0;
+        let successCount = 0;
+        let failedCount = 0;
+        let initialBalance = 0;
+        let currentBalance = 0;
+        let totalFees = 0;
+        let totalVolume = 0;
+        let slippageList = [];
+        let lastSwapAmount = null;
+        let currentSwapType = 'PAXI_TO_PRC20';
+        let autoSignMode = false;
+        let privateKeyData = null;
+
+        const toBase64 = bytes => btoa(String.fromCharCode(...bytes));
+
+        // ============ AUTO-SIGN & PRIVATE KEY MANAGEMENT ============
+        document.getElementById('autoSignToggle').addEventListener('change', (e) => {
+            const container = document.getElementById('privateKeyContainer');
+            const signModeText = document.getElementById('signModeText');
+            
+            if (e.target.checked) {
+                container.style.display = 'block';
+                signModeText.textContent = 'Mode: Auto-Sign (Tunggu private key)';
+                autoSignMode = true;
+                log('Auto-Sign mode activated', 'warning');
+            } else {
+                container.style.display = 'none';
+                signModeText.textContent = 'Mode: Manual (PaxiHub konfirmasi)';
+                autoSignMode = false;
+                privateKeyData = null;
+                document.getElementById('privateKey').value = '';
+                document.getElementById('privateKeyConfirm').checked = false;
+                document.getElementById('keyStatus').textContent = '⏳ Menunggu input...';
+                log('Switched to Manual Mode', 'info');
+            }
+        });
+
+        function validatePrivateKey(key) {
+            if (!key || key.length < 64) return false;
+            if (!/^[a-fA-F0-9]+$/.test(key)) return false;
+            return true;
+        }
+
+        document.getElementById('privateKey').addEventListener('input', (e) => {
+            const key = e.target.value.trim();
+            const confirm = document.getElementById('privateKeyConfirm').checked;
+            const keyStatus = document.getElementById('keyStatus');
+            
+            if (key && confirm && validatePrivateKey(key)) {
+                privateKeyData = key;
+                keyStatus.innerHTML = '<span class="text-green-400">✓ Private key ready untuk auto-sign</span>';
+                log('✓ Private key loaded successfully', 'success');
+            } else if (key && !confirm) {
+                keyStatus.innerHTML = '<span class="text-yellow-400">⚠️ Centang persetujuan dulu</span>';
+                privateKeyData = null;
+            } else if (key && !validatePrivateKey(key)) {
+                keyStatus.innerHTML = '<span class="text-red-400">✗ Format key tidak valid (hex 64+ chars)</span>';
+                privateKeyData = null;
+            } else {
+                keyStatus.innerHTML = '<span class="text-slate-500">⏳ Menunggu input...</span>';
+                privateKeyData = null;
+            }
+        });
+
+        document.getElementById('privateKeyConfirm').addEventListener('change', () => {
+            const privateKey = document.getElementById('privateKey');
+            privateKey.dispatchEvent(new Event('input'));
+        });
+
+        // ============ UTILS & LOGGING ============
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString();
+            let icon = 'fa-info-circle';
+            let color = 'text-cyan-400';
+            
+            if (type === 'error') {
+                icon = 'fa-times-circle';
+                color = 'text-red-400';
+            } else if (type === 'success') {
+                icon = 'fa-check-circle';
+                color = 'text-green-400';
+            } else if (type === 'warning') {
+                icon = 'fa-exclamation-triangle';
+                color = 'text-yellow-400';
+            }
+            
+            logContainer.innerHTML += `<div class="mb-1 ${color}"><i class="fas ${icon}"></i> [${time}] ${message}</div>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // ============ STATS MANAGEMENT ============
+        function loadStats() {
+            const stats = JSON.parse(localStorage.getItem('swapStats') || '{}');
+            totalVolume = stats.totalVolume || 0;
+            totalFees = stats.totalFees || 0;
+            document.getElementById('totalVolume').textContent = (totalVolume / 1000000).toFixed(2);
+            document.getElementById('totalFees').textContent = (totalFees / 1000000).toFixed(6);
+        }
+
+        function saveStats() {
+            localStorage.setItem('swapStats', JSON.stringify({ totalVolume, totalFees }));
+        }
+
+        function updateStats() {
+            document.getElementById('totalSwaps').textContent = swapCount;
+            document.getElementById('successSwaps').textContent = successCount;
+            document.getElementById('failedSwaps').textContent = failedCount;
+            document.getElementById('totalVolume').textContent = (totalVolume / 1000000).toFixed(2);
+            document.getElementById('totalFees').textContent = (totalFees / 1000000).toFixed(6);
+            
+            if (slippageList.length > 0) {
+                const avgSlip = slippageList.reduce((a, b) => a + b, 0) / slippageList.length;
+                document.getElementById('avgSlippage').textContent = avgSlip.toFixed(2) + '%';
+            }
+
+            const threshold = parseFloat(document.getElementById('stopLossThreshold').value) * 1000000;
+            if (currentBalance < threshold && isRunning) {
+                log(`🚨 STOP-LOSS TRIGGERED! Balance: ${(currentBalance/1000000).toFixed(6)} < ${threshold/1000000} PAXI`, 'error');
+                document.getElementById('balanceWarning').innerHTML = 
+                    '<div class="glass-light rounded-xl p-3 border-l-4 border-red-500 text-red-400 text-sm font-semibold animate-pulse"><i class="fas fa-exclamation-triangle"></i> STOP-LOSS ACTIVATED - EMERGENCY SELLING PRC20</div>';
+                
+                isRunning = false;
+                (async () => {
+                    await emergencySellPRC20();
+                    stopBot();
+                })();
+            }
+
+            saveStats();
+        }
+
+        // ============ HISTORY MANAGEMENT ============
+        function saveHistory(entry) {
+            let history = JSON.parse(localStorage.getItem('swapHistory') || '[]');
+            history.push(entry);
+            localStorage.setItem('swapHistory', JSON.stringify(history));
+            updateHistoryTable();
+        }
+
+        function getHistory() {
+            return JSON.parse(localStorage.getItem('swapHistory') || '[]');
+        }
+
+        function updateHistoryTable() {
+            const history = getHistory();
+            const tbody = document.getElementById('historyBody');
+            
+            if (history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500"><i class="fas fa-inbox text-3xl mb-2 block"></i>No history yet</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = history.slice(-20).reverse().map(h => `
+                <tr class="border-t border-slate-700/50 hover:bg-slate-800/30">
+                    <td class="px-2 sm:px-4 py-2 sm:py-3">${new Date(h.timestamp).toLocaleTimeString()}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs">${h.type}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell text-xs">${h.amountIn}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell text-xs">${h.amountOut || '-'}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3">${h.slippage ? h.slippage.toFixed(2) + '%' : '-'}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3">${h.status === 'success' ? '<span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-semibold">✓ OK</span>' : '<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-semibold">✗ FAIL</span>'}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3">${h.txHash !== 'N/A' ? `<a href="https://explorer.paxinet.io/txs/${h.txHash}" target="_blank" class="text-blue-400 hover:text-blue-300"><i class="fas fa-external-link-alt"></i></a>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function downloadHistory() {
+            const history = getHistory();
+            if (history.length === 0) {
+                alert('No history to download');
+                return;
+            }
+
+            const csv = [
+                ['Timestamp', 'Type', 'Amount In', 'Amount Out', 'Slippage %', 'Fee', 'Status', 'TxHash'].join(','),
+                ...history.map(h => [
+                    new Date(h.timestamp).toISOString(),
+                    h.type,
+                    h.amountIn,
+                    h.amountOut || '',
+                    h.slippage || '',
+                    h.fee,
+                    h.status,
+                    h.txHash
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `paxi-swap-history-${Date.now()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('History downloaded successfully', 'success');
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all history?')) {
+                localStorage.removeItem('swapHistory');
+                localStorage.removeItem('swapStats');
+                totalVolume = 0;
+                totalFees = 0;
+                updateHistoryTable();
+                updateStats();
+                log('History and stats cleared', 'warning');
+            }
+        }
+
+        // ============ BLOCKCHAIN OPERATIONS ============
+        async function getBalance(address) {
+            try {
+                const res = await fetch(`${lcd}/cosmos/bank/v1beta1/balances/${address}`);
+                const data = await res.json();
+                const paxiBalance = data.balances.find(b => b.denom === denom);
+                return paxiBalance ? parseInt(paxiBalance.amount) : 0;
+            } catch (e) {
+                console.error('Error fetching balance:', e);
+                return 0;
+            }
+        }
+
+        async function verifyTransaction(txHash, maxRetries = 10) {
+            log(`Verifying tx: ${txHash.substring(0, 10)}...`, 'info');
+            
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    const res = await fetch(`${lcd}/cosmos/tx/v1beta1/txs/${txHash}`);
+                    const data = await res.json();
+                    
+                    if (data.tx_response) {
+                        const code = data.tx_response.code;
+                        if (code === 0) {
+                            log(`✓ Transaction confirmed on blockchain`, 'success');
+                            return { success: true, data: data.tx_response };
+                        } else {
+                            log(`✗ Transaction failed: ${data.tx_response.raw_log}`, 'error');
+                            return { success: false, error: data.tx_response.raw_log };
+                        }
+                    }
+                } catch (e) {
+                    if (i === maxRetries - 1) {
+                        log(`Failed to verify after ${maxRetries} attempts`, 'error');
+                        return { success: false, error: 'Verification timeout' };
+                    }
+                }
+                
+                log(`Waiting for confirmation... (${i + 1}/${maxRetries})`, 'warning');
+            }
+            
+            return { success: false, error: 'Verification timeout' };
+        }
+
+        async function emergencySellPRC20() {
+            log('🚨 EMERGENCY: Converting PRC20 back to PAXI...', 'warning');
+            
+            try {
+                if (lastSwapAmount && lastSwapAmount > 0 && currentSwapType === 'PRC20_TO_PAXI') {
+                    const prc20 = document.getElementById('prc20Address').value;
+                    log(`Selling ${lastSwapAmount.toFixed(2)} PRC20 back to PAXI...`, 'info');
+                    
+                    const swapResult = await swapPRC20ToPAXI(prc20, lastSwapAmount);
+                    
+                    if (swapResult.result.tx_response && swapResult.result.tx_response.txhash) {
+                        const txHash = swapResult.result.tx_response.txhash;
+                        log(`Emergency sell broadcast: ${txHash}`, 'info');
+                        
+                        const verification = await verifyTransaction(txHash);
+                        
+                        if (verification.success) {
+                            log('✓ Emergency sell completed successfully', 'success');
+                            
+                            const sender = await window.paxihub.paxi.getAddress();
+                            currentBalance = await getBalance(sender.address);
+                            document.getElementById('currentBalance').textContent = (currentBalance / 1000000).toFixed(6);
+                            
+                            log(`Final balance: ${(currentBalance / 1000000).toFixed(6)} PAXI`, 'success');
+                            lastSwapAmount = null;
+                            currentSwapType = 'PAXI_TO_PRC20';
+                        } else {
+                            log('✗ Emergency sell failed on blockchain', 'error');
+                        }
+                    }
+                } else {
+                    log('No PRC20 tokens to sell (already in PAXI)', 'info');
+                }
+            } catch (e) {
+                log(`Emergency sell error: ${e.message}`, 'error');
+            }
+        }
+
+        // ============ WALLET OPERATIONS ============
+        async function checkWallet() {
+            if (typeof window.paxihub === 'undefined') {
+                log('PaxiHub wallet not detected!', 'error');
+                alert('Please install PaxiHub wallet!');
+                return false;
+            }
+
+            try {
+                const sender = await window.paxihub.paxi.getAddress();
+                document.getElementById('walletAddress').textContent = 
+                    sender.address.substring(0, 10) + '...' + sender.address.slice(-8);
+                
+                const balance = await getBalance(sender.address);
+                currentBalance = balance;
+                if (initialBalance === 0) {
+                    initialBalance = balance;
+                    document.getElementById('initialBalance').textContent = (balance / 1000000).toFixed(6);
+                }
+                document.getElementById('currentBalance').textContent = (balance / 1000000).toFixed(6);
+                
+                log(`Wallet connected: ${sender.address}`, 'success');
+                log(`Balance: ${(balance / 1000000).toFixed(6)} PAXI`, 'success');
+                return true;
+            } catch (e) {
+                log('Failed to connect wallet: ' + e.message, 'error');
+                return false;
+            }
+        }
+
+        // ============ SLIPPAGE & GAS CALCULATION ============
+        function calculateOptimalSlippage(reservePaxi, reservePrc20, swapAmount) {
+            const liquidityDepth = Math.min(reservePaxi, reservePrc20);
+            const swapImpact = (swapAmount / liquidityDepth) * 100;
+            
+            let optimalSlippage;
+            if (swapImpact < 0.1) {
+                optimalSlippage = 0.5;
+            } else if (swapImpact < 0.5) {
+                optimalSlippage = 1.0;
+            } else if (swapImpact < 1.0) {
+                optimalSlippage = 1.5;
+            } else {
+                optimalSlippage = 2.0;
+            }
+            
+            log(`Auto slippage: ${optimalSlippage}% (impact: ${swapImpact.toFixed(3)}%)`, 'info');
+            return optimalSlippage;
+        }
+
+        function calculateOptimalGas(messageCount = 1) {
+            const baseGas = 200000;
+            const gasPerMessage = 300000;
+            const optimalGas = baseGas + (messageCount * gasPerMessage);
+            
+            log(`Auto gas: ${optimalGas} (${messageCount} msgs)`, 'info');
+            return optimalGas;
+        }
+
+        // ============ TRANSACTION BUILDING ============
+        async function buildCommon(chainId, address) {
+            const res = await fetch(`${lcd}/cosmos/auth/v1beta1/accounts/${address}`);
+            const { account } = await res.json();
+            const ba = account.base_account || account;
+            return {
+                accountNumber: Number(ba.account_number),
+                sequence: Number(ba.sequence)
+            };
+        }
+
+        async function fetchPool(contractAddress) {
+            try {
+                const url = `${lcd}/paxi/swap/pool/${contractAddress}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Fetch pool failed');
+                return res.json();
+            } catch (e) {
+                console.error('[fetchPool]', e);
+                return null;
+            }
+        }
+
+        async function buildAndSendTx(messages, memo = "", customGas = null) {
+            const chainId = await fetch(`${rpc}/status`)
+                .then(r => r.json())
+                .then(d => d.result.node_info.network);
+
+            const sender = await window.paxihub.paxi.getAddress();
+            const { accountNumber, sequence } = await buildCommon(chainId, sender.address);
+
+            const txBody = PaxiCosmJS.TxBody.fromPartial({ messages, memo });
+            
+            const gasLimit = customGas || calculateOptimalGas(messages.length);
+            const gasAmount = Math.ceil(gasLimit * 0.0625);
+            
+            const fee = {
+                amount: [PaxiCosmJS.coins(gasAmount.toString(), denom)[0]],
+                gasLimit: gasLimit
+            };
+
+            totalFees += gasAmount;
+
+            const pubkeyBytes = new Uint8Array(sender.public_key);
+            const pubkeyAny = {
+                typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+                value: PaxiCosmJS.PubKey.encode({ key: pubkeyBytes }).finish()
+            };
+
+            const authInfo = PaxiCosmJS.AuthInfo.fromPartial({
+                signerInfos: [{
+                    publicKey: pubkeyAny,
+                    modeInfo: { single: { mode: 1 } },
+                    sequence: BigInt(sequence)
+                }],
+                fee
+            });
+
+            const signDoc = PaxiCosmJS.SignDoc.fromPartial({
+                bodyBytes: PaxiCosmJS.TxBody.encode(txBody).finish(),
+                authInfoBytes: PaxiCosmJS.AuthInfo.encode(authInfo).finish(),
+                chainId,
+                accountNumber: BigInt(accountNumber)
+            });
+
+            let sigBytes;
+
+            if (autoSignMode && privateKeyData) {
+                // Auto-sign dengan private key menggunakan secp256k1
+                log('🔐 Auto-signing dengan private key...', 'info');
+                
+                try {
+                    // Convert hex private key ke Uint8Array
+                    const privKeyBytes = new Uint8Array(privateKeyData.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                    
+                    // Encode sign doc bytes
+                    const signDocBytes = PaxiCosmJS.SignDoc.encode(signDoc).finish();
+                    
+                    log('Step 1: Computing SHA-256 hash...', 'info');
+                    
+                    // Hash sign doc - multiple methods to ensure it works
+                    let messageHash;
+                    
+                    try {
+                        // Method 1: native crypto.subtle (fastest)
+                        if (typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function') {
+                            log('Using native crypto.subtle for hashing', 'info');
+                            messageHash = await crypto.subtle.digest('SHA-256', signDocBytes);
+                        } else {
+                            throw new Error('crypto.subtle not available, trying fallback');
+                        }
+                    } catch (e1) {
+                        try {
+                            // Method 2: CryptoJS (fallback)
+                            log(`Native crypto failed: ${e1.message}. Using CryptoJS...`, 'warning');
+                            if (typeof CryptoJS === 'undefined') {
+                                throw new Error('CryptoJS not loaded');
+                            }
+                            
+                            // Convert Uint8Array to WordArray for CryptoJS
+                            const wordArray = CryptoJS.lib.WordArray.create(signDocBytes);
+                            const hashObj = CryptoJS.SHA256(wordArray);
+                            
+                            // Convert back to Uint8Array
+                            const hex = hashObj.toString();
+                            messageHash = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                        } catch (e2) {
+                            throw new Error(`All hash methods failed: ${e1.message} | ${e2.message}`);
+                        }
+                    }
+                    
+                    const messageHashArray = new Uint8Array(messageHash);
+                    log(`Step 2: Hash computed (${messageHashArray.length} bytes)`, 'info');
+                    
+                    log('Step 3: Signing dengan ECDSA secp256k1...', 'info');
+                    
+                    // Sign dengan noble-secp256k1
+                    if (typeof nobleSecp256k1 === 'undefined') {
+                        throw new Error('noble-secp256k1 library not loaded');
+                    }
+                    
+                    const sig = nobleSecp256k1.sign(messageHashArray, privKeyBytes);
+                    
+                    // Get signature bytes (DER format)
+                    let sigDER;
+                    if (typeof sig.toDERRawBytes === 'function') {
+                        sigDER = sig.toDERRawBytes();
+                    } else if (typeof sig.toRawBytes === 'function') {
+                        sigDER = sig.toRawBytes();
+                    } else if (typeof sig.toDER === 'function') {
+                        sigDER = sig.toDER();
+                    } else {
+                        // Fallback: sig might already be bytes
+                        sigDER = sig;
+                    }
+                    
+                    sigBytes = new Uint8Array(sigDER);
+                    log(`✓ Transaction signed successfully (${sigBytes.length} bytes signature)`, 'success');
+                    
+                } catch (e) {
+                    log(`❌ Auto-sign error: ${e.message}`, 'error');
+                    log('⚠️ Falling back to manual mode (PaxiHub confirmation required)...', 'warning');
+                    
+                    // Fallback ke manual signing via PaxiHub
+                    try {
+                        const txObj = {
+                            bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
+                            authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
+                            chainId,
+                            accountNumber: signDoc.accountNumber.toString()
+                        };
+                        const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
+                        sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
+                        log('✓ Transaction signed via PaxiHub', 'success');
+                    } catch (fallbackError) {
+                        throw new Error(`Both auto-sign and manual signing failed: ${fallbackError.message}`);
+                    }
+                }
+            } else {
+                // Manual mode - gunakan wallet extension (PaxiHub)
+                log('📱 Waiting for PaxiHub wallet confirmation...', 'info');
+                const txObj = {
+                    bodyBytes: btoa(String.fromCharCode(...signDoc.bodyBytes)),
+                    authInfoBytes: btoa(String.fromCharCode(...signDoc.authInfoBytes)),
+                    chainId,
+                    accountNumber: signDoc.accountNumber.toString()
+                };
+
+                const result = await window.paxihub.paxi.signAndSendTransaction(txObj);
+                sigBytes = Uint8Array.from(atob(result.success), c => c.charCodeAt(0));
+                log('✓ Transaction signed via PaxiHub', 'success');
+            }
+
+            const txRaw = PaxiCosmJS.TxRaw.fromPartial({
+                bodyBytes: signDoc.bodyBytes,
+                authInfoBytes: signDoc.authInfoBytes,
+                signatures: [sigBytes]
+            });
+
+            const txBytes = PaxiCosmJS.TxRaw.encode(txRaw).finish();
+            const base64Tx = toBase64(txBytes);
+
+            const broadcastResult = await fetch(`${lcd}/cosmos/tx/v1beta1/txs`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tx_bytes: base64Tx, mode: "BROADCAST_MODE_SYNC" })
+            }).then(r => r.json());
+
+            return broadcastResult;
+        }
+
+        // ============ SWAP OPERATIONS ============
+        async function swapPAXIToPRC20(prc20, amount) {
+            const senderInfo = await window.paxihub.paxi.getAddress();
+            const sender = senderInfo.address;
+
+            const pool = await fetchPool(prc20);
+            if (!pool) throw new Error('Pool not found');
+
+            const reservePaxi = parseFloat(pool['reserve_paxi']);
+            const reservePrc20 = parseFloat(pool['reserve_prc20']);
+            
+            const amountWithFee = amount * 997;
+            const numerator = amountWithFee * reservePrc20;
+            const denominator = (reservePaxi * 1000) + amountWithFee;
+            const expectedOutput = numerator / denominator;
+            
+            const slippageMode = document.getElementById('slippageMode').value;
+            let maxSlippage;
+            
+            if (slippageMode === 'auto') {
+                maxSlippage = calculateOptimalSlippage(reservePaxi, reservePrc20, amount) / 100;
+            } else {
+                maxSlippage = parseFloat(document.getElementById('maxSlippage').value) / 100;
+            }
+            
+            const minReceive = Math.floor(expectedOutput * (1 - maxSlippage));
+
+            log(`Expected: ${expectedOutput.toFixed(2)} PRC20, Min: ${minReceive}`, 'info');
+
+            const swapMsg = {
+                creator: sender,
+                prc20: prc20,
+                offerDenom: denom,
+                offerAmount: String(amount),
+                minReceive: String(minReceive)
+            };
+            const swapExec = PaxiCosmJS.MsgSwap.fromPartial(swapMsg);
+            const msgs = [PaxiCosmJS.Any.fromPartial({
+                typeUrl: "/x.swap.types.MsgSwap",
+                value: PaxiCosmJS.MsgSwap.encode(swapExec).finish()
+            })];
+
+            const result = await buildAndSendTx(msgs, `Swap PAXI to PRC20`);
+            
+            if (result.tx_response && result.tx_response.code === 0) {
+                lastSwapAmount = minReceive;
+                totalVolume += amount;
+            }
+            
+            return { result, expectedOutput, minReceive, maxSlippage };
+        }
+
+        async function swapPRC20ToPAXI(prc20, amount) {
+            const senderInfo = await window.paxihub.paxi.getAddress();
+            const sender = senderInfo.address;
+
+            const pool = await fetchPool(prc20);
+            if (!pool) throw new Error('Pool not found');
+
+            const reservePaxi = parseFloat(pool['reserve_paxi']);
+            const reservePrc20 = parseFloat(pool['reserve_prc20']);
+            
+            const amountWithFee = amount * 997;
+            const numerator = amountWithFee * reservePaxi;
+            const denominator = (reservePrc20 * 1000) + amountWithFee;
+            const expectedOutput = numerator / denominator;
+            
+            const slippageMode = document.getElementById('slippageMode').value;
+            let maxSlippage;
+            
+            if (slippageMode === 'auto') {
+                maxSlippage = calculateOptimalSlippage(reservePrc20, reservePaxi, amount) / 100;
+            } else {
+                maxSlippage = parseFloat(document.getElementById('maxSlippage').value) / 100;
+            }
+            
+            const minReceive = Math.floor(expectedOutput * (1 - maxSlippage));
+
+            log(`Expected: ${(expectedOutput/1000000).toFixed(6)} PAXI`, 'info');
+
+            const msgs = [];
+            
+            const allowanceMsg = {
+                increase_allowance: {
+                    spender: swapModuleAddress,
+                    amount: String(amount)
+                }
+            };
+            const exec1 = PaxiCosmJS.MsgExecuteContract.fromPartial({
+                sender: sender,
+                contract: prc20,
+                msg: new TextEncoder().encode(JSON.stringify(allowanceMsg)),
+            });
+            msgs.push(PaxiCosmJS.Any.fromPartial({
+                typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+                value: PaxiCosmJS.MsgExecuteContract.encode(exec1).finish()
+            }));
+
+            const swapMsg = {
+                creator: sender,
+                prc20: prc20,
+                offerDenom: prc20,
+                offerAmount: String(amount),
+                minReceive: String(minReceive)
+            };
+            const swapExec = PaxiCosmJS.MsgSwap.fromPartial(swapMsg);
+            msgs.push(PaxiCosmJS.Any.fromPartial({
+                typeUrl: "/x.swap.types.MsgSwap",
+                value: PaxiCosmJS.MsgSwap.encode(swapExec).finish()
+            }));
+
+            const result = await buildAndSendTx(msgs, `Swap PRC20 to PAXI`);
+            
+            if (result.tx_response && result.tx_response.code === 0) {
+                totalVolume += minReceive;
+            }
+            
+            return { result, expectedOutput, minReceive, maxSlippage };
+        }
+
+        async function performSwap() {
+            const prc20 = document.getElementById('prc20Address').value;
+            const amount = parseInt(document.getElementById('swapAmount').value) * 1000000;
+
+            try {
+                let result, expectedOutput, minReceive, actualSlippage, maxSlippage;
+                let swapType, amountIn, amountOut;
+
+                if (currentSwapType === 'PAXI_TO_PRC20') {
+                    log(`Swapping PAXI → PRC20 (${amount/1000000} PAXI)...`);
+                    const swapResult = await swapPAXIToPRC20(prc20, amount);
+                    result = swapResult.result;
+                    expectedOutput = swapResult.expectedOutput;
+                    minReceive = swapResult.minReceive;
+                    maxSlippage = swapResult.maxSlippage;
+                    swapType = 'PAXI → PRC20';
+                    amountIn = (amount/1000000).toFixed(6) + ' PAXI';
+                    amountOut = minReceive.toFixed(2) + ' PRC20';
+                    currentSwapType = 'PRC20_TO_PAXI';
+                } else {
+                    const swapAmount = lastSwapAmount || amount;
+                    log(`Swapping PRC20 → PAXI (${swapAmount.toFixed(2)} PRC20)...`);
+                    const swapResult = await swapPRC20ToPAXI(prc20, swapAmount);
+                    result = swapResult.result;
+                    expectedOutput = swapResult.expectedOutput;
+                    minReceive = swapResult.minReceive;
+                    maxSlippage = swapResult.maxSlippage;
+                    swapType = 'PRC20 → PAXI';
+                    amountIn = swapAmount.toFixed(2) + ' PRC20';
+                    amountOut = (minReceive/1000000).toFixed(6) + ' PAXI';
+                    currentSwapType = 'PAXI_TO_PRC20';
+                }
+
+                if (result.tx_response && result.tx_response.txhash) {
+                    const txHash = result.tx_response.txhash;
+                    log(`Transaction broadcast: ${txHash}`, 'info');
+                    
+                    const verification = await verifyTransaction(txHash);
+                    
+                    if (verification.success) {
+                        swapCount++;
+                        successCount++;
+                        
+                        actualSlippage = ((expectedOutput - minReceive) / expectedOutput * 100);
+                        slippageList.push(actualSlippage);
+
+                        const sender = await window.paxihub.paxi.getAddress();
+                        currentBalance = await getBalance(sender.address);
+                        document.getElementById('currentBalance').textContent = (currentBalance / 1000000).toFixed(6);
+
+                        saveHistory({
+                            timestamp: Date.now(),
+                            type: swapType,
+                            amountIn: amountIn,
+                            amountOut: amountOut,
+                            slippage: actualSlippage,
+                            fee: (totalFees / 1000000).toFixed(6) + ' PAXI',
+                            status: 'success',
+                            txHash: txHash
+                        });
+
+                        log(`Swap successful! ✓`, 'success');
+                        log(`Slippage: ${actualSlippage.toFixed(2)}%`, 'info');
+                        
+                        updateStats();
+                    } else {
+                        throw new Error(verification.error || 'Transaction failed on blockchain');
+                    }
+                } else {
+                    throw new Error(result.tx_response?.raw_log || 'Broadcast failed');
+                }
+            } catch (e) {
+                failedCount++;
+                log(`Error: ${e.message}`, 'error');
+                
+                saveHistory({
+                    timestamp: Date.now(),
+                    type: currentSwapType === 'PAXI_TO_PRC20' ? 'PAXI → PRC20' : 'PRC20 → PAXI',
+                    amountIn: '-',
+                    amountOut: '-',
+                    slippage: null,
+                    fee: '-',
+                    status: 'failed',
+                    txHash: 'N/A'
+                });
+                
+                updateStats();
+                throw e;
+            }
+        }
+
+        async function runBot() {
+            const delay = parseInt(document.getElementById('delaySeconds').value) * 1000;
+
+            while (isRunning) {
+                try {
+                    await performSwap();
+                    
+                    if (isRunning) {
+                        log(`Waiting ${delay/1000} seconds for next swap...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                } catch (e) {
+                    log(`Error occurred, stopping bot...`, 'error');
+                    stopBot();
+                    break;
+                }
+            }
+        }
+
+        async function startBot() {
+            const prc20 = document.getElementById('prc20Address').value;
+            const amount = document.getElementById('swapAmount').value;
+            const stopLoss = document.getElementById('stopLossThreshold').value;
+
+            if (!prc20 || !amount || !stopLoss) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            if (autoSignMode && !privateKeyData) {
+                alert('Auto-Sign mode enabled but no valid private key!');
+                return;
+            }
+
+            if (!(await checkWallet())) return;
+
+            const threshold = parseFloat(stopLoss) * 1000000;
+            if (currentBalance < threshold) {
+                alert(`Your balance (${(currentBalance/1000000).toFixed(6)} PAXI) is below stop-loss threshold (${stopLoss} PAXI)!`);
+                return;
+            }
+
+            isRunning = true;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('status').innerHTML = '<div class="spinner inline-block mr-2"></div> Running';
+            document.getElementById('statusDot').className = 'pulse-dot w-2 h-2 rounded-full bg-green-400';
+            document.getElementById('balanceWarning').innerHTML = '';
+            
+            const slippageMode = document.getElementById('slippageMode').value;
+            const signMode = autoSignMode && privateKeyData ? 'Auto-Sign (Private Key)' : 'Manual (PaxiHub)';
+            
+            log('Bot started! 🚀', 'success');
+            log(`Settings: ${amount} PAXI per swap`, 'info');
+            log(`Slippage: ${slippageMode === 'auto' ? 'Auto (0.5-2%)' : document.getElementById('maxSlippage').value + '%'}`, 'info');
+            log(`Gas: Auto-optimized`, 'info');
+            log(`Sign Mode: ${signMode}`, 'info');
+            log(`Stop-loss: ${stopLoss} PAXI (with emergency PRC20 sell)`, 'info');
+            
+            runBot();
+        }
+
+        function stopBot() {
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('status').textContent = 'Stopped';
+            document.getElementById('statusDot').className = 'pulse-dot w-2 h-2 rounded-full bg-red-400';
+            log('Bot stopped', 'warning');
+        }
+
+        // ============ UI HANDLERS ============
+        document.getElementById('slippageMode').addEventListener('change', (e) => {
+            const manualContainer = document.getElementById('manualSlippageContainer');
+            if (e.target.value === 'manual') {
+                manualContainer.style.display = 'block';
+            } else {
+                manualContainer.style.display = 'none';
+            }
+        });
+
+        // ============ INITIALIZATION ============
+        function checkLibraries() {
+            const checks = {
+                libNoble: typeof nobleSecp256k1 !== 'undefined',
+                libCrypto: typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function',
+                libCryptoJS: typeof CryptoJS !== 'undefined',
+                libPaxi: typeof PaxiCosmJS !== 'undefined'
+            };
+
+            for (const [id, status] of Object.entries(checks)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    const libName = id.replace('lib', '');
+                    if (status) {
+                        el.innerHTML = `🟢 ${libName}`;
+                        el.className = 'text-green-400';
+                    } else {
+                        el.innerHTML = `🔴 ${libName}`;
+                        el.className = 'text-red-400';
+                    }
+                }
+            }
+
+            // Check if at least crypto solution exists
+            const hasCrypto = checks.libCrypto || checks.libCryptoJS;
+            
+            return { ...checks, hasCrypto };
+        }
+
+        window.addEventListener('load', async () => {
+            // Initial check
+            let libs = checkLibraries();
+            
+            loadStats();
+            updateHistoryTable();
+            
+            log('Enhanced bot v2.1 loaded with:', 'success');
+            log('✓ Blockchain transaction verification', 'info');
+            log('✓ Auto slippage & gas optimization', 'info');
+            log('✓ Emergency PRC20 sell on stop-loss', 'info');
+            log('✓ Dual-mode signing (Auto + Manual)', 'info');
+            log('✓ Multi-fallback crypto methods', 'info');
+            log('✓ Total volume tracking', 'info');
+            
+            // Check libraries with retry
+            setTimeout(() => {
+                libs = checkLibraries();
+                
+                if (!libs.libNoble) {
+                    log('⚠️ noble-secp256k1 not loaded - will use PaxiHub manual mode', 'warning');
+                } else {
+                    log('✓ noble-secp256k1 ready for auto-signing', 'success');
+                }
+                
+                if (!libs.hasCrypto) {
+                    log('❌ No crypto hashing available! Bot may not work.', 'error');
+                } else if (libs.libCrypto) {
+                    log('✓ Using native crypto.subtle for hashing', 'success');
+                } else {
+                    log('✓ Using CryptoJS for hashing (fallback)', 'success');
+                }
+                
+                if (!libs.libPaxi) {
+                    log('❌ PaxiCosmJS not loaded! Bot will not work.', 'error');
+                } else {
+                    log('✓ PaxiCosmJS ready', 'success');
+                }
+            }, 2000);
+            
+            if (typeof window.paxihub !== 'undefined') {
+                log('✓ PaxiHub wallet detected', 'success');
+            } else {
+                log('⚠️ PaxiHub not detected - please install', 'warning');
+            }
+        });
+
+        setInterval(async () => {
+            if (isRunning && typeof window.paxihub !== 'undefined') {
+                try {
+                    const sender = await window.paxihub.paxi.getAddress();
+                    const balance = await getBalance(sender.address);
+                    currentBalance = balance;
+                    document.getElementById('currentBalance').textContent = (balance / 1000000).toFixed(6);
+                    
+                    const threshold = parseFloat(document.getElementById('stopLossThreshold').value) * 1000000;
+                    if (balance < threshold) {
+                        updateStats();
+                    }
+                } catch (e) {
+                    console.error('Error refreshing balance:', e);
+                }
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
